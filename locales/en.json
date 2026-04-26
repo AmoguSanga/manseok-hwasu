@@ -1,0 +1,134 @@
+{
+  "site": {
+    "title": "Manseok-Hwasu | Digital Detox Coast",
+    "brand": "MANSEOK-HWASU",
+    "tagline": "Digital Detox Coast"
+  },
+  "nav": {
+    "visit": "VISIT",
+    "discover": "DISCOVER",
+    "reading": "READING & BOOKING",
+    "seasonal": "SEASONAL ACTIVITIES",
+    "community": "JOIN COMMUNITY",
+    "lang": "KOR"
+  },
+  "hero": {
+    "subtitle": "Where the West Sea meets stillness",
+    "title": "A Coast for Slow Reading,\nDeep Breath, and Quiet Sunsets",
+    "description": "Manseok-Hwasu is a coastal escape designed for those who want to disconnect from screens and reconnect with the rhythm of the sea, the sky, and themselves.",
+    "cta_primary": "Plan Your Visit",
+    "cta_secondary": "Explore the Coast"
+  },
+  "visit": {
+    "title": "Plan Your Visit",
+    "subtitle": "Everything you need before you arrive",
+    "cards": {
+      "directions": {
+        "title": "How to Get Here",
+        "description": "Detailed directions by car, public transit, and bicycle from major Korean cities."
+      },
+      "parking": {
+        "title": "Parking Lot Guide",
+        "description": "Real-time availability and pinned navigation to all coastal parking areas."
+      },
+      "map": {
+        "title": "Area Map",
+        "description": "Full overview of the promenade, reading zones, and surrounding facilities."
+      }
+    }
+  },
+  "discover": {
+    "title": "Discover the Coast",
+    "subtitle": "Tap any pin to explore",
+    "tour_label": "3D Coastal Tour",
+    "points": {
+      "waterfront": {
+        "title": "Waterfront Dock",
+        "description": "The Manseok-Hwasu Waterfront Dock is the top local spot for watching the sunset. It provides a wide, open view of the sky and the West Sea, making it easy to capture great photos. It is a go-to destination for anyone looking for the best sunset views and a peaceful sound of waves."
+      },
+      "lookout": {
+        "title": "Sea Lookout",
+        "description": "Equipped with shared binoculars, this elevated lookout offers a panoramic view of passing ships, distant islands, and the changing tides."
+      },
+      "library": {
+        "title": "Coastal Reading Pavilion",
+        "description": "An open-air pavilion stocked with donated books. Pick one up, sit by the railing, and read while the sea reads itself."
+      },
+      "cafe": {
+        "title": "Slow Café",
+        "description": "A small phone-free café serving hand-drip coffee, seasonal teas, and locally baked bread. Conversation is welcome; notifications are not."
+      },
+      "gallery": {
+        "title": "Rotating Art Gallery",
+        "description": "A small exhibition space featuring works from local artists, refreshed every season."
+      },
+      "bike": {
+        "title": "Coastal Bike Path",
+        "description": "A 4 km flat path connecting the dock to the southern lighthouse. Bikes are available for free hourly checkout."
+      }
+    },
+    "close": "Close"
+  },
+  "reading": {
+    "title": "Reading & Booking",
+    "subtitle": "Reserve a quiet seat by the sea",
+    "zones_title": "Coastal Reading Zones",
+    "zones_subtitle": "Free, first-come-first-served. No reservation required.",
+    "premium_title": "Premium Reading Room",
+    "premium_subtitle": "A reservable, climate-controlled space with sea-view seating",
+    "select_date": "SELECT DATE & TIME",
+    "select_seat": "SELECT YOUR SEAT",
+    "available": "Available",
+    "selected": "Selected",
+    "occupied": "Occupied",
+    "confirm": "Confirm Booking",
+    "donate_title": "Donate a Book",
+    "donate_description": "Help grow our shared coastal library. Drop off books at the Welcome Pavilion or partner with our local library.",
+    "donate_cta": "Open Donation Form",
+    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "weekdays": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+  },
+  "seasonal": {
+    "title": "Seasonal Activities",
+    "subtitle": "The coast changes. So do its rituals.",
+    "spring": {
+      "label": "Spring",
+      "title": "Cherry Walks & Tide Pools",
+      "description": "Gentle morning walks along the blooming coastal path and afternoon tide pool exploration with local naturalists."
+    },
+    "summer": {
+      "label": "Summer",
+      "title": "Sunset Concerts & Night Reading",
+      "description": "Acoustic concerts at golden hour and lantern-lit reading sessions stretching late into warm summer nights."
+    },
+    "autumn": {
+      "label": "Autumn",
+      "title": "Open-Air Chess & Go",
+      "description": "Slow, contemplative board games on the wooden deck overlooking the sea, paired with hot tea and seasonal pastries."
+    },
+    "winter": {
+      "label": "Winter",
+      "title": "Quiet Tides & Hot Drinks",
+      "description": "Bundled coastal walks, the year's clearest stargazing nights, and warm gatherings around the indoor fireplaces."
+    }
+  },
+  "community": {
+    "title": "Join the Community",
+    "subtitle": "Visitors who came back",
+    "forum_title": "Community Forum",
+    "forum_description": "Share photos, reading recommendations, and stories from your visit. Discover what locals love most about this coast.",
+    "forum_cta": "Open Forum",
+    "volunteer_title": "Volunteer With Us",
+    "volunteer_description": "Help maintain reading zones, lead seasonal events, or support the donated book library.",
+    "volunteer_cta": "Apply to Volunteer",
+    "stories_title": "Visitor Stories"
+  },
+  "footer": {
+    "about": "About",
+    "about_text": "A community-led coastal project of Dong-gu, Incheon, dedicated to slow living and shared reading.",
+    "contact": "Contact",
+    "address": "Manseok-dong, Dong-gu, Incheon, Republic of Korea",
+    "follow": "Follow",
+    "rights": "© 2026 Manseok-Hwasu Digital Detox Coast. A community project of Dong-gu."
+  }
+}

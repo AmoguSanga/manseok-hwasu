@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="site.title">Manseok-Hwasu | Digital Detox Coast</title>
+  <meta name="description" content="A coastal escape in Dong-gu, Incheon, designed for slow reading, deep breath, and quiet sunsets." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;500&display=swap" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/sections.css" />
+
+  <!-- Favicon (uses logo) -->
+  <link rel="icon" type="image/svg+xml" href="assets/logos/manseok-logo.svg" />
+</head>
+<body>
+
+<!-- ============================================================
+     NAV
+     ============================================================ -->
+<nav class="nav" aria-label="Main navigation">
+  <a href="#hero" class="nav__brand">
+    <span class="nav__logo">
+      <!-- Inline logo for clean color control -->
+      <svg viewBox="0 0 397 405.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use href="assets/logos/manseok-logo.svg#Layer_1"></use>
+      </svg>
+      <img src="assets/logos/manseok-logo.svg" alt="" style="display:none" />
+    </span>
+    <span class="nav__brand-text">
+      <strong data-i18n="site.brand">MANSEOK-HWASU</strong>
+      <span data-i18n="site.tagline">Digital Detox Coast</span>
+    </span>
+  </a>
+
+  <ul class="nav__menu" role="menubar">
+    <li><a href="#visit"     class="nav__link" data-target="visit"     data-i18n="nav.visit">VISIT</a></li>
+    <li><a href="#discover"  class="nav__link" data-target="discover"  data-i18n="nav.discover">DISCOVER</a></li>
+    <li><a href="#reading"   class="nav__link" data-target="reading"   data-i18n="nav.reading">READING &amp; BOOKING</a></li>
+    <li><a href="#seasonal"  class="nav__link" data-target="seasonal"  data-i18n="nav.seasonal">SEASONAL ACTIVITIES</a></li>
+    <li><a href="#community" class="nav__link" data-target="community" data-i18n="nav.community">JOIN COMMUNITY</a></li>
+  </ul>
+
+  <button class="nav__lang" aria-label="Switch language">
+    <span data-i18n="nav.lang">KOR</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="nav__toggle" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</nav>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero" id="hero">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <span class="eyebrow" data-i18n="hero.subtitle">Where the West Sea meets stillness</span>
+      <h1 class="hero__title" data-i18n="hero.title">A Coast for Slow Reading,
+Deep Breath, and Quiet Sunsets</h1>
+      <p class="hero__desc" data-i18n="hero.description">Manseok-Hwasu is a coastal escape designed for those who want to disconnect from screens and reconnect with the rhythm of the sea, the sky, and themselves.</p>
+      <div class="hero__ctas">
+        <a href="#visit" class="btn btn--primary">
+          <span data-i18n="hero.cta_primary">Plan Your Visit</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="#discover" class="btn">
+          <span data-i18n="hero.cta_secondary">Explore the Coast</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero__visual" aria-hidden="true">
+      <div class="hero__scene" id="heroScene">
+        <canvas class="hero__canvas" id="heroCanvas"></canvas>
+
+        <!-- Far layer: ambient color blobs (parallax slowest) -->
+        <div class="hero__depth-far" id="heroFar">
+          <div class="hero__blob hero__blob--1"></div>
+          <div class="hero__blob hero__blob--2"></div>
+          <div class="hero__blob hero__blob--3"></div>
+        </div>
+
+        <!-- Mid layer: central orb with pulsing rings -->
+        <div class="hero__depth-mid" id="heroMid">
+          <div class="hero__orb" id="heroOrb">
+            <div class="hero__orb-ring hero__orb-ring--1"></div>
+            <div class="hero__orb-ring hero__orb-ring--2"></div>
+            <div class="hero__orb-ring hero__orb-ring--3"></div>
+            <div class="hero__orb-core">
+              <img src="assets/logos/manseok-logo.svg" alt="Manseok-Hwasu" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Near layer: floating location tags (parallax strongest) -->
+        <div class="hero__depth-near" id="heroNear">
+          <div class="hero__tag hero__tag--1"><span>📖</span> Reading Pavilion</div>
+          <div class="hero__tag hero__tag--2"><span>☕</span> Slow Café</div>
+          <div class="hero__tag hero__tag--3"><span>🌅</span> Sunset Dock</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     VISIT
+     ============================================================ -->
+<section class="visit" id="visit">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">02 · <span data-i18n="nav.visit">VISIT</span></span>
+      <h2 data-i18n="visit.title">Plan Your Visit</h2>
+      <p data-i18n="visit.subtitle" style="color: var(--ink-muted);">Everything you need before you arrive</p>
+    </div>
+
+    <div class="visit__grid">
+      <a class="visit-card reveal" href="#" aria-label="How to Get Here">
+        <div class="visit-card__icon">
+          <!-- compass icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        </div>
+        <h3 data-i18n="visit.cards.directions.title">How to Get Here</h3>
+        <p data-i18n="visit.cards.directions.description">Detailed directions by car, public transit, and bicycle from major Korean cities.</p>
+        <span class="visit-card__arrow">View directions
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a class="visit-card reveal" href="#" aria-label="Parking Lot Guide">
+        <div class="visit-card__icon">
+          <!-- parking pin icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><path d="M9 7v10M9 7h4a3 3 0 0 1 0 6H9"/></svg>
+        </div>
+        <h3 data-i18n="visit.cards.parking.title">Parking Lot Guide</h3>
+        <p data-i18n="visit.cards.parking.description">Real-time availability and pinned navigation to all coastal parking areas.</p>
+        <span class="visit-card__arrow">Open guide
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a class="visit-card reveal" href="#" aria-label="Area Map">
+        <div class="visit-card__icon">
+          <!-- map icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <h3 data-i18n="visit.cards.map.title">Area Map</h3>
+        <p data-i18n="visit.cards.map.description">Full overview of the promenade, reading zones, and surrounding facilities.</p>
+        <span class="visit-card__arrow">View map
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     DISCOVER — interactive coastal map
+     ============================================================ -->
+<section class="discover" id="discover">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">03 · <span data-i18n="nav.discover">DISCOVER</span></span>
+      <h2 data-i18n="discover.title">Discover the Coast</h2>
+      <p data-i18n="discover.subtitle" style="color: var(--ink-muted);">Tap any pin to explore</p>
+    </div>
+
+    <div class="discover__map reveal">
+      <div class="discover__map-img"></div>
+
+      <div class="discover__tour-badge">
+        <span data-i18n="discover.tour_label">3D Coastal Tour</span>
+      </div>
+
+      <div class="discover__pins">
+        <button class="discover-pin" data-id="waterfront" aria-label="Waterfront Dock">
+          <span class="discover-pin__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><polyline points="21 15 16 10 5 21"/></svg>
+          </span>
+        </button>
+        <button class="discover-pin" data-id="lookout" aria-label="Sea Lookout">
+          <span class="discover-pin__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          </span>
+        </button>
+        <button class="discover-pin" data-id="library" aria-label="Coastal Reading Pavilion">
+          <span class="discover-pin__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </span>
+        </button>
+        <button class="discover-pin" data-id="cafe" aria-label="Slow Café">
+          <span class="discover-pin__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+          </span>
+        </button>
+        <button class="discover-pin" data-id="gallery" aria-label="Rotating Art Gallery">
+          <span class="discover-pin__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </span>
+        </button>
+        <button class="discover-pin" data-id="bike" aria-label="Coastal Bike Path">
+          <span class="discover-pin__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h3l3 11.5M5.5 17.5l4-9 4 9M9.5 8.5h6"/></svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Detail panel -->
+      <aside class="discover__panel" aria-live="polite">
+        <button class="discover__panel-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="discover__panel-img"></div>
+        <h3 data-panel-title>Waterfront Dock</h3>
+        <p data-panel-desc>Description loads from translations.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     READING & BOOKING
+     ============================================================ -->
+<section class="reading" id="reading">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">04 · <span data-i18n="nav.reading">READING &amp; BOOKING</span></span>
+      <h2 data-i18n="reading.title">Reading &amp; Booking</h2>
+      <p data-i18n="reading.subtitle" style="color: var(--ink-muted);">Reserve a quiet seat by the sea</p>
+    </div>
+
+    <!-- Premium reading room booking -->
+    <div style="margin-bottom: 24px;">
+      <span class="eyebrow" style="display:block; margin-bottom:8px;" data-i18n="reading.premium_title">Premium Reading Room</span>
+      <p style="color: var(--ink-muted); font-size: 0.95rem;" data-i18n="reading.premium_subtitle">A reservable, climate-controlled space with sea-view seating</p>
+    </div>
+
+    <div class="reading__layout">
+      <!-- Calendar pane -->
+      <div class="card booking-pane reveal">
+        <div class="calendar">
+          <h3 data-i18n="reading.select_date">SELECT DATE &amp; TIME</h3>
+          <div class="calendar__head">
+            <button class="calendar__nav calendar__nav--prev" aria-label="Previous month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="calendar__title">—</div>
+            <button class="calendar__nav calendar__nav--next" aria-label="Next month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <div class="calendar__grid"></div>
+        </div>
+
+        <div class="timeslots">
+          <button class="timeslot">10:00</button>
+          <button class="timeslot">12:00</button>
+          <button class="timeslot is-active">13:00</button>
+          <button class="timeslot">14:00</button>
+          <button class="timeslot">15:00</button>
+          <button class="timeslot">17:00</button>
+        </div>
+      </div>
+
+      <!-- Seat map pane -->
+      <div class="card seatmap-pane reveal">
+        <div class="seatmap-pane__head">
+          <h3 data-i18n="reading.select_seat">SELECT YOUR SEAT</h3>
+          <div class="seatmap-legend">
+            <span><i class="l-avail"></i><span data-i18n="reading.available">Available</span></span>
+            <span><i class="l-sel"></i><span data-i18n="reading.selected">Selected</span></span>
+            <span><i class="l-occ"></i><span data-i18n="reading.occupied">Occupied</span></span>
+          </div>
+        </div>
+
+        <div class="seatmap">
+          <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Room outline -->
+            <rect x="20" y="20" width="760" height="460" rx="20" fill="none" stroke="#9aa3af" stroke-width="2" stroke-dasharray="4 6" opacity="0.4"/>
+
+            <!-- Window seats — top row -->
+            <rect x="180" y="40" width="500" height="40" rx="8" fill="rgba(255, 194, 32, 0.15)"/>
+            <text x="430" y="65" text-anchor="middle" font-size="11" fill="#808080" letter-spacing="3">SEA-VIEW WINDOW</text>
+
+            <!-- Top row of seats -->
+            <g>
+              <circle class="seat" cx="220" cy="120" r="14" data-state="available" data-seat="A1"/>
+              <circle class="seat" cx="270" cy="120" r="14" data-state="available" data-seat="A2"/>
+              <circle class="seat" cx="340" cy="120" r="14" data-state="occupied"  data-seat="A3"/>
+              <circle class="seat" cx="390" cy="120" r="14" data-state="available" data-seat="A4"/>
+              <circle class="seat" cx="460" cy="120" r="14" data-state="available" data-seat="A5"/>
+              <circle class="seat" cx="510" cy="120" r="14" data-state="occupied"  data-seat="A6"/>
+              <circle class="seat" cx="580" cy="120" r="14" data-state="available" data-seat="A7"/>
+              <circle class="seat" cx="630" cy="120" r="14" data-state="available" data-seat="A8"/>
+            </g>
+
+            <!-- Center long table -->
+            <rect x="290" y="200" width="220" height="100" rx="10" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
+            <text x="400" y="255" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="2">SHARED TABLE</text>
+
+            <g>
+              <circle class="seat" cx="320" cy="190" r="12" data-state="available" data-seat="B1"/>
+              <circle class="seat" cx="370" cy="190" r="12" data-state="available" data-seat="B2"/>
+              <circle class="seat" cx="430" cy="190" r="12" data-state="occupied"  data-seat="B3"/>
+              <circle class="seat" cx="480" cy="190" r="12" data-state="available" data-seat="B4"/>
+
+              <circle class="seat" cx="320" cy="310" r="12" data-state="available" data-seat="B5"/>
+              <circle class="seat" cx="370" cy="310" r="12" data-state="occupied"  data-seat="B6"/>
+              <circle class="seat" cx="430" cy="310" r="12" data-state="available" data-seat="B7"/>
+              <circle class="seat" cx="480" cy="310" r="12" data-state="available" data-seat="B8"/>
+            </g>
+
+            <!-- Quiet pods left side -->
+            <rect x="60" y="160" width="100" height="80" rx="14" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
+            <text x="110" y="205" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="2">POD 1</text>
+            <circle class="seat" cx="110" cy="170" r="11" data-state="available" data-seat="C1"/>
+            <circle class="seat" cx="110" cy="225" r="11" data-state="available" data-seat="C2"/>
+
+            <rect x="60" y="270" width="100" height="80" rx="14" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
+            <text x="110" y="315" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="2">POD 2</text>
+            <circle class="seat" cx="110" cy="280" r="11" data-state="occupied"  data-seat="C3"/>
+            <circle class="seat" cx="110" cy="335" r="11" data-state="available" data-seat="C4"/>
+
+            <!-- Bottom row -->
+            <g>
+              <circle class="seat" cx="220" cy="400" r="14" data-state="available" data-seat="D1"/>
+              <circle class="seat" cx="270" cy="400" r="14" data-state="occupied"  data-seat="D2"/>
+              <circle class="seat" cx="340" cy="400" r="14" data-state="available" data-seat="D3"/>
+              <circle class="seat" cx="390" cy="400" r="14" data-state="available" data-seat="D4"/>
+              <circle class="seat" cx="460" cy="400" r="14" data-state="available" data-seat="D5"/>
+              <circle class="seat" cx="510" cy="400" r="14" data-state="available" data-seat="D6"/>
+              <circle class="seat" cx="580" cy="400" r="14" data-state="occupied"  data-seat="D7"/>
+              <circle class="seat" cx="630" cy="400" r="14" data-state="available" data-seat="D8"/>
+            </g>
+
+            <!-- Right side: solo desks -->
+            <g>
+              <rect x="690" y="170" width="60" height="40" rx="8" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
+              <circle class="seat" cx="720" cy="240" r="12" data-state="available" data-seat="E1"/>
+
+              <rect x="690" y="260" width="60" height="40" rx="8" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
+              <circle class="seat" cx="720" cy="330" r="12" data-state="available" data-seat="E2"/>
+            </g>
+
+            <!-- Entrance label -->
+            <text x="400" y="475" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="3">ENTRANCE</text>
+          </svg>
+        </div>
+
+        <div class="booking-confirm">
+          <div class="booking-confirm__summary"><strong>—</strong> · — · —</div>
+          <button class="btn btn--accent">
+            <span data-i18n="reading.confirm">Confirm Booking</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Free reading zones -->
+    <div style="margin-top: 80px;">
+      <div class="section-head" style="margin-bottom: 32px;">
+        <span class="eyebrow" data-i18n="reading.zones_title">Coastal Reading Zones</span>
+        <p style="color: var(--ink-muted);" data-i18n="reading.zones_subtitle">Free, first-come-first-served. No reservation required.</p>
+      </div>
+      <div class="zones-grid">
+        <div class="zone-card reveal">
+          <div class="zone-card__img" style="background-image: url('assets/images/reading/reading-zone-1.webp')"></div>
+          <div class="zone-card__body">
+            <h4>North Pavilion</h4>
+            <p>An open-sided wooden pavilion with cushions, facing the morning sun.</p>
+            <span class="zone-card__tag">12 seats · open daily</span>
+          </div>
+        </div>
+        <div class="zone-card reveal">
+          <div class="zone-card__img" style="background-image: url('assets/images/reading/reading-zone-2.webp')"></div>
+          <div class="zone-card__body">
+            <h4>Sunset Bench</h4>
+            <p>Long curved bench positioned for the best evening light over the West Sea.</p>
+            <span class="zone-card__tag">8 seats · best at golden hour</span>
+          </div>
+        </div>
+        <div class="zone-card reveal">
+          <div class="zone-card__img" style="background-image: url('assets/images/reading/reading-zone-3.webp')"></div>
+          <div class="zone-card__body">
+            <h4>Library Steps</h4>
+            <p>Casual stepped seating beside the donated-book shelf. Pick up a book and read.</p>
+            <span class="zone-card__tag">20+ seats · book exchange</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donate -->
+    <div class="card donate reveal">
+      <div class="donate__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <div class="donate__copy">
+        <h4 data-i18n="reading.donate_title">Donate a Book</h4>
+        <p data-i18n="reading.donate_description">Help grow our shared coastal library. Drop off books at the Welcome Pavilion or partner with our local library.</p>
+      </div>
+      <a href="#" class="btn btn--primary">
+        <span data-i18n="reading.donate_cta">Open Donation Form</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SEASONAL ACTIVITIES
+     ============================================================ -->
+<section class="seasonal" id="seasonal">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">05 · <span data-i18n="nav.seasonal">SEASONAL ACTIVITIES</span></span>
+      <h2 data-i18n="seasonal.title">Seasonal Activities</h2>
+      <p data-i18n="seasonal.subtitle" style="color: var(--ink-muted);">The coast changes. So do its rituals.</p>
+    </div>
+
+    <div class="seasonal__tabs reveal">
+      <button class="seasonal__tab" data-season="spring"><span>🌸</span><span data-i18n="seasonal.spring.label">Spring</span></button>
+      <button class="seasonal__tab" data-season="summer"><span>☀️</span><span data-i18n="seasonal.summer.label">Summer</span></button>
+      <button class="seasonal__tab" data-season="autumn"><span>🍂</span><span data-i18n="seasonal.autumn.label">Autumn</span></button>
+      <button class="seasonal__tab" data-season="winter"><span>❄️</span><span data-i18n="seasonal.winter.label">Winter</span></button>
+    </div>
+
+    <div class="seasonal__panel reveal">
+      <div class="seasonal__panel-img"></div>
+      <div class="seasonal__panel-body">
+        <span class="eyebrow" data-season-label>Spring</span>
+        <h3 data-season-title>Cherry Walks &amp; Tide Pools</h3>
+        <p data-season-desc>Description loads from translations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COMMUNITY
+     ============================================================ -->
+<section class="community" id="community">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">06 · <span data-i18n="nav.community">JOIN COMMUNITY</span></span>
+      <h2 data-i18n="community.title">Join the Community</h2>
+      <p data-i18n="community.subtitle" style="color: var(--ink-muted);">Visitors who came back</p>
+    </div>
+
+    <div class="community__grid">
+      <div class="community-card reveal">
+        <div class="community-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3 data-i18n="community.forum_title">Community Forum</h3>
+        <p data-i18n="community.forum_description">Share photos, reading recommendations, and stories from your visit. Discover what locals love most about this coast.</p>
+        <a href="#" class="btn">
+          <span data-i18n="community.forum_cta">Open Forum</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+
+      <div class="community-card reveal">
+        <div class="community-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3 data-i18n="community.volunteer_title">Volunteer With Us</h3>
+        <p data-i18n="community.volunteer_description">Help maintain reading zones, lead seasonal events, or support the donated book library.</p>
+        <a href="#" class="btn">
+          <span data-i18n="community.volunteer_cta">Apply to Volunteer</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-bottom: 32px;">
+      <span class="eyebrow" data-i18n="community.stories_title">Visitor Stories</span>
+    </div>
+
+    <div class="stories">
+      <article class="story reveal">
+        <div class="story__img" style="background-image: url('assets/images/community/story-1.webp')"></div>
+        <div class="story__body">
+          <p>"Spent three hours here without checking my phone. I forgot what that felt like."</p>
+          <span class="story__meta">Jiwoo · Seoul</span>
+        </div>
+      </article>
+      <article class="story reveal">
+        <div class="story__img" style="background-image: url('assets/images/community/story-2.webp')"></div>
+        <div class="story__body">
+          <p>"Came for the sunset, stayed for the silence. Already planning my next visit."</p>
+          <span class="story__meta">Minseo · Busan</span>
+        </div>
+      </article>
+      <article class="story reveal">
+        <div class="story__img" style="background-image: url('assets/images/community/story-3.webp')"></div>
+        <div class="story__body">
+          <p>"The slow café made me realize how fast I usually drink coffee. A small revelation."</p>
+          <span class="story__meta">Daehyun · Incheon</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand-block">
+        <a href="#hero" class="nav__brand" style="padding:0;">
+          <span class="nav__logo"><img src="assets/logos/manseok-logo.svg" alt="" /></span>
+          <span class="nav__brand-text">
+            <strong data-i18n="site.brand">MANSEOK-HWASU</strong>
+            <span data-i18n="site.tagline">Digital Detox Coast</span>
+          </span>
+        </a>
+        <p data-i18n="footer.about_text">A community-led coastal project of Dong-gu, Incheon, dedicated to slow living and shared reading.</p>
+      </div>
+      <div>
+        <h4 data-i18n="footer.contact">Contact</h4>
+        <ul>
+          <li data-i18n="footer.address">Manseok-dong, Dong-gu, Incheon</li>
+          <li>hello@manseok-hwasu.kr</li>
+          <li>+82 32 000 0000</li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="nav.visit">Visit</h4>
+        <ul>
+          <li><a href="#visit">Plan Your Visit</a></li>
+          <li><a href="#discover">Discover</a></li>
+          <li><a href="#reading">Reading &amp; Booking</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="footer.follow">Follow</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">Naver Blog</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom" data-i18n="footer.rights">
+      © 2026 Manseok-Hwasu Digital Detox Coast. A community project of Dong-gu.
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

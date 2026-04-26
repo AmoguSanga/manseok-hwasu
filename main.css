@@ -1,0 +1,436 @@
+/* ============================================================
+   MANSEOK-HWASU — Design Tokens
+   Color palette pulled directly from your brand color system.
+   Soft neomorphism: light comes from top-left, shadow falls
+   bottom-right. Surfaces are slightly raised or pressed-in.
+   ============================================================ */
+
+:root {
+  /* ── Brand: Primary & Secondary ───────────── */
+  --primary-sky: #97D5FF;
+  --secondary-aqua: #84E9E0;
+  --secondary-yellow: #FFC220;
+  --secondary-orange: #FF7740;
+
+  /* ── System ────────────────────────────────── */
+  --system-white: #FFFAF5;
+  --system-black: #292121;
+
+  /* ── Grayscale ─────────────────────────────── */
+  --gray-1: #FCFCFC;
+  --gray-2: #F1F1F1;
+  --gray-3: #E5E5E5;
+  --gray-4: #CCCCCC;
+  --gray-5: #B6B6B6;
+  --gray-6: #A0A0A0;
+  --gray-7: #808080;
+  --gray-8: #4A4A4A;
+  --gray-9: #292121;
+
+  /* ── Semantic ──────────────────────────────── */
+  --bg: #EEF2F7;             /* the canvas — slightly cool, neutral */
+  --bg-elevated: #F4F7FA;
+  --surface: #EEF2F7;
+  --ink: #292121;
+  --ink-muted: #6b7280;
+  --ink-soft: #9aa3af;
+  --accent: var(--secondary-orange);
+  --accent-soft: var(--primary-sky);
+
+  /* ── Neomorphism shadows ───────────────────── */
+  /* Raised */
+  --neo-raised:
+    -8px -8px 20px rgba(255, 255, 255, 0.95),
+    8px 8px 20px rgba(163, 177, 198, 0.45);
+  --neo-raised-sm:
+    -4px -4px 10px rgba(255, 255, 255, 0.9),
+    4px 4px 10px rgba(163, 177, 198, 0.35);
+  --neo-raised-lg:
+    -14px -14px 32px rgba(255, 255, 255, 0.95),
+    14px 14px 32px rgba(163, 177, 198, 0.5);
+  /* Pressed (inset) */
+  --neo-pressed:
+    inset -4px -4px 10px rgba(255, 255, 255, 0.85),
+    inset 4px 4px 10px rgba(163, 177, 198, 0.35);
+  --neo-pressed-deep:
+    inset -6px -6px 14px rgba(255, 255, 255, 0.85),
+    inset 6px 6px 14px rgba(163, 177, 198, 0.45);
+  /* Hover lift */
+  --neo-lift:
+    -10px -10px 24px rgba(255, 255, 255, 1),
+    10px 10px 24px rgba(163, 177, 198, 0.55);
+
+  /* ── Type ──────────────────────────────────── */
+  --font-display: "Fraunces", "Noto Serif KR", Georgia, serif;
+  --font-body: "Inter", "Noto Sans KR", system-ui, sans-serif;
+
+  /* ── Layout ────────────────────────────────── */
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+  --radius-pill: 999px;
+
+  --container: 1280px;
+  --gutter: 24px;
+
+  --transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 1200px 600px at 80% -10%, rgba(151, 213, 255, 0.18), transparent 60%),
+    radial-gradient(ellipse 800px 400px at -10% 80%, rgba(255, 119, 64, 0.10), transparent 60%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+img, svg { display: block; max-width: 100%; height: auto; }
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); }
+h2 { font-size: clamp(1.8rem, 3.4vw, 2.8rem); }
+h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* ============================================================
+   Layout helpers
+   ============================================================ */
+
+.container {
+  width: min(100% - calc(var(--gutter) * 2), var(--container));
+  margin-inline: auto;
+}
+
+section {
+  padding: clamp(64px, 9vw, 120px) 0;
+}
+
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 56px;
+  max-width: 720px;
+}
+
+/* ============================================================
+   Top Navigation
+   ============================================================ */
+
+.nav {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100% - 32px, 1320px);
+  z-index: 100;
+  padding: 12px 18px;
+  background: rgba(238, 242, 247, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--neo-raised-sm);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  transition: box-shadow var(--transition), background var(--transition);
+}
+
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+.nav__logo {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ink);
+  padding: 6px;
+}
+.nav__logo svg { width: 100%; height: 100%; fill: var(--system-white); }
+
+.nav__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.nav__brand-text strong {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  font-weight: 500;
+}
+.nav__brand-text span {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-muted);
+  margin-top: 3px;
+}
+
+.nav__menu {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.nav__link {
+  position: relative;
+  padding: 10px 18px;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  color: var(--ink-muted);
+  border-radius: var(--radius-pill);
+  transition: color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.nav__link:hover { color: var(--ink); }
+
+.nav__link.is-active {
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: var(--neo-pressed);
+}
+
+.nav__link.is-active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.nav__lang {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--system-white);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform var(--transition), background var(--transition);
+}
+.nav__lang:hover { transform: translateY(-1px); background: var(--gray-8); }
+.nav__lang svg { width: 12px; height: 12px; }
+
+/* mobile nav toggle */
+.nav__toggle { display: none; }
+
+@media (max-width: 980px) {
+  .nav { padding: 10px 14px; gap: 8px; }
+  .nav__brand-text span { display: none; }
+  .nav__menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    flex-direction: column;
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 12px;
+    box-shadow: var(--neo-raised);
+    min-width: 240px;
+    gap: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity var(--transition), transform var(--transition);
+  }
+  .nav.is-open .nav__menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .nav__link { width: 100%; text-align: left; padding: 12px 16px; }
+  .nav__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: var(--neo-raised-sm);
+  }
+  .nav__toggle svg { width: 18px; height: 18px; }
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--neo-raised);
+  transition: box-shadow var(--transition), transform var(--transition), color var(--transition);
+}
+.btn:hover { box-shadow: var(--neo-lift); transform: translateY(-1px); }
+.btn:active { box-shadow: var(--neo-pressed); transform: translateY(0); }
+.btn svg { width: 14px; height: 14px; transition: transform var(--transition); }
+.btn:hover svg { transform: translateX(3px); }
+
+.btn--primary { background: var(--ink); color: var(--system-white); box-shadow: var(--neo-raised); }
+.btn--primary:hover { background: var(--gray-8); }
+.btn--accent { background: var(--accent); color: white; }
+.btn--accent:hover { background: #e5642f; }
+
+/* ============================================================
+   Card primitive (raised neomorphic surface)
+   ============================================================ */
+
+.card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--neo-raised);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.card--lifted:hover { box-shadow: var(--neo-lift); transform: translateY(-3px); }
+.card--inset { box-shadow: var(--neo-pressed); }
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.footer {
+  padding: 80px 0 40px;
+  border-top: 1px solid rgba(0,0,0,0.04);
+  margin-top: 80px;
+}
+.footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+.footer__brand-block { max-width: 320px; }
+.footer__brand-block .nav__brand-text strong { font-size: 0.95rem; }
+.footer__brand-block p {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  margin-top: 16px;
+  line-height: 1.7;
+}
+.footer h4 {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+}
+.footer ul li { margin-bottom: 8px; font-size: 0.88rem; color: var(--ink-muted); }
+.footer__bottom {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  padding-top: 32px;
+  border-top: 1px solid rgba(0,0,0,0.04);
+}
+
+@media (max-width: 720px) {
+  .footer__grid { grid-template-columns: 1fr 1fr; }
+  .footer__brand-block { grid-column: 1 / -1; }
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 800ms ease, transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* ============================================================
+   Utility
+   ============================================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
