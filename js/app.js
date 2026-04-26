@@ -77,88 +77,22 @@ function initHeroScene() {
     tick();
   }
 
-  // ── Mouse parallax (desktop) / Touch+Gyro parallax (mobile) ──
+  // ── Mouse parallax (desktop) ──
   let tx = 0, ty = 0, cx = 0, cy = 0;
-  const isTouch = window.matchMedia('(pointer: coarse)').matches;
 
-  if (!isTouch) {
-    // Desktop: standard mouse parallax
-    const onPointerMove = (e) => {
-      const rect = scene.getBoundingClientRect();
-      tx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      ty = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
-    };
-    scene.addEventListener('mousemove', onPointerMove);
-    scene.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
-  } else {
-    // Mobile: show a brief tilt hint
-    const hint = document.createElement('div');
-    hint.className = 'hero__tilt-hint';
-    hint.textContent = '✦ Touch & tilt to explore';
-    scene.appendChild(hint);
-    setTimeout(() => hint.classList.add('is-fading'), 2200);
-    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 2900);
+  const onPointerMove = (e) => {
+    const rect = scene.getBoundingClientRect();
+    tx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    ty = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
+  };
 
-    // Gyroscope parallax — no permission needed on Android; request on iOS 13+
-    let hasGyro = false;
-    let baseGamma = null, baseBeta = null;
+  scene.addEventListener('mousemove', onPointerMove);
+  scene.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
 
-    const applyOrientation = (e) => {
-      if (e.gamma === null) return;
-      if (!hasGyro) hasGyro = true;
-      if (baseGamma === null) { baseGamma = e.gamma; baseBeta = e.beta || 0; }
-      tx = Math.max(-1, Math.min(1, (e.gamma - baseGamma) / 18));
-      ty = Math.max(-1, Math.min(1, ((e.beta || 0) - baseBeta) / 18));
-    };
-
-    const startGyro = () => window.addEventListener('deviceorientation', applyOrientation, true);
-
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-      // iOS 13+ — only ask on first tap
-      scene.addEventListener('touchstart', async function askOnce() {
-        scene.removeEventListener('touchstart', askOnce);
-        try {
-          const res = await DeviceOrientationEvent.requestPermission();
-          if (res === 'granted') startGyro();
-        } catch (_) {}
-      }, { once: true });
-    } else {
-      startGyro();
-    }
-
-    // Touch-drag parallax (fallback + complements gyro)
-    scene.addEventListener('touchmove', (e) => {
-      if (hasGyro) return; // gyro already driving tx/ty
-      const touch = e.touches[0];
-      const rect = scene.getBoundingClientRect();
-      tx = ((touch.clientX - rect.left) / rect.width - 0.5) * 2;
-      ty = ((touch.clientY - rect.top)  / rect.height - 0.5) * 2;
-    }, { passive: true });
-
-    scene.addEventListener('touchend', () => {
-      if (!hasGyro) { tx = 0; ty = 0; }
-    }, { passive: true });
-
-    // Orb tap burst — satisfying ripple on tap
-    const orbCore = scene.querySelector('.hero__orb-core');
-    if (orb && orbCore) {
-      orb.style.pointerEvents = 'auto';
-      orb.style.cursor = 'pointer';
-      orb.addEventListener('click', () => {
-        orb.classList.remove('orb-tapped');
-        void orb.offsetWidth; // reflow to restart animation
-        orb.classList.add('orb-tapped');
-        setTimeout(() => orb.classList.remove('orb-tapped'), 700);
-      });
-    }
-  }
-
-  // Smooth lerp loop for parallax (runs on both desktop and mobile)
+  // Smooth lerp loop for parallax
   const lerpParallax = () => {
-    const lerpFactor = isTouch ? 0.04 : 0.055;
-    cx += (tx - cx) * lerpFactor;
-    cy += (ty - cy) * lerpFactor;
+    cx += (tx - cx) * 0.055;
+    cy += (ty - cy) * 0.055;
 
     // Far blobs move opposite the mouse (subtle counter-parallax)
     if (farLayer) farLayer.style.transform = `translate(${cx * -8}px, ${cy * -5}px)`;
