@@ -26,11 +26,7 @@
 <nav class="nav" aria-label="Main navigation">
   <a href="#hero" class="nav__brand">
     <span class="nav__logo">
-      <!-- Inline logo for clean color control -->
-      <svg viewBox="0 0 397 405.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <use href="assets/logos/manseok-logo.svg#Layer_1"></use>
-      </svg>
-      <img src="assets/logos/manseok-logo.svg" alt="" style="display:none" />
+      <img src="assets/logos/manseok-logo.svg" alt="" aria-hidden="true" />
     </span>
     <span class="nav__brand-text">
       <strong data-i18n="site.brand">MANSEOK-HWASU</strong>
@@ -84,30 +80,56 @@ Deep Breath, and Quiet Sunsets</h1>
       <div class="hero__scene" id="heroScene">
         <canvas class="hero__canvas" id="heroCanvas"></canvas>
 
-        <!-- Far layer: ambient color blobs (parallax slowest) -->
+        <!-- Ambient color blobs -->
         <div class="hero__depth-far" id="heroFar">
           <div class="hero__blob hero__blob--1"></div>
           <div class="hero__blob hero__blob--2"></div>
           <div class="hero__blob hero__blob--3"></div>
         </div>
 
-        <!-- Mid layer: central orb with pulsing rings -->
-        <div class="hero__depth-mid" id="heroMid">
-          <div class="hero__orb" id="heroOrb">
-            <div class="hero__orb-ring hero__orb-ring--1"></div>
-            <div class="hero__orb-ring hero__orb-ring--2"></div>
-            <div class="hero__orb-ring hero__orb-ring--3"></div>
-            <div class="hero__orb-core">
-              <img src="assets/logos/manseok-logo.svg" alt="Manseok-Hwasu" />
-            </div>
-          </div>
-        </div>
+        <!-- SVG Ocean Wave Animation -->
+        <svg class="hero__wave-scene" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="heroWaveGrad1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#97D5FF" stop-opacity="0.48"/>
+              <stop offset="100%" stop-color="#84E3E9" stop-opacity="0.86"/>
+            </linearGradient>
+            <linearGradient id="heroWaveGrad2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#74c7da" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#52b3c9" stop-opacity="0.91"/>
+            </linearGradient>
+            <linearGradient id="heroWaveGrad3" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4aa4bf" stop-opacity="0.72"/>
+              <stop offset="100%" stop-color="#3590b0" stop-opacity="0.97"/>
+            </linearGradient>
+          </defs>
+          <!-- Horizon warm glow -->
+          <ellipse cx="450" cy="198" rx="330" ry="72" fill="#FFC229" opacity="0.09"/>
+          <!-- Wave 1: back, lightest, slowest -->
+          <path class="hero__wave hero__wave--1"
+            d="M-70,295 C55,268 165,315 285,293 C405,271 498,310 622,288 C746,266 842,302 970,282 L970,480 L-70,480 Z"
+            fill="url(#heroWaveGrad1)"/>
+          <!-- Wave 2: mid speed -->
+          <path class="hero__wave hero__wave--2"
+            d="M-70,330 C75,310 178,342 302,322 C426,302 515,336 642,316 C769,296 862,328 970,310 L970,480 L-70,480 Z"
+            fill="url(#heroWaveGrad2)"/>
+          <!-- Wave 3: front, darkest, fastest -->
+          <path class="hero__wave hero__wave--3"
+            d="M-70,370 C95,350 204,376 336,356 C468,336 564,368 698,348 C832,328 918,356 970,344 L970,480 L-70,480 Z"
+            fill="url(#heroWaveGrad3)"/>
+          <!-- Foam crest -->
+          <path class="hero__wave-crest"
+            d="M-70,370 C95,350 204,376 336,356 C468,336 564,368 698,348 C832,328 918,356 970,344"
+            stroke="rgba(255,255,255,0.55)" stroke-width="1.8" fill="none"/>
+        </svg>
 
-        <!-- Near layer: floating location tags (parallax strongest) -->
-        <div class="hero__depth-near" id="heroNear">
-          <div class="hero__tag hero__tag--1"><span>📖</span> Reading Pavilion</div>
-          <div class="hero__tag hero__tag--2"><span>☕</span> Slow Café</div>
-          <div class="hero__tag hero__tag--3"><span>🌅</span> Sunset Dock</div>
+        <!-- Logo stamp floating above the waves -->
+        <div class="hero__stamp" id="heroStamp">
+          <div class="hero__stamp-ring hero__stamp-ring--1"></div>
+          <div class="hero__stamp-ring hero__stamp-ring--2"></div>
+          <div class="hero__stamp-core">
+            <img src="assets/logos/manseok-logo.svg" alt="Manseok-Hwasu" />
+          </div>
         </div>
       </div>
     </div>
@@ -560,6 +582,55 @@ Deep Breath, and Quiet Sunsets</h1>
     </div>
   </div>
 </footer>
+
+<!-- ============================================================
+     BOOKING CONFIRMATION MODAL
+     ============================================================ -->
+<div class="booking-modal" id="bookingModal" role="dialog" aria-modal="true" aria-label="Reservation Complete">
+  <div class="booking-modal__overlay" id="bookingModalOverlay"></div>
+  <div class="booking-modal__content">
+    <div class="booking-modal__device">
+      <!-- Device chrome (macOS-style on PC, pill notch on mobile via CSS) -->
+      <div class="booking-modal__device-bar">
+        <div class="booking-modal__device-dot booking-modal__device-dot--red"></div>
+        <div class="booking-modal__device-dot booking-modal__device-dot--yellow"></div>
+        <div class="booking-modal__device-dot booking-modal__device-dot--green"></div>
+        <div class="booking-modal__device-bar-url">manseok-hwasu.kr / booking / confirm</div>
+      </div>
+
+      <!-- Success screen -->
+      <div class="booking-success" id="bookingSuccess">
+        <div class="booking-success__sparkles" id="bookingSparkles"></div>
+
+        <div class="booking-success__check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+
+        <div class="booking-success__title" data-i18n="reading.confirm_title">Reservation Complete!</div>
+        <div class="booking-success__sub" data-i18n="reading.confirm_sub">Your quiet seat by the sea is waiting.</div>
+
+        <div class="booking-success__card">
+          <div class="booking-success__field">
+            <span class="booking-success__field-label" data-i18n="reading.confirm_date">Date</span>
+            <span class="booking-success__field-value" id="confirmDate">—</span>
+          </div>
+          <div class="booking-success__field">
+            <span class="booking-success__field-label" data-i18n="reading.confirm_time">Time</span>
+            <span class="booking-success__field-value" id="confirmTime">—</span>
+          </div>
+          <div class="booking-success__field">
+            <span class="booking-success__field-label" data-i18n="reading.confirm_seat">Seat</span>
+            <span class="booking-success__field-value" id="confirmSeat">—</span>
+          </div>
+        </div>
+
+        <button class="btn btn--primary" id="bookingModalClose">
+          <span data-i18n="reading.confirm_done">Done</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Scripts -->
 <script src="js/i18n.js"></script>

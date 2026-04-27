@@ -14,17 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCalendar();
   initSeatMap();
   initSeasonalTabs();
+  initBookingModal();
 });
 
-/* ─── Hero Scene: canvas particles + mouse parallax ─ */
+/* ─── Hero Scene: canvas particles + subtle parallax ─ */
 function initHeroScene() {
   const scene = document.getElementById('heroScene');
   if (!scene) return;
 
   const canvas = document.getElementById('heroCanvas');
   const farLayer = document.getElementById('heroFar');
-  const nearLayer = document.getElementById('heroNear');
-  const orb = document.getElementById('heroOrb');
+  const stamp = document.getElementById('heroStamp');
 
   // ── Canvas particle field ──
   if (canvas && canvas.getContext) {
@@ -38,7 +38,6 @@ function initHeroScene() {
     const ro = new ResizeObserver(resize);
     ro.observe(scene);
 
-    // Brand-palette particles: sky, aqua, and a few warm yellow accents
     const COLORS = ['151,213,255', '132,227,233', '255,194,41', '151,213,255', '151,213,255'];
     const pts = Array.from({ length: 42 }, () => ({
       x: Math.random(),
@@ -48,7 +47,6 @@ function initHeroScene() {
       r: Math.random() * 1.8 + 0.7,
       a: Math.random() * 0.45 + 0.15,
       c: COLORS[Math.floor(Math.random() * COLORS.length)],
-      // Each particle has its own slow oscillation for organic feel
       phase: Math.random() * Math.PI * 2,
       freq: 0.0003 + Math.random() * 0.0004,
     }));
@@ -58,15 +56,12 @@ function initHeroScene() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       t++;
       pts.forEach(p => {
-        // Gentle sine drift layered on top of linear velocity
         const drift = Math.sin(t * p.freq + p.phase) * 0.00015;
         p.x += p.vx + drift;
         p.y += p.vy;
-        // Wrap around edges
         if (p.y < -0.05) p.y = 1.05;
         if (p.x < -0.05) p.x = 1.05;
         if (p.x > 1.05) p.x = -0.05;
-
         ctx.beginPath();
         ctx.arc(p.x * canvas.width, p.y * canvas.height, p.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${p.c},${p.a})`;
@@ -77,31 +72,20 @@ function initHeroScene() {
     tick();
   }
 
-  // ── Mouse parallax (desktop) ──
+  // ── Subtle mouse parallax on ambient blobs ──
   let tx = 0, ty = 0, cx = 0, cy = 0;
 
-  const onPointerMove = (e) => {
+  scene.addEventListener('mousemove', (e) => {
     const rect = scene.getBoundingClientRect();
     tx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
     ty = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
-  };
-
-  scene.addEventListener('mousemove', onPointerMove);
+  });
   scene.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
 
-  // Smooth lerp loop for parallax
   const lerpParallax = () => {
     cx += (tx - cx) * 0.055;
     cy += (ty - cy) * 0.055;
-
-    // Far blobs move opposite the mouse (subtle counter-parallax)
-    if (farLayer) farLayer.style.transform = `translate(${cx * -8}px, ${cy * -5}px)`;
-    // Orb tilts and shifts in mouse direction (mid)
-    if (orb) orb.style.transform =
-      `translate(${cx * 14}px, ${cy * 9}px) rotateX(${-cy * 7}deg) rotateY(${cx * 7}deg)`;
-    // Tags move most strongly (near layer)
-    if (nearLayer) nearLayer.style.transform = `translate(${cx * 24}px, ${cy * 16}px)`;
-
+    if (farLayer) farLayer.style.transform = `translate(${cx * -6}px, ${cy * -4}px)`;
     requestAnimationFrame(lerpParallax);
   };
   lerpParallax();
@@ -194,7 +178,6 @@ function initDiscoverMap() {
   const panelDesc = panel?.querySelector('[data-panel-desc]');
   const closeBtn = panel?.querySelector('.discover__panel-close');
 
-  // Map pin id -> image filename (custom photos can replace these)
   const pinImages = {
     waterfront: 'assets/images/discover/waterfront-dock.webp',
     lookout: 'assets/images/discover/sea-lookout.webp',
@@ -204,16 +187,39 @@ function initDiscoverMap() {
     bike: 'assets/images/discover/bike-path.webp'
   };
 
-  const showPanel = (id) => {
-    pins.forEach(p => p.classList.toggle('is-active', p.dataset.id === id));
+  const applyContent = (id) => {
     const dict = window.i18n?.dict;
     const point = dict?.discover?.points?.[id];
     if (!point) return;
     panelTitle.textContent = point.title;
     panelDesc.textContent = point.description;
     if (pinImages[id]) panelImg.style.backgroundImage = `url('${pinImages[id]}')`;
-    panel.classList.add('is-visible');
+  };
+
+  const showPanel = (id, animate = true) => {
+    pins.forEach(p => p.classList.toggle('is-active', p.dataset.id === id));
     panel.dataset.activeId = id;
+
+    if (!animate) {
+      applyContent(id);
+      panel.classList.add('is-visible');
+      return;
+    }
+
+    if (panel.classList.contains('is-visible')) {
+      // Panel is already open — briefly fade content then update
+      panel.classList.add('is-refreshing');
+      setTimeout(() => {
+        applyContent(id);
+        panel.classList.remove('is-refreshing');
+      }, 160);
+    } else {
+      applyContent(id);
+      // Double rAF so the browser paints the initial hidden state first
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        panel.classList.add('is-visible');
+      }));
+    }
   };
 
   pins.forEach(pin => {
@@ -226,13 +232,13 @@ function initDiscoverMap() {
     delete panel.dataset.activeId;
   });
 
-  // Re-translate the open panel when language changes
   document.addEventListener('i18n:applied', () => {
-    if (panel.dataset.activeId) showPanel(panel.dataset.activeId);
+    if (panel.dataset.activeId) showPanel(panel.dataset.activeId, false);
   });
 
-  // Show waterfront by default (matches your reference screenshot)
-  showPanel('waterfront');
+  // Show waterfront on load with animation after a short delay so the
+  // page has settled and the transition plays visibly
+  setTimeout(() => showPanel('waterfront'), 600);
 }
 
 /* ─── Calendar ────────────────────────────────────── */
@@ -373,6 +379,82 @@ function updateBookingSummary() {
   const seatStr = seat ? `Seat ${seat}` : '—';
 
   el.innerHTML = `<strong>${dateStr}</strong> · ${timeStr} · ${seatStr}`;
+}
+
+/* ─── Booking confirmation modal ─────────────────── */
+function initBookingModal() {
+  const modal = document.getElementById('bookingModal');
+  if (!modal) return;
+
+  const overlay = document.getElementById('bookingModalOverlay');
+  const closeBtn = document.getElementById('bookingModalClose');
+  const confirmBtn = document.querySelector('.booking-confirm .btn--accent');
+  const sparklesEl = document.getElementById('bookingSparkles');
+
+  const SPARK_COLORS = ['#97D5FF','#84E3E9','#FFC229','#FF7746','#fff'];
+
+  const launchSparkles = () => {
+    sparklesEl.innerHTML = '';
+    const cx = sparklesEl.offsetWidth / 2;
+    const cy = sparklesEl.offsetHeight * 0.35;
+    for (let i = 0; i < 22; i++) {
+      const el = document.createElement('div');
+      el.className = 'booking-success__spark';
+      const angle = (i / 22) * Math.PI * 2;
+      const dist = 60 + Math.random() * 80;
+      el.style.cssText = `
+        left:${cx}px; top:${cy}px;
+        background:${SPARK_COLORS[i % SPARK_COLORS.length]};
+        --dx:${Math.cos(angle) * dist}px;
+        --dy:${Math.sin(angle) * dist - 40}px;
+        animation-delay:${Math.random() * 200}ms;
+        width:${4 + Math.random() * 5}px;
+        height:${4 + Math.random() * 5}px;
+      `;
+      sparklesEl.appendChild(el);
+    }
+  };
+
+  const openModal = () => {
+    const dict = window.i18n?.dict;
+    const months = dict?.reading?.months || [];
+    const date = calendarState.selected;
+    const time = document.querySelector('.timeslot.is-active')?.textContent?.trim();
+    const seat = seatState.selected;
+
+    document.getElementById('confirmDate').textContent =
+      date ? `${months[date.getMonth()] || ''} ${date.getDate()}` : '—';
+    document.getElementById('confirmTime').textContent = time || '—';
+    document.getElementById('confirmSeat').textContent = seat ? `Seat ${seat}` : '—';
+
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    launchSparkles();
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+  };
+
+  confirmBtn?.addEventListener('click', () => {
+    if (!calendarState.selected || !document.querySelector('.timeslot.is-active') || !seatState.selected) {
+      // Shake the confirm row if incomplete
+      const row = document.querySelector('.booking-confirm');
+      row.style.animation = 'none';
+      row.offsetHeight; // reflow
+      row.style.animation = 'shake 400ms ease';
+      return;
+    }
+    openModal();
+  });
+
+  overlay?.addEventListener('click', closeModal);
+  closeBtn?.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+  });
 }
 
 /* ─── Seasonal tabs ───────────────────────────────── */
