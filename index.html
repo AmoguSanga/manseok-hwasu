@@ -49,7 +49,7 @@
     </svg>
   </button>
 
-  <button class="nav__toggle" aria-label="Toggle menu">
+  <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
 </nav>
@@ -76,61 +76,13 @@ Deep Breath, and Quiet Sunsets</h1>
       </div>
     </div>
 
-    <div class="hero__visual" aria-hidden="true">
-      <div class="hero__scene" id="heroScene">
-        <canvas class="hero__canvas" id="heroCanvas"></canvas>
-
-        <!-- Ambient color blobs -->
-        <div class="hero__depth-far" id="heroFar">
-          <div class="hero__blob hero__blob--1"></div>
-          <div class="hero__blob hero__blob--2"></div>
-          <div class="hero__blob hero__blob--3"></div>
-        </div>
-
-        <!-- SVG Ocean Wave Animation -->
-        <svg class="hero__wave-scene" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="heroWaveGrad1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#97D5FF" stop-opacity="0.48"/>
-              <stop offset="100%" stop-color="#84E3E9" stop-opacity="0.86"/>
-            </linearGradient>
-            <linearGradient id="heroWaveGrad2" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#74c7da" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#52b3c9" stop-opacity="0.91"/>
-            </linearGradient>
-            <linearGradient id="heroWaveGrad3" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#4aa4bf" stop-opacity="0.72"/>
-              <stop offset="100%" stop-color="#3590b0" stop-opacity="0.97"/>
-            </linearGradient>
-          </defs>
-          <!-- Horizon warm glow -->
-          <ellipse cx="450" cy="198" rx="330" ry="72" fill="#FFC229" opacity="0.09"/>
-          <!-- Wave 1: back, lightest, slowest -->
-          <path class="hero__wave hero__wave--1"
-            d="M-70,295 C55,268 165,315 285,293 C405,271 498,310 622,288 C746,266 842,302 970,282 L970,480 L-70,480 Z"
-            fill="url(#heroWaveGrad1)"/>
-          <!-- Wave 2: mid speed -->
-          <path class="hero__wave hero__wave--2"
-            d="M-70,330 C75,310 178,342 302,322 C426,302 515,336 642,316 C769,296 862,328 970,310 L970,480 L-70,480 Z"
-            fill="url(#heroWaveGrad2)"/>
-          <!-- Wave 3: front, darkest, fastest -->
-          <path class="hero__wave hero__wave--3"
-            d="M-70,370 C95,350 204,376 336,356 C468,336 564,368 698,348 C832,328 918,356 970,344 L970,480 L-70,480 Z"
-            fill="url(#heroWaveGrad3)"/>
-          <!-- Foam crest -->
-          <path class="hero__wave-crest"
-            d="M-70,370 C95,350 204,376 336,356 C468,336 564,368 698,348 C832,328 918,356 970,344"
-            stroke="rgba(255,255,255,0.55)" stroke-width="1.8" fill="none"/>
-        </svg>
-
-        <!-- Logo stamp floating above the waves -->
-        <div class="hero__stamp" id="heroStamp">
-          <div class="hero__stamp-ring hero__stamp-ring--1"></div>
-          <div class="hero__stamp-ring hero__stamp-ring--2"></div>
-          <div class="hero__stamp-core">
-            <img src="assets/logos/manseok-logo.svg" alt="Manseok-Hwasu" />
-          </div>
-        </div>
+    <div class="hero__visual">
+      <div class="hero__carousel" id="heroCarousel" aria-label="Manseok-Hwasu photo highlights">
+        <img class="hero__photo is-active" src="assets/images/discover/waterfront-dock.webp" alt="Waterfront dock at Manseok-Hwasu" />
+        <img class="hero__photo" src="assets/images/reading/reading-room-bg.webp" alt="Reading room by the coast" />
+        <img class="hero__photo" src="assets/images/seasonal/summer.webp" alt="Summer coast activity" />
+        <img class="hero__photo" src="assets/images/community/story-1.webp" alt="Visitor moment at Manseok-Hwasu" />
+        <div class="hero__carousel-dots" aria-hidden="true"></div>
       </div>
     </div>
   </div>
@@ -172,7 +124,7 @@ Deep Breath, and Quiet Sunsets</h1>
         </span>
       </a>
 
-      <a class="visit-card reveal" href="#" aria-label="Area Map">
+      <a class="visit-card reveal" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="Area Map">
         <div class="visit-card__icon">
           <!-- map icon -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
@@ -220,7 +172,7 @@ Deep Breath, and Quiet Sunsets</h1>
 
       <label class="discover__zoom" aria-label="3D map zoom">
         <span>Zoom</span>
-        <input type="range" min="2.4" max="7.2" step="0.1" value="4.1" data-map-zoom />
+        <input type="range" min="1.9" max="6.2" step="0.1" value="3.1" data-map-zoom />
       </label>
 
       <div class="discover__pins">
@@ -265,6 +217,17 @@ Deep Breath, and Quiet Sunsets</h1>
         <h3 data-panel-title>Waterfront Dock</h3>
         <p data-panel-desc>Description loads from translations.</p>
       </aside>
+    </div>
+
+    <div class="map-app-links reveal" aria-label="Open mock map integration">
+      <a class="map-app-link" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="Open KakaoTalk map mockup">
+        <img src="assets/logos/kkt.png" alt="" />
+        <span>KakaoTalk Map</span>
+      </a>
+      <a class="map-app-link" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="Open Naver map mockup">
+        <img src="assets/logos/naver.png" alt="" />
+        <span>Naver Map</span>
+      </a>
     </div>
   </div>
 </section>
@@ -593,6 +556,19 @@ Deep Breath, and Quiet Sunsets</h1>
           <li><a href="#">Naver Blog</a></li>
           <li><a href="#">YouTube</a></li>
         </ul>
+      </div>
+      <div>
+        <h4>Map Apps</h4>
+        <div class="footer__map-apps">
+          <a class="map-app-link map-app-link--compact" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="Open KakaoTalk map mockup">
+            <img src="assets/logos/kkt.png" alt="" />
+            <span>KakaoTalk</span>
+          </a>
+          <a class="map-app-link map-app-link--compact" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="Open Naver map mockup">
+            <img src="assets/logos/naver.png" alt="" />
+            <span>Naver</span>
+          </a>
+        </div>
       </div>
     </div>
     <div class="footer__bottom" data-i18n="footer.rights">

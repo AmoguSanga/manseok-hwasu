@@ -4,15 +4,15 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const MODEL_URL = 'assets/models/discover/manseok-hwasu-map.glb';
 const PIN_IDS = ['waterfront', 'lookout', 'library', 'cafe', 'gallery', 'bike'];
 const PIN_LIFT = 0.06;
-const DEFAULT_ROTATION = -0.38;
+const DEFAULT_ROTATION = 2.75;
 const DEFAULT_TILT = 0.05;
 const AUTO_ROTATE_DELAY = 10000;
 const AUTO_ROTATE_SPEED = 0.00012;
 const CAMERA_TARGET = new THREE.Vector3(0, 0.42, 0);
 const CAMERA_DIRECTION = new THREE.Vector3(0, 0.72, 0.94).normalize();
-const DEFAULT_ZOOM = 4.1;
-const MIN_ZOOM = 2.4;
-const MAX_ZOOM = 7.2;
+const DEFAULT_ZOOM = 3.1;
+const MIN_ZOOM = 1.9;
+const MAX_ZOOM = 6.2;
 
 const fallbackPinPoints = {
   waterfront: new THREE.Vector3(-3.2, 0.28, 1.35),
@@ -77,7 +77,8 @@ function initDiscover3D() {
   let lastY = 0;
   let pinchStartDistance = 0;
   let pinchStartZoom = DEFAULT_ZOOM;
-  let lastInteractionAt = 0;
+  let lastInteractionAt = performance.now();
+  let isMapVisible = false;
   const activePointers = new Map();
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -106,6 +107,13 @@ function initDiscover3D() {
   const ro = new ResizeObserver(resize);
   ro.observe(map);
   resize();
+
+  const visibilityObserver = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    isMapVisible = Boolean(entry?.isIntersecting);
+    if (isMapVisible) pauseAutoRotate();
+  }, { threshold: 0.35 });
+  visibilityObserver.observe(map);
 
   const shouldIgnoreDrag = (target) => (
     target.closest('.discover-pin') ||
@@ -162,7 +170,11 @@ function initDiscover3D() {
     pauseAutoRotate();
     isDragging = false;
     map.classList.remove('is-dragging');
-    if (map.hasPointerCapture(event.pointerId)) map.releasePointerCapture(event.pointerId);
+    try {
+      if (map.hasPointerCapture?.(event.pointerId)) map.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      // Some mobile browsers release capture before pointerup/pointercancel reaches us.
+    }
   };
 
   map.addEventListener('pointerup', releaseDrag);
@@ -199,7 +211,7 @@ function initDiscover3D() {
   const animate = () => {
     requestAnimationFrame(animate);
     clock += 0.01;
-    const canAutoRotate = !isDragging && !reducedMotion && performance.now() - lastInteractionAt > AUTO_ROTATE_DELAY;
+    const canAutoRotate = isMapVisible && !isDragging && !reducedMotion && performance.now() - lastInteractionAt > AUTO_ROTATE_DELAY;
     if (canAutoRotate) targetRotation += AUTO_ROTATE_SPEED;
 
     mapRoot.rotation.y += (targetRotation - mapRoot.rotation.y) * 0.08;

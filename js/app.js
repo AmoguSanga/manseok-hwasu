@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initLangToggle();
   initScrollReveal();
   initActiveNavLink();
-  initHeroScene();
+  initHeroCarousel();
   initDiscoverMap();
   initCalendar();
   initSeatMap();
@@ -17,78 +17,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   initBookingModal();
 });
 
-/* ─── Hero Scene: canvas particles + subtle parallax ─ */
-function initHeroScene() {
-  const scene = document.getElementById('heroScene');
-  if (!scene) return;
+/* ─── Hero Carousel ───────────────────────────────── */
+function initHeroCarousel() {
+  const root = document.getElementById('heroCarousel');
+  if (!root) return;
 
-  const canvas = document.getElementById('heroCanvas');
-  const farLayer = document.getElementById('heroFar');
-  const stamp = document.getElementById('heroStamp');
+  const photos = Array.from(root.querySelectorAll('.hero__photo'));
+  const dots = root.querySelector('.hero__carousel-dots');
+  if (photos.length < 2 || !dots) return;
 
-  // ── Canvas particle field ──
-  if (canvas && canvas.getContext) {
-    const ctx = canvas.getContext('2d');
-
-    const resize = () => {
-      canvas.width = scene.offsetWidth;
-      canvas.height = scene.offsetHeight;
-    };
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(scene);
-
-    const COLORS = ['151,213,255', '132,227,233', '255,194,41', '151,213,255', '151,213,255'];
-    const pts = Array.from({ length: 42 }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      vx: (Math.random() - 0.5) * 0.00045,
-      vy: (Math.random() - 0.5) * 0.00045 - 0.00018,
-      r: Math.random() * 1.8 + 0.7,
-      a: Math.random() * 0.45 + 0.15,
-      c: COLORS[Math.floor(Math.random() * COLORS.length)],
-      phase: Math.random() * Math.PI * 2,
-      freq: 0.0003 + Math.random() * 0.0004,
-    }));
-
-    let t = 0;
-    const tick = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      t++;
-      pts.forEach(p => {
-        const drift = Math.sin(t * p.freq + p.phase) * 0.00015;
-        p.x += p.vx + drift;
-        p.y += p.vy;
-        if (p.y < -0.05) p.y = 1.05;
-        if (p.x < -0.05) p.x = 1.05;
-        if (p.x > 1.05) p.x = -0.05;
-        ctx.beginPath();
-        ctx.arc(p.x * canvas.width, p.y * canvas.height, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${p.c},${p.a})`;
-        ctx.fill();
-      });
-      requestAnimationFrame(tick);
-    };
-    tick();
-  }
-
-  // ── Subtle mouse parallax on ambient blobs ──
-  let tx = 0, ty = 0, cx = 0, cy = 0;
-
-  scene.addEventListener('mousemove', (e) => {
-    const rect = scene.getBoundingClientRect();
-    tx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    ty = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
+  photos.forEach((_, index) => {
+    const dot = document.createElement('span');
+    dot.className = index === 0 ? 'is-active' : '';
+    dots.appendChild(dot);
   });
-  scene.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
 
-  const lerpParallax = () => {
-    cx += (tx - cx) * 0.055;
-    cy += (ty - cy) * 0.055;
-    if (farLayer) farLayer.style.transform = `translate(${cx * -6}px, ${cy * -4}px)`;
-    requestAnimationFrame(lerpParallax);
+  const dotEls = Array.from(dots.children);
+  let active = 0;
+
+  const show = (index) => {
+    const previous = active;
+    active = index % photos.length;
+    photos.forEach((photo, i) => {
+      photo.classList.toggle('is-active', i === active);
+      photo.classList.toggle('is-prev', i === previous && i !== active);
+    });
+    dotEls.forEach((dot, i) => dot.classList.toggle('is-active', i === active));
   };
-  lerpParallax();
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  setInterval(() => show(active + 1), 4200);
 }
 
 /* ─── Navigation ──────────────────────────────────── */
@@ -96,11 +54,17 @@ function initNav() {
   const nav = document.querySelector('.nav');
   const toggle = document.querySelector('.nav__toggle');
   if (toggle) {
-    toggle.addEventListener('click', () => nav.classList.toggle('is-open'));
+    toggle.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    });
   }
   // Close menu when a link is clicked (mobile)
   document.querySelectorAll('.nav__link').forEach(link => {
-    link.addEventListener('click', () => nav.classList.remove('is-open'));
+    link.addEventListener('click', () => {
+      nav.classList.remove('is-open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
   });
 }
 
@@ -235,10 +199,6 @@ function initDiscoverMap() {
   document.addEventListener('i18n:applied', () => {
     if (panel.dataset.activeId) showPanel(panel.dataset.activeId, false);
   });
-
-  // Show waterfront on load with animation after a short delay so the
-  // page has settled and the transition plays visibly
-  setTimeout(() => showPanel('waterfront'), 600);
 }
 
 /* ─── Calendar ────────────────────────────────────── */
