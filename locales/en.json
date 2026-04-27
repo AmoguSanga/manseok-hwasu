@@ -13,11 +13,11 @@
     "lang": "KOR"
   },
   "hero": {
-    "subtitle": "Where the West Sea meets stillness",
-    "title": "A Coast for Slow Reading,\nDeep Breath, and Quiet Sunsets",
-    "description": "Manseok-Hwasu is a coastal escape designed for those who want to disconnect from screens and reconnect with the rhythm of the sea, the sky, and themselves.",
-    "cta_primary": "Plan Your Visit",
-    "cta_secondary": "Explore the Coast"
+    "subtitle": "Community-led coastal revitalization in Manseok-dong",
+    "title": "나만 아는 해안\nMy Secret Coast",
+    "description": "Hidden behind Incheon's industrial waterfront, two overlooked coastlines are being reintroduced as a living cultural destination: a connected walking route, discovery waypoints, a library-linked reading space, outdoor art and open-air programs, and a digital guide that leads people back to the real shore.",
+    "cta_primary": "Start Your Route",
+    "cta_secondary": "Discover the Coast"
   },
   "visit": {
     "title": "Plan Your Visit",
@@ -72,8 +72,30 @@
   "reading": {
     "title": "Reading & Booking",
     "subtitle": "Reserve a quiet seat by the sea",
-    "zones_title": "Coastal Reading Zones",
-    "zones_subtitle": "Free, first-come-first-served. No reservation required.",
+    "zones_title": "One Coast, Many Reasons to Slow Down",
+    "zones_subtitle": "Each zone gives you a different reason to slow down — but they're all part of the same coast.",
+    "zones_intro": "The zones work as an identity ring: each one serves a different time of day, a different type of person, and a different emotional need, while sharing one physical route and one digital platform.",
+    "zones": {
+      "morning": {
+        "title": "Morning Circuit",
+        "description": "A calm route for older locals, early walkers, and anyone who wants the coast before the city speeds up.",
+        "tag": "morning rhythm · daily walk"
+      },
+      "reader": {
+        "title": "Sea-View Reading Shelter",
+        "description": "A reason to stay, not just pass through: borrowed books, shade, sea air, and a slower alternative to the cafe ceiling.",
+        "tag": "borrowed books · quiet stay"
+      },
+      "heritage": {
+        "title": "묘도길 Heritage Stops",
+        "description": "Lore stops along the trail trace the memory of Cat Island, once tied to Incheon's croaker fishing trade.",
+        "tag": "Cat Island story · trail markers"
+      }
+    },
+    "heritage_title": "The Coast Was Always There",
+    "heritage_description": "Manseok-Hwasu is an Incheon waterfront with a coastline, a walking trail, and a history most people have never heard. Before reclamation reshaped this stretch of coast, the area was anchored by 묘도 — Cat Island — once the heart of Incheon's croaker fishing trade. The island is gone, but its memory runs through the promenade, the port, and the people who lived here.",
+    "heritage_quote": "The space exists. The experience does not — yet.",
+    "heritage_note": "Cat Island gives this coast a story nobody else can claim: 묘도길 lore stops, cat-themed seasonal art, and a shared identity that turns a pass-through promenade into a reason to return.",
     "premium_title": "Premium Reading Room",
     "premium_subtitle": "A reservable, climate-controlled space with sea-view seating",
     "select_date": "SELECT DATE & TIME",

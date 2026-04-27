@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initNav();
   initLangToggle();
+  initIncheonLinks();
   initScrollReveal();
   initActiveNavLink();
   initHeroCarousel();
@@ -72,6 +73,24 @@ function initLangToggle() {
   const btn = document.querySelector('.nav__lang');
   if (!btn) return;
   btn.addEventListener('click', () => i18n.toggle());
+}
+
+function initIncheonLinks() {
+  const links = document.querySelectorAll('[data-incheon-link]');
+  if (!links.length) return;
+
+  const urls = {
+    en: 'https://www.incheon.go.kr/en/index',
+    ko: 'https://www.incheon.go.kr/index'
+  };
+
+  const apply = (lang = window.i18n?.currentLang || 'en') => {
+    const href = urls[lang] || urls.en;
+    links.forEach(link => { link.href = href; });
+  };
+
+  apply();
+  document.addEventListener('i18n:applied', (event) => apply(event.detail?.lang));
 }
 
 /* ─── Scroll reveals ──────────────────────────────── */

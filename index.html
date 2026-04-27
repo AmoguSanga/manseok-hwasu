@@ -9,7 +9,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" />
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
@@ -52,6 +52,10 @@
   <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
+
+  <a class="nav__partner" href="https://www.incheon.go.kr/en/index" target="_blank" rel="noopener" data-incheon-link aria-label="Incheon Metropolitan City">
+    <img src="assets/logos/ci_incheon.svg" alt="Incheon Metropolitan City" />
+  </a>
 </nav>
 
 <!-- ============================================================
@@ -61,17 +65,17 @@
   <div class="hero__bg" aria-hidden="true"></div>
   <div class="container hero__inner">
     <div class="hero__copy">
-      <span class="eyebrow" data-i18n="hero.subtitle">Where the West Sea meets stillness</span>
-      <h1 class="hero__title" data-i18n="hero.title">A Coast for Slow Reading,
-Deep Breath, and Quiet Sunsets</h1>
-      <p class="hero__desc" data-i18n="hero.description">Manseok-Hwasu is a coastal escape designed for those who want to disconnect from screens and reconnect with the rhythm of the sea, the sky, and themselves.</p>
+      <span class="eyebrow" data-i18n="hero.subtitle">Community-led coastal revitalization in Manseok-dong</span>
+      <h1 class="hero__title" data-i18n="hero.title">나만 아는 해안
+My Secret Coast</h1>
+      <p class="hero__desc" data-i18n="hero.description">Hidden behind Incheon's industrial waterfront, two overlooked coastlines are being reintroduced as a living cultural destination: a connected walking route, discovery waypoints, a library-linked reading space, outdoor art and open-air programs, and a digital guide that leads people back to the real shore.</p>
       <div class="hero__ctas">
         <a href="#visit" class="btn btn--primary">
-          <span data-i18n="hero.cta_primary">Plan Your Visit</span>
+          <span data-i18n="hero.cta_primary">Start Your Route</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
         <a href="#discover" class="btn">
-          <span data-i18n="hero.cta_secondary">Explore the Coast</span>
+          <span data-i18n="hero.cta_secondary">Discover the Coast</span>
         </a>
       </div>
     </div>
@@ -100,7 +104,7 @@ Deep Breath, and Quiet Sunsets</h1>
     </div>
 
     <div class="visit__grid">
-      <a class="visit-card reveal" href="#" aria-label="How to Get Here">
+      <a class="visit-card reveal" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="How to Get Here">
         <div class="visit-card__icon">
           <!-- compass icon -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
@@ -376,32 +380,43 @@ Deep Breath, and Quiet Sunsets</h1>
       <div class="section-head" style="margin-bottom: 32px;">
         <span class="eyebrow" data-i18n="reading.zones_title">Coastal Reading Zones</span>
         <p style="color: var(--ink-muted);" data-i18n="reading.zones_subtitle">Free, first-come-first-served. No reservation required.</p>
+        <p class="zones-intro" data-i18n="reading.zones_intro">The zones work as an identity ring: each one serves a different time of day, a different type of person, and a different emotional need, while sharing one physical route and one digital platform.</p>
       </div>
       <div class="zones-grid">
         <div class="zone-card reveal">
           <div class="zone-card__img" style="background-image: url('assets/images/reading/reading-zone-1.webp')"></div>
           <div class="zone-card__body">
-            <h4>North Pavilion</h4>
-            <p>An open-sided wooden pavilion with cushions, facing the morning sun.</p>
-            <span class="zone-card__tag">12 seats · open daily</span>
+            <h4 data-i18n="reading.zones.morning.title">Morning Circuit</h4>
+            <p data-i18n="reading.zones.morning.description">A calm route for older locals, early walkers, and anyone who wants the coast before the city speeds up.</p>
+            <span class="zone-card__tag" data-i18n="reading.zones.morning.tag">morning rhythm · daily walk</span>
           </div>
         </div>
         <div class="zone-card reveal">
           <div class="zone-card__img" style="background-image: url('assets/images/reading/reading-zone-2.webp')"></div>
           <div class="zone-card__body">
-            <h4>Sunset Bench</h4>
-            <p>Long curved bench positioned for the best evening light over the West Sea.</p>
-            <span class="zone-card__tag">8 seats · best at golden hour</span>
+            <h4 data-i18n="reading.zones.reader.title">Sea-View Reading Shelter</h4>
+            <p data-i18n="reading.zones.reader.description">A reason to stay, not just pass through: borrowed books, shade, sea air, and a slower alternative to the cafe ceiling.</p>
+            <span class="zone-card__tag" data-i18n="reading.zones.reader.tag">borrowed books · quiet stay</span>
           </div>
         </div>
         <div class="zone-card reveal">
           <div class="zone-card__img" style="background-image: url('assets/images/reading/reading-zone-3.webp')"></div>
           <div class="zone-card__body">
-            <h4>Library Steps</h4>
-            <p>Casual stepped seating beside the donated-book shelf. Pick up a book and read.</p>
-            <span class="zone-card__tag">20+ seats · book exchange</span>
+            <h4 data-i18n="reading.zones.heritage.title">묘도길 Heritage Stops</h4>
+            <p data-i18n="reading.zones.heritage.description">Lore stops along the trail trace the memory of Cat Island, once tied to Incheon's croaker fishing trade.</p>
+            <span class="zone-card__tag" data-i18n="reading.zones.heritage.tag">Cat Island story · trail markers</span>
           </div>
         </div>
+      </div>
+
+      <div class="heritage-thread reveal">
+        <div>
+          <span class="eyebrow">묘도 · Cat Island</span>
+          <h3 data-i18n="reading.heritage_title">The Coast Was Always There</h3>
+        </div>
+        <p data-i18n="reading.heritage_description">Manseok-Hwasu is an Incheon waterfront with a coastline, a walking trail, and a history most people have never heard. Before reclamation reshaped this stretch of coast, the area was anchored by 묘도 — Cat Island — once the heart of Incheon's croaker fishing trade. The island is gone, but its memory runs through the promenade, the port, and the people who lived here.</p>
+        <blockquote data-i18n="reading.heritage_quote">The space exists. The experience does not — yet.</blockquote>
+        <p data-i18n="reading.heritage_note">Cat Island gives this coast a story nobody else can claim: 묘도길 lore stops, cat-themed seasonal art, and a shared identity that turns a pass-through promenade into a reason to return.</p>
       </div>
     </div>
 
@@ -468,7 +483,7 @@ Deep Breath, and Quiet Sunsets</h1>
         </div>
         <h3 data-i18n="community.forum_title">Community Forum</h3>
         <p data-i18n="community.forum_description">Share photos, reading recommendations, and stories from your visit. Discover what locals love most about this coast.</p>
-        <a href="#" class="btn">
+        <a href="https://www.incheon.go.kr/en/index" class="btn" target="_blank" rel="noopener" data-incheon-link>
           <span data-i18n="community.forum_cta">Open Forum</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
@@ -480,7 +495,7 @@ Deep Breath, and Quiet Sunsets</h1>
         </div>
         <h3 data-i18n="community.volunteer_title">Volunteer With Us</h3>
         <p data-i18n="community.volunteer_description">Help maintain reading zones, lead seasonal events, or support the donated book library.</p>
-        <a href="#" class="btn">
+        <a href="https://www.incheon.go.kr/en/index" class="btn" target="_blank" rel="noopener" data-incheon-link>
           <span data-i18n="community.volunteer_cta">Apply to Volunteer</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
@@ -532,6 +547,9 @@ Deep Breath, and Quiet Sunsets</h1>
           </span>
         </a>
         <p data-i18n="footer.about_text">A community-led coastal project of Dong-gu, Incheon, dedicated to slow living and shared reading.</p>
+        <a class="footer__partner" href="https://www.incheon.go.kr/en/index" target="_blank" rel="noopener" data-incheon-link aria-label="Incheon Metropolitan City">
+          <img src="assets/logos/ci_incheon.svg" alt="Incheon Metropolitan City" />
+        </a>
       </div>
       <div>
         <h4 data-i18n="footer.contact">Contact</h4>
@@ -632,8 +650,8 @@ Deep Breath, and Quiet Sunsets</h1>
 <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+      "three": "./vendor/three/three.module.js",
+      "three/addons/": "./vendor/three/addons/"
     }
   }
 </script>
