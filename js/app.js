@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   await i18n.init();
 
+  initThemeToggle();
   initNav();
   initLangToggle();
   initIncheonLinks();
@@ -17,6 +18,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSeasonalTabs();
   initBookingModal();
 });
+
+/* ─── Theme Toggle (logo click) ───────────────────── */
+function initThemeToggle() {
+  const logo = document.querySelector('.nav__logo');
+  if (!logo) return;
+
+  logo.setAttribute('role', 'button');
+  logo.setAttribute('tabindex', '0');
+  logo.title = 'Toggle dark / light mode';
+
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('mh-theme', theme); } catch (e) {}
+    logo.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  };
+
+  const toggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    // Spin + pulse feedback
+    logo.animate([
+      { transform: 'scale(1)    rotate(0deg)',   boxShadow: '' },
+      { transform: 'scale(1.22) rotate(180deg)', offset: 0.5 },
+      { transform: 'scale(1)    rotate(360deg)', boxShadow: '' }
+    ], { duration: 520, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fill: 'none' });
+  };
+
+  logo.addEventListener('click', toggle);
+  logo.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') toggle(e);
+  });
+}
 
 /* ─── Hero Carousel ───────────────────────────────── */
 function initHeroCarousel() {

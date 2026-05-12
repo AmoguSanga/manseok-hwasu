@@ -6,6 +6,11 @@
   <title data-i18n="site.title">Manseok-Hwasu | Digital Detox Coast</title>
   <meta name="description" content="A coastal escape in Dong-gu, Incheon, designed for slow reading, deep breath, and quiet sunsets." />
 
+  <!-- Theme: set data-theme before first paint to prevent flash -->
+  <script>
+    (function(){try{var t=localStorage.getItem('mh-theme');if(!t)t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+  </script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

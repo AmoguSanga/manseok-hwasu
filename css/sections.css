@@ -39,6 +39,14 @@
 
 .hero__copy {
   animation: heroCopyIn 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  background: rgba(238, 242, 247, 0.74);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-radius: var(--radius-xl);
+  padding: 48px 52px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    var(--neo-raised-sm);
 }
 .hero__copy .eyebrow { display: inline-block; padding: 6px 14px; border-radius: var(--radius-pill); background: var(--bg); box-shadow: var(--neo-pressed); margin-bottom: 24px; }
 .hero__copy .eyebrow,
@@ -93,11 +101,10 @@
 .hero__desc {
   font-size: 1.05rem;
   line-height: 1.75;
-  color: rgba(255, 250, 243, 0.88);
+  color: var(--ink-muted);
   opacity: 1;
   max-width: 520px;
   margin-bottom: 36px;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.15);
 }
 
 .hero__ctas { display: flex; gap: 16px; flex-wrap: wrap; }
@@ -210,24 +217,15 @@
   }
 
   .hero__copy {
-    background: rgba(238, 242, 247, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(238, 242, 247, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-radius: var(--radius-lg);
     padding: 28px 24px;
-  }
-  /* Restore dark text over white box */
-  .hero__copy .hero__title {
-    text-shadow:
-      0 1px 0 rgba(255, 250, 245, 0.75),
-      0 5px 16px rgba(41, 33, 33, 0.22),
-      0 0 18px rgba(151, 213, 255, 0.35),
-      0 0 34px rgba(255, 119, 64, 0.25);
   }
   .hero__copy .hero__desc {
     color: var(--ink-muted);
     text-shadow: none;
-    opacity: 0.85;
   }
 
   .hero__visual {
@@ -727,9 +725,9 @@
   text-align: center;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   padding: 8px 0;
-  font-weight: 500;
+  font-weight: 600;
 }
 .calendar__day {
   aspect-ratio: 1;
@@ -840,6 +838,7 @@
   padding: 24px;
 }
 .seatmap svg { width: 100%; height: 100%; display: block; }
+.seatmap text { fill: var(--ink-muted); }
 
 .seat {
   cursor: pointer;
@@ -1248,7 +1247,7 @@
 }
 .story__meta {
   font-size: 0.75rem;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1335,7 +1334,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.68rem;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   letter-spacing: 0.04em;
 }
 
@@ -1401,7 +1400,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   font-weight: 600;
 }
 .booking-success__field-value {
@@ -1469,4 +1468,71 @@
   .booking-success__field { flex-direction: row; align-items: center; justify-content: space-between; }
   .booking-success__title { font-size: 1.6rem; }
   .booking-success .btn { width: 100%; justify-content: center; }
+}
+
+/* ============================================================
+   Dark Mode — section-level overrides
+   Triggered by JS writing data-theme="dark" on <html>.
+   ============================================================ */
+
+/* Hero */
+[data-theme="dark"] .hero__copy {
+  background: rgba(21, 24, 31, 0.76);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.04) inset,
+    var(--neo-raised-sm);
+}
+[data-theme="dark"] .hero__bg {
+  opacity: 0.38;
+}
+
+/* Discover map glass */
+[data-theme="dark"] .discover__panel {
+  background: rgba(21, 24, 31, 0.94);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), var(--neo-raised-sm);
+}
+[data-theme="dark"] .discover__tour-badge {
+  background: rgba(21, 24, 31, 0.93);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+[data-theme="dark"] .discover__controls {
+  background: rgba(21, 24, 31, 0.92);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+[data-theme="dark"] .discover__zoom {
+  background: rgba(21, 24, 31, 0.92);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+[data-theme="dark"] .discover__panel-close {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* Heritage thread card */
+[data-theme="dark"] .heritage-thread {
+  background:
+    linear-gradient(135deg, rgba(27, 31, 40, 0.92), rgba(21, 24, 31, 0.96)),
+    radial-gradient(circle at 12% 18%, rgba(255, 194, 32, 0.07), transparent 34%);
+}
+
+/* Donate card */
+[data-theme="dark"] .donate {
+  background: linear-gradient(135deg, var(--bg) 0%, rgba(255, 194, 41, 0.04) 100%);
+  border-color: rgba(255, 194, 41, 0.1);
+}
+
+/* Zone tag */
+[data-theme="dark"] .zone-card__tag {
+  background: rgba(255, 119, 64, 0.14);
+}
+
+/* Community gradient */
+[data-theme="dark"] .community {
+  background: linear-gradient(180deg, transparent 0%, rgba(132, 227, 233, 0.04) 100%);
+}
+
+/* Mobile: hero glass slightly more opaque */
+@media (max-width: 640px) {
+  [data-theme="dark"] .hero__copy {
+    background: rgba(21, 24, 31, 0.86);
+  }
 }
