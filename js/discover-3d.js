@@ -30,6 +30,28 @@ document.addEventListener('DOMContentLoaded', () => {
 function initDiscover3D() {
   const map = document.querySelector('.discover__map');
   const canvas = document.getElementById('discoverCanvas');
+  const enterButton = map?.querySelector('[data-tour-enter]');
+
+  if (!map || !canvas) return;
+
+  let sceneStarted = false;
+
+  const activate = () => {
+    map.classList.remove('is-locked');
+    map.classList.add(window.matchMedia('(max-width: 640px)').matches ? 'is-mobile-expanded' : 'is-expanded');
+    document.dispatchEvent(new CustomEvent('discover:tour-activated', { detail: { map } }));
+    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+
+    if (sceneStarted) return;
+    sceneStarted = true;
+    initDiscover3DScene(map, canvas);
+  };
+
+  enterButton?.addEventListener('click', activate);
+  document.addEventListener('discover:activate-tour', activate);
+}
+
+function initDiscover3DScene(map, canvas) {
   const pinLayer = document.querySelector('.discover__pins');
   const pins = Array.from(document.querySelectorAll('.discover-pin'));
   const zoomInput = map?.querySelector('[data-map-zoom]');
@@ -119,7 +141,9 @@ function initDiscover3D() {
     target.closest('.discover-pin') ||
     target.closest('.discover__panel') ||
     target.closest('.discover__controls') ||
-    target.closest('.discover__zoom')
+    target.closest('.discover__zoom') ||
+    target.closest('.discover__stage-actions') ||
+    target.closest('.discover__viewer')
   );
 
   map.addEventListener('pointerdown', (event) => {
@@ -210,6 +234,9 @@ function initDiscover3D() {
   let clock = 0;
   const animate = () => {
     requestAnimationFrame(animate);
+    const isInteractive = !map.classList.contains('is-locked') && !map.classList.contains('is-viewer-open');
+    if (!isInteractive) return;
+
     clock += 0.01;
     const canAutoRotate = isMapVisible && !isDragging && !reducedMotion && performance.now() - lastInteractionAt > AUTO_ROTATE_DELAY;
     if (canAutoRotate) targetRotation += AUTO_ROTATE_SPEED;

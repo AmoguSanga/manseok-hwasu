@@ -41,6 +41,7 @@
 
   <ul class="nav__menu" role="menubar">
     <li><a href="#visit"     class="nav__link" data-target="visit"     data-i18n="nav.visit">VISIT</a></li>
+    <li><a href="#current"   class="nav__link" data-target="current" data-i18n="nav.current">CURRENT</a></li>
     <li><a href="#discover"  class="nav__link" data-target="discover"  data-i18n="nav.discover">DISCOVER</a></li>
     <li><a href="#reading"   class="nav__link" data-target="reading"   data-i18n="nav.reading">READING &amp; BOOKING</a></li>
     <li><a href="#seasonal"  class="nav__link" data-target="seasonal"  data-i18n="nav.seasonal">SEASONAL ACTIVITIES</a></li>
@@ -149,22 +150,102 @@ My Secret Coast</h1>
 </section>
 
 <!-- ============================================================
+     CURRENT — reading themes and event calendar
+     ============================================================ -->
+<section class="current" id="current">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">03 · CURRENT</span>
+      <h2>What&apos;s Reading Now</h2>
+      <p style="color: var(--ink-muted);">Seasonal reading themes, notes from the coast, and upcoming gathering days.</p>
+    </div>
+
+    <div class="current__layout">
+      <div class="current__feed reveal">
+        <div class="current__feed-head">
+          <span class="eyebrow">Theme Board</span>
+          <div class="current__theme-actions">
+            <button class="current__mini-action" type="button" data-current-prev>Previous theme</button>
+            <button class="current__mini-action" type="button" data-current-next>Next theme</button>
+          </div>
+        </div>
+        <div class="current__feature" data-current-feature></div>
+        <div class="current__list" data-current-list></div>
+      </div>
+
+      <aside class="current__calendar reveal" aria-label="Reading theme event calendar">
+        <div class="current__calendar-head">
+          <button class="current__calendar-nav" type="button" data-current-cal-prev aria-label="Previous month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div>
+            <span class="eyebrow">Event Calendar</span>
+            <h3 data-current-cal-title>Month 2026</h3>
+          </div>
+          <button class="current__calendar-nav" type="button" data-current-cal-next aria-label="Next month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="current__calendar-grid" data-current-calendar></div>
+        <div class="current__agenda" data-current-agenda></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
      DISCOVER — interactive coastal map
      ============================================================ -->
 <section class="discover" id="discover">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">03 · <span data-i18n="nav.discover">DISCOVER</span></span>
+      <span class="eyebrow">04 · <span data-i18n="nav.discover">DISCOVER</span></span>
       <h2 data-i18n="discover.title">Discover the Coast</h2>
       <p data-i18n="discover.subtitle" style="color: var(--ink-muted);">Tap any pin to explore</p>
     </div>
 
-    <div class="discover__map reveal">
+    <div class="discover__map reveal is-locked">
       <div class="discover__map-img"></div>
       <canvas class="discover__canvas" id="discoverCanvas" aria-hidden="true"></canvas>
 
       <div class="discover__tour-badge">
         <span data-i18n="discover.tour_label">3D Coastal Tour</span>
+      </div>
+
+      <button class="discover__enter" type="button" data-tour-enter aria-label="Start interactive 3D coastal tour">
+        <span class="discover__enter-cue" aria-hidden="true">
+          <svg class="discover__enter-cue-svg" viewBox="0 0 150 130" fill="none">
+            <g class="discover__enter-cue-arrows" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M36 36C50 18 82 12 105 25" />
+              <path d="M104 25L94 20M104 25L100 36" />
+              <path d="M114 94C98 112 62 116 40 101" />
+              <path d="M40 101L50 107M40 101L46 90" />
+            </g>
+            <g class="discover__enter-cue-cube" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round">
+              <path d="M56 42L84 28L111 44L83 60L56 42Z" />
+              <path d="M56 42V76L83 93V60L56 42Z" />
+              <path d="M111 44V78L83 93V60L111 44Z" />
+              <path d="M56 76L84 61L111 78" opacity="0.55" />
+            </g>
+            <g class="discover__enter-cue-hand" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M101 87L93 77C90 73 93 69 97 72L101 76V54C101 50 107 50 107 54V68" />
+              <path d="M107 68V61C107 57 113 57 113 61V70" />
+              <path d="M113 70V65C113 61 119 62 119 66V75" />
+              <path d="M119 75V71C119 68 125 68 125 73V83C125 96 119 103 108 103C103 103 99 101 95 96" />
+            </g>
+          </svg>
+        </span>
+        <span class="discover__enter-label">Click to explore the 3D coast</span>
+        <small>Rotate the map, then choose a pin to step inside</small>
+      </button>
+
+      <div class="discover__stage-actions" aria-label="3D tour view controls">
+        <button class="discover__stage-action" type="button" data-tour-fullscreen aria-label="Open 3D tour fullscreen" title="Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
+        <button class="discover__stage-action discover__stage-action--close" type="button" data-tour-close aria-label="Close expanded 3D tour" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <div class="discover__controls" aria-label="3D map controls">
@@ -217,15 +298,34 @@ My Secret Coast</h1>
         </button>
       </div>
 
-      <!-- Detail panel -->
-      <aside class="discover__panel" aria-live="polite">
-        <button class="discover__panel-close" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-        <div class="discover__panel-img"></div>
-        <h3 data-panel-title>Waterfront Dock</h3>
-        <p data-panel-desc>Description loads from translations.</p>
-      </aside>
+      <div class="discover__viewer" aria-hidden="true" aria-live="polite">
+        <div class="discover__viewer-bar">
+          <div>
+            <h3 data-viewer-title>Waterfront Dock</h3>
+            <p data-viewer-desc>Description loads from translations.</p>
+          </div>
+          <div class="discover__viewer-actions">
+            <button class="discover__viewer-action" type="button" data-viewer-fullscreen aria-label="Open viewer fullscreen" title="Fullscreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            </button>
+            <button class="discover__viewer-action" type="button" data-viewer-close aria-label="Return to 3D coastal tour" title="Back to map">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="discover__viewer-frame">
+          <div class="discover__marzipano" data-panorama-viewer></div>
+          <div class="discover__fallback" data-panorama-fallback></div>
+          <div class="discover__viewer-status" data-panorama-status>Loading 3D space...</div>
+          <div class="discover__viewer-note" data-viewer-note hidden>This area is currently under development. Preview image shown for now.</div>
+        </div>
+        <div class="discover__space-jump" data-space-jump>
+          <button class="discover__space-jump-toggle" type="button" data-space-jump-toggle aria-expanded="false" aria-label="Open space list">
+            <span>Spaces</span>
+          </button>
+          <div class="discover__space-jump-panel" data-space-jump-panel aria-label="Jump to another 3D space"></div>
+        </div>
+      </div>
     </div>
 
     <div class="map-app-links reveal" aria-label="Open mock map integration">
@@ -247,7 +347,7 @@ My Secret Coast</h1>
 <section class="reading" id="reading">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">04 · <span data-i18n="nav.reading">READING &amp; BOOKING</span></span>
+      <span class="eyebrow">05 · <span data-i18n="nav.reading">READING &amp; BOOKING</span></span>
       <h2 data-i18n="reading.title">Reading &amp; Booking</h2>
       <p data-i18n="reading.subtitle" style="color: var(--ink-muted);">Reserve a quiet seat by the sea</p>
     </div>
@@ -283,12 +383,17 @@ My Secret Coast</h1>
           <button class="timeslot">15:00</button>
           <button class="timeslot">17:00</button>
         </div>
+
+        <div class="booking-name-row">
+          <label class="booking-label" for="guestName">YOUR NAME</label>
+          <input type="text" id="guestName" class="booking-name-input" placeholder="e.g. Jiwoo Kim" maxlength="40" autocomplete="name" />
+        </div>
       </div>
 
       <!-- Seat map pane -->
       <div class="card seatmap-pane reveal">
         <div class="seatmap-pane__head">
-          <h3 data-i18n="reading.select_seat">SELECT YOUR SEAT</h3>
+          <h3>SELECT AREA &amp; SEAT</h3>
           <div class="seatmap-legend">
             <span><i class="l-avail"></i><span data-i18n="reading.available">Available</span></span>
             <span><i class="l-sel"></i><span data-i18n="reading.selected">Selected</span></span>
@@ -296,78 +401,34 @@ My Secret Coast</h1>
           </div>
         </div>
 
-        <div class="seatmap">
-          <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
-            <!-- Room outline -->
-            <rect x="20" y="20" width="760" height="460" rx="20" fill="none" stroke="#9aa3af" stroke-width="2" stroke-dasharray="4 6" opacity="0.4"/>
+        <!-- Area selector tabs -->
+        <div class="area-tabs">
+          <button class="area-tab is-active" data-area="coffee">
+            <span class="area-tab__icon">&#9749;</span>
+            <span class="area-tab__label">Coffee Shop</span>
+          </button>
+          <button class="area-tab" data-area="benches">
+            <span class="area-tab__icon">&#127754;</span>
+            <span class="area-tab__label">Outside Benches</span>
+          </button>
+          <button class="area-tab" data-area="terrace">
+            <span class="area-tab__icon">&#127774;</span>
+            <span class="area-tab__label">Terrace</span>
+          </button>
+        </div>
 
-            <!-- Window seats — top row -->
-            <rect x="180" y="40" width="500" height="40" rx="8" fill="rgba(255, 194, 32, 0.15)"/>
-            <text x="430" y="65" text-anchor="middle" font-size="11" fill="#808080" letter-spacing="3">SEA-VIEW WINDOW</text>
+        <!-- Area floor plan (JS-rendered SVG) -->
+        <div class="seatmap" id="areaMapContainer"></div>
 
-            <!-- Top row of seats -->
-            <g>
-              <circle class="seat" cx="220" cy="120" r="14" data-state="available" data-seat="A1"/>
-              <circle class="seat" cx="270" cy="120" r="14" data-state="available" data-seat="A2"/>
-              <circle class="seat" cx="340" cy="120" r="14" data-state="occupied"  data-seat="A3"/>
-              <circle class="seat" cx="390" cy="120" r="14" data-state="available" data-seat="A4"/>
-              <circle class="seat" cx="460" cy="120" r="14" data-state="available" data-seat="A5"/>
-              <circle class="seat" cx="510" cy="120" r="14" data-state="occupied"  data-seat="A6"/>
-              <circle class="seat" cx="580" cy="120" r="14" data-state="available" data-seat="A7"/>
-              <circle class="seat" cx="630" cy="120" r="14" data-state="available" data-seat="A8"/>
-            </g>
-
-            <!-- Center long table -->
-            <rect x="290" y="200" width="220" height="100" rx="10" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
-            <text x="400" y="255" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="2">SHARED TABLE</text>
-
-            <g>
-              <circle class="seat" cx="320" cy="190" r="12" data-state="available" data-seat="B1"/>
-              <circle class="seat" cx="370" cy="190" r="12" data-state="available" data-seat="B2"/>
-              <circle class="seat" cx="430" cy="190" r="12" data-state="occupied"  data-seat="B3"/>
-              <circle class="seat" cx="480" cy="190" r="12" data-state="available" data-seat="B4"/>
-
-              <circle class="seat" cx="320" cy="310" r="12" data-state="available" data-seat="B5"/>
-              <circle class="seat" cx="370" cy="310" r="12" data-state="occupied"  data-seat="B6"/>
-              <circle class="seat" cx="430" cy="310" r="12" data-state="available" data-seat="B7"/>
-              <circle class="seat" cx="480" cy="310" r="12" data-state="available" data-seat="B8"/>
-            </g>
-
-            <!-- Quiet pods left side -->
-            <rect x="60" y="160" width="100" height="80" rx="14" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
-            <text x="110" y="205" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="2">POD 1</text>
-            <circle class="seat" cx="110" cy="170" r="11" data-state="available" data-seat="C1"/>
-            <circle class="seat" cx="110" cy="225" r="11" data-state="available" data-seat="C2"/>
-
-            <rect x="60" y="270" width="100" height="80" rx="14" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
-            <text x="110" y="315" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="2">POD 2</text>
-            <circle class="seat" cx="110" cy="280" r="11" data-state="occupied"  data-seat="C3"/>
-            <circle class="seat" cx="110" cy="335" r="11" data-state="available" data-seat="C4"/>
-
-            <!-- Bottom row -->
-            <g>
-              <circle class="seat" cx="220" cy="400" r="14" data-state="available" data-seat="D1"/>
-              <circle class="seat" cx="270" cy="400" r="14" data-state="occupied"  data-seat="D2"/>
-              <circle class="seat" cx="340" cy="400" r="14" data-state="available" data-seat="D3"/>
-              <circle class="seat" cx="390" cy="400" r="14" data-state="available" data-seat="D4"/>
-              <circle class="seat" cx="460" cy="400" r="14" data-state="available" data-seat="D5"/>
-              <circle class="seat" cx="510" cy="400" r="14" data-state="available" data-seat="D6"/>
-              <circle class="seat" cx="580" cy="400" r="14" data-state="occupied"  data-seat="D7"/>
-              <circle class="seat" cx="630" cy="400" r="14" data-state="available" data-seat="D8"/>
-            </g>
-
-            <!-- Right side: solo desks -->
-            <g>
-              <rect x="690" y="170" width="60" height="40" rx="8" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
-              <circle class="seat" cx="720" cy="240" r="12" data-state="available" data-seat="E1"/>
-
-              <rect x="690" y="260" width="60" height="40" rx="8" fill="none" stroke="#9aa3af" stroke-width="1.5" opacity="0.5"/>
-              <circle class="seat" cx="720" cy="330" r="12" data-state="available" data-seat="E2"/>
-            </g>
-
-            <!-- Entrance label -->
-            <text x="400" y="475" text-anchor="middle" font-size="10" fill="#808080" letter-spacing="3">ENTRANCE</text>
-          </svg>
+        <!-- Seat picker (appears after clicking a table) -->
+        <div class="seat-picker" id="seatPicker">
+          <div class="seat-picker__head">
+            <span class="seat-picker__table-label" id="seatPickerLabel">Select a table on the map</span>
+            <button class="seat-picker__close" id="seatPickerClose" aria-label="Deselect table">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="seat-picker__grid" id="seatPickerGrid"></div>
         </div>
 
         <div class="booking-confirm">
@@ -445,7 +506,7 @@ My Secret Coast</h1>
 <section class="seasonal" id="seasonal">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">05 · <span data-i18n="nav.seasonal">SEASONAL ACTIVITIES</span></span>
+      <span class="eyebrow">06 · <span data-i18n="nav.seasonal">SEASONAL ACTIVITIES</span></span>
       <h2 data-i18n="seasonal.title">Seasonal Activities</h2>
       <p data-i18n="seasonal.subtitle" style="color: var(--ink-muted);">The coast changes. So do its rituals.</p>
     </div>
@@ -474,7 +535,7 @@ My Secret Coast</h1>
 <section class="community" id="community">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">06 · <span data-i18n="nav.community">JOIN COMMUNITY</span></span>
+      <span class="eyebrow">07 · <span data-i18n="nav.community">JOIN COMMUNITY</span></span>
       <h2 data-i18n="community.title">Join the Community</h2>
       <p data-i18n="community.subtitle" style="color: var(--ink-muted);">Visitors who came back</p>
     </div>
@@ -617,38 +678,114 @@ My Secret Coast</h1>
       <div class="booking-success" id="bookingSuccess">
         <div class="booking-success__sparkles" id="bookingSparkles"></div>
 
+        <button class="booking-modal__close-x" id="bookingModalCloseX" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        <div class="booking-success__area-icon" id="confirmAreaIcon">&#9749;</div>
+
         <div class="booking-success__check">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
 
+        <div class="booking-success__greeting" id="confirmGreeting">See you there!</div>
         <div class="booking-success__title" data-i18n="reading.confirm_title">Reservation Complete!</div>
         <div class="booking-success__sub" data-i18n="reading.confirm_sub">Your quiet seat by the sea is waiting.</div>
 
         <div class="booking-success__card">
+          <div class="booking-success__field booking-success__field--full">
+            <span class="booking-success__field-label">Guest</span>
+            <span class="booking-success__field-value" id="confirmName">—</span>
+          </div>
           <div class="booking-success__field">
-            <span class="booking-success__field-label" data-i18n="reading.confirm_date">Date</span>
-            <span class="booking-success__field-value" id="confirmDate">—</span>
+            <span class="booking-success__field-label">Area</span>
+            <span class="booking-success__field-value" id="confirmArea">—</span>
+          </div>
+          <div class="booking-success__field">
+            <span class="booking-success__field-label" data-i18n="reading.confirm_seat">Seat</span>
+            <span class="booking-success__field-value booking-success__field-value--accent" id="confirmSeat">—</span>
           </div>
           <div class="booking-success__field">
             <span class="booking-success__field-label" data-i18n="reading.confirm_time">Time</span>
             <span class="booking-success__field-value" id="confirmTime">—</span>
           </div>
           <div class="booking-success__field">
-            <span class="booking-success__field-label" data-i18n="reading.confirm_seat">Seat</span>
-            <span class="booking-success__field-value" id="confirmSeat">—</span>
+            <span class="booking-success__field-label" data-i18n="reading.confirm_date">Date</span>
+            <span class="booking-success__field-value" id="confirmDate">—</span>
           </div>
         </div>
 
-        <button class="btn btn--primary" id="bookingModalClose">
-          <span data-i18n="reading.confirm_done">Done</span>
+        <button class="btn btn--primary booking-modal__done-btn" id="bookingModalClose">
+          <span data-i18n="reading.confirm_done">Close</span>
         </button>
       </div>
     </div>
   </div>
 </div>
 
+<div class="event-modal" id="eventModal" role="dialog" aria-modal="true" aria-label="Reading theme details">
+  <div class="event-modal__overlay" data-event-close></div>
+  <div class="event-modal__content">
+    <button class="event-modal__close" type="button" data-event-close aria-label="Close reading theme details">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <article class="event-post">
+      <div class="event-post__hero" data-event-image></div>
+      <div class="event-post__body">
+        <span class="eyebrow" data-event-category>Reading Theme</span>
+        <h2 data-event-title>Theme title</h2>
+        <p class="event-post__meta" data-event-meta>Dates</p>
+        <div class="event-post__copy" data-event-body></div>
+
+        <div class="event-post__schedule">
+          <h3>Program Days</h3>
+          <div data-event-schedule></div>
+        </div>
+
+        <div class="event-post__comments">
+          <h3>Reader Comments</h3>
+          <div class="event-post__comment-list" data-event-comments></div>
+          <form class="event-post__comment-form" data-event-comment-form>
+            <input type="text" name="name" placeholder="Name" maxlength="32" />
+            <textarea name="comment" placeholder="Write a short comment" maxlength="180"></textarea>
+            <button class="btn btn--primary" type="submit">Add Comment</button>
+          </form>
+        </div>
+
+        <form class="event-reserve" data-event-reserve-form>
+          <div>
+            <span class="eyebrow">Reserve Your Place</span>
+            <p>This prototype does not save reservations yet. The fields are ready for a future database or form service.</p>
+          </div>
+          <div class="event-reserve__grid">
+            <label>
+              <span>Name</span>
+              <input type="text" name="guest" placeholder="Your name" autocomplete="name" />
+            </label>
+            <label>
+              <span>Email</span>
+              <input type="email" name="email" placeholder="you@example.com" autocomplete="email" />
+            </label>
+            <label>
+              <span>Day of Coming</span>
+              <select name="date" data-event-reserve-date></select>
+            </label>
+            <label>
+              <span>People</span>
+              <input type="number" name="party" min="1" max="6" value="1" />
+            </label>
+          </div>
+          <button class="btn btn--accent" type="submit">Reserve Your Place</button>
+          <p class="event-reserve__status" data-event-reserve-status></p>
+        </form>
+      </div>
+    </article>
+  </div>
+</div>
+
 <!-- Scripts -->
 <script src="js/i18n.js"></script>
+<script src="js/reading-events.js"></script>
 <script src="js/app.js"></script>
 <script type="importmap">
   {
