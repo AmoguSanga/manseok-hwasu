@@ -434,6 +434,18 @@
   transition: opacity var(--transition-slow), transform var(--transition-slow);
 }
 
+.discover__map.is-locked .discover__enter {
+  z-index: 1005;
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.discover__map.is-locked .discover__canvas,
+.discover__map.is-locked .discover__map-img {
+  pointer-events: none;
+}
+
 .discover__enter-cue {
   pointer-events: none;
   display: block;

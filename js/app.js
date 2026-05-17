@@ -582,6 +582,14 @@ function initDiscoverMap() {
   viewerLayer.addEventListener('click', handleViewerChromeClick, true);
 
   const handleStageControlClick = (event) => {
+    const enterButton = event.target.closest('[data-tour-enter]');
+    if (enterButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      document.dispatchEvent(new CustomEvent('discover:activate-tour'));
+      return;
+    }
+
     const fullscreenButton = event.target.closest('[data-tour-fullscreen]');
     if (fullscreenButton) {
       event.preventDefault();
@@ -599,7 +607,7 @@ function initDiscoverMap() {
   };
 
   const stopStageControlPointer = (event) => {
-    if (event.target.closest('[data-tour-fullscreen], [data-tour-close]')) {
+    if (event.target.closest('[data-tour-enter], [data-tour-fullscreen], [data-tour-close]')) {
       event.stopPropagation();
     }
   };
