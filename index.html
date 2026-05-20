@@ -526,6 +526,69 @@ My Secret Coast</h1>
         <p data-season-desc>Description loads from translations.</p>
       </div>
     </div>
+
+    <div class="promenade-map reveal" id="promenade-map" aria-labelledby="promenadeMapTitle">
+      <div class="promenade-map__head">
+        <div>
+          <span class="eyebrow">Four zones · One continuous promenade</span>
+          <h3 id="promenadeMapTitle">Explore Manseok-Hwasu by Zone</h3>
+        </div>
+        <p>Click a zone node to preview its program layer and shift the live map toward that location.</p>
+      </div>
+
+      <div class="promenade-map__grid">
+        <div class="promenade-map__stage" aria-label="Interactive promenade zone diagram">
+          <div class="promenade-map__paper">
+            <img class="promenade-map__svg" src="assets/models/zonemap/4sections.svg" alt="" aria-hidden="true" />
+            <svg class="promenade-map__beams" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" data-promenade-beams></svg>
+            <div class="promenade-map__hit-areas" data-promenade-hit-areas></div>
+            <div class="promenade-map__nodes" data-promenade-nodes></div>
+            <div class="promenade-map__photo-pins" data-promenade-photo-pins></div>
+            <div class="promenade-map__sea-motion" aria-hidden="true">
+              <span></span>
+              <span></span>
+            </div>
+            <div class="promenade-photo-card" data-promenade-photo-card hidden>
+              <button class="promenade-photo-card__close" type="button" data-promenade-photo-close aria-label="Close place preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+              <div class="promenade-photo-card__image" data-photo-card-image></div>
+              <div class="promenade-photo-card__body">
+                <span data-photo-card-zone>Zone</span>
+                <strong data-photo-card-title>Place title</strong>
+                <p data-photo-card-description>Place description</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="promenade-map__side" aria-live="polite">
+          <article class="promenade-zone" data-promenade-detail>
+            <div class="promenade-zone__image" data-zone-image></div>
+            <span class="promenade-zone__kicker" data-zone-kicker>Quiet zone</span>
+            <h4 data-zone-title>Reading Shore</h4>
+            <p data-zone-tagline>Bring a book. Take your time.</p>
+            <p data-zone-description>Designated rest and reading zone at the promenade entrance.</p>
+            <div class="promenade-zone__gallery" data-zone-gallery></div>
+            <div class="promenade-zone__meta">
+              <span data-zone-free>Open seating and book swap</span>
+              <span data-zone-premium>Reserved shelter pods</span>
+            </div>
+            <ul data-zone-activities></ul>
+          </article>
+        </aside>
+
+        <div class="promenade-map__preview">
+          <iframe
+            title="Google Maps preview for Manseok-Hwasu promenade"
+            data-promenade-iframe
+            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d2662.2263819783493!2d126.614379101482!3d37.48577632868872!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2skr!4v1779243248838!5m2!1sen!2skr"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 

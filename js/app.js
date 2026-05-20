@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCalendar();
   initAreaBooking();
   initSeasonalTabs();
+  initPromenadeMap();
   initBookingModal();
 });
 
@@ -1503,4 +1504,555 @@ function initSeasonalTabs() {
                       : month >= 8 && month <= 10 ? 'autumn'
                       : 'winter';
   show(currentSeason);
+}
+
+/* ─── Promenade zone map ─────────────────────────── */
+function initPromenadeMap() {
+  const root = document.getElementById('promenade-map');
+  if (!root) return;
+
+  const hitLayer = root.querySelector('[data-promenade-hit-areas]');
+  const beamsLayer = root.querySelector('[data-promenade-beams]');
+  const nodesLayer = root.querySelector('[data-promenade-nodes]');
+  const photoPinsLayer = root.querySelector('[data-promenade-photo-pins]');
+  const photoCard = root.querySelector('[data-promenade-photo-card]');
+  const iframe = root.querySelector('[data-promenade-iframe]');
+  const detail = root.querySelector('[data-promenade-detail]');
+  if (!nodesLayer || !detail) return;
+
+  const zoneEls = {
+    image: detail.querySelector('[data-zone-image]'),
+    kicker: detail.querySelector('[data-zone-kicker]'),
+    title: detail.querySelector('[data-zone-title]'),
+    tagline: detail.querySelector('[data-zone-tagline]'),
+    description: detail.querySelector('[data-zone-description]'),
+    gallery: detail.querySelector('[data-zone-gallery]'),
+    free: detail.querySelector('[data-zone-free]'),
+    premium: detail.querySelector('[data-zone-premium]'),
+    activities: detail.querySelector('[data-zone-activities]')
+  };
+
+  const photoEls = {
+    image: photoCard?.querySelector('[data-photo-card-image]'),
+    zone: photoCard?.querySelector('[data-photo-card-zone]'),
+    title: photoCard?.querySelector('[data-photo-card-title]'),
+    description: photoCard?.querySelector('[data-photo-card-description]'),
+    close: photoCard?.querySelector('[data-promenade-photo-close]')
+  };
+
+  const baseMapUrl = iframe?.src || '';
+
+  const promenadeZones = [
+    {
+      id: 'reading',
+      color: '#9DDDFF',
+      kicker: 'Quiet zone',
+      title: 'Reading Shore',
+      titleKo: '독서 해변',
+      tagline: 'Bring a book. Take your time.',
+      description: 'Open-sided canopy shelter, staggered seating pods, book swap cabinet, and QR markers for seasonal reading lists.',
+      free: 'Free: open seating, book swap, general access',
+      premium: 'Premium: reserved shelter pod, 90-min slots',
+      activities: ['Solo reading', 'Book borrowing and returning', 'Quiet sea-facing rest', 'Seasonal reading list discovery'],
+      image: 'assets/images/reading/reading-zone-1.webp',
+      gallery: [
+        { title: 'Shelter Pods', image: 'assets/images/reading/reading-zone-1.webp', description: 'Small seating clusters for quiet reading and water-facing rest.' },
+        { title: 'Book Swap Cabinet', image: 'assets/images/reading/reading-zone-2.webp', description: 'A weatherproof cabinet for borrowing, returning, and sharing books.' },
+        { title: 'Reading QR', image: 'assets/images/reading/reading-zone-3.webp', description: 'Seasonal reading lists and booking links are one scan away.' }
+      ],
+      x: 82,
+      y: 26,
+      anchor: { x: 91, y: 36 },
+      hit: { x: 66, y: 4, w: 28, h: 62 },
+      map: { lat: 37.486561, lng: 126.610212, zoom: 18, label: 'Reading Shore Manseok-Hwasu' }
+    },
+    {
+      id: 'social',
+      color: '#FDC374',
+      kicker: 'Social zone',
+      title: 'Neighborhood Deck',
+      titleKo: '동네 마당',
+      tagline: 'A daily movement spine for local regulars.',
+      description: 'Distributed walking, stretching, texture path, shaded pergola, and a morning movement platform with QR pass access.',
+      free: 'Free: open circulation and resting after 9am',
+      premium: 'Member: 6-9am platform priority and station slots',
+      activities: ['Slow walking circuit', 'Individual stretching', 'Sensory walking path', 'Morning tai-chi and slow movement'],
+      image: 'assets/images/discover/morning_circuit.webp',
+      gallery: [
+        { title: 'Morning Platform', image: 'assets/images/discover/morning_circuit.webp', description: 'A flat deck for 6-9am slow movement and health club routines.' },
+        { title: 'Texture Path', image: 'assets/images/discover/bike-path.webp', description: 'Smooth, pebble, and soft walking textures slow the body down.' },
+        { title: 'Pergola Rest', image: 'assets/images/discover/sea-lookout.webp', description: 'A shaded pause point where the view is the activity.' }
+      ],
+      x: 78,
+      y: 15,
+      anchor: { x: 60, y: 39 },
+      hit: { x: 39, y: 2, w: 30, h: 65 },
+      map: { lat: 37.486776, lng: 126.612482, zoom: 18, label: 'Neighborhood Deck Manseok-Hwasu' }
+    },
+    {
+      id: 'heritage',
+      color: '#84E3E9',
+      kicker: 'Heritage zone',
+      title: 'Cat Island Trail',
+      titleKo: '묘도길',
+      tagline: 'History appears as small stops along the water.',
+      description: 'Five to seven lore marker posts, sea panorama points, seasonal installation space, and QR access to archival stories.',
+      free: 'Free: self-guided heritage walk and QR archive',
+      premium: 'Community: submit stories and vote on seasonal stops',
+      activities: ['Lore stop sequence', 'Open Sea Panorama', 'Tidal lookout photography', 'Community memory submissions'],
+      image: 'assets/images/discover/heritage_stop.webp',
+      gallery: [
+        { title: 'Lore Marker', image: 'assets/images/discover/heritage_stop.webp', description: 'Marker posts reveal the former Cat Island geography and port memory.' },
+        { title: 'Open Sea Panorama', image: 'assets/images/discover/sea-lookout.webp', description: 'A wide view point for the main heritage cluster.' },
+        { title: 'Archive Layer', image: 'assets/images/community/story-2.webp', description: 'Residents can submit stories and photos for seasonal updates.' }
+      ],
+      x: 24,
+      y: 31,
+      anchor: { x: 40, y: 9 },
+      hit: { x: 6, y: 0, w: 38, h: 67 },
+      map: { lat: 37.488059, lng: 126.613293, zoom: 18, label: 'Cat Island Trail Manseok-Hwasu' }
+    },
+    {
+      id: 'event',
+      color: '#FF7746',
+      kicker: 'Event zone',
+      title: 'Tidal Stage',
+      titleKo: '해안 무대',
+      tagline: 'The trail closes at the sea.',
+      description: 'Movable low seating, sunset viewing, clear West Sea sightlines, and seasonal community-voted programs.',
+      free: 'Free: sunset viewing, photography, quiet rest',
+      premium: 'Seasonal: voted events and reserved gathering moments',
+      activities: ['Tidal and sunset viewing', 'Open sea photography', 'Flexible seating', 'Small seasonal programs'],
+      image: 'assets/images/discover/sea-lookout.webp',
+      gallery: [
+        { title: 'Tidal Lookout', image: 'assets/images/discover/sea-lookout.webp', description: 'A camera-ready end point for sunset, tides, and horizon watching.' },
+        { title: 'Flexible Seating', image: 'assets/images/discover/waterfront-dock.webp', description: 'Movable low seating keeps the deck open for seasonal programs.' },
+        { title: 'Seasonal Gathering', image: 'assets/images/community/story-3.webp', description: 'Community-voted events can happen without heavy fixed infrastructure.' }
+      ],
+      x: 17,
+      y: 48,
+      anchor: { x: 14, y: 63 },
+      hit: { x: 5, y: 34, w: 29, h: 35 },
+      map: { lat: 37.488854, lng: 126.615067, zoom: 18, label: 'Tidal Stage Manseok-Hwasu' }
+    }
+  ];
+
+  const photoSpots = [
+    {
+      id: 'reading-books',
+      zoneId: 'reading',
+      title: 'Book Swap Cabinet',
+      description: 'Borrow, return, or leave a coastal reading note for the next visitor.',
+      image: 'assets/images/reading/reading-zone-2.webp',
+      x: 88,
+      y: 43
+    },
+    {
+      id: 'social-platform',
+      zoneId: 'social',
+      title: 'Morning Movement Platform',
+      description: 'A time-zoned deck for slow exercise groups before the promenade opens fully.',
+      image: 'assets/images/discover/morning_circuit.webp',
+      x: 61,
+      y: 61
+    },
+    {
+      id: 'heritage-marker',
+      zoneId: 'heritage',
+      title: 'Lore Stop Marker',
+      description: 'A QR-linked stop for the Manseok name, Cat Island memory, and community archives.',
+      image: 'assets/images/discover/heritage_stop.webp',
+      x: 41,
+      y: 24
+    },
+    {
+      id: 'tidal-lookout',
+      zoneId: 'event',
+      title: 'Tidal Stage Lookout',
+      description: 'The flexible end-of-trail deck for sunset watching and open sea photography.',
+      image: 'assets/images/discover/sea-lookout.webp',
+      x: 14,
+      y: 64
+    }
+  ];
+
+  const buildMapUrl = (zone) => {
+    if (!zone?.map) return baseMapUrl;
+    const query = encodeURIComponent(`${zone.map.lat},${zone.map.lng}`);
+    return `https://www.google.com/maps?q=${query}&z=${zone.map.zoom || 18}&hl=en&output=embed`;
+  };
+
+  const isCompactZoneMap = () => window.matchMedia('(max-width: 740px)').matches;
+
+  const getNodeCenter = (node) => {
+    const paperRect = nodesLayer.getBoundingClientRect();
+    const nodeRect = node.getBoundingClientRect();
+    return {
+      x: ((nodeRect.left + nodeRect.width / 2 - paperRect.left) / paperRect.width) * 100,
+      y: ((nodeRect.top + nodeRect.height / 2 - paperRect.top) / paperRect.height) * 100
+    };
+  };
+
+  const clampNodeToPaper = (node, x, y) => {
+    const paperRect = nodesLayer.getBoundingClientRect();
+    if (!paperRect.width || !paperRect.height) return { x, y };
+
+    node.style.setProperty('--node-x', `${x}%`);
+    node.style.setProperty('--node-y', `${y}%`);
+
+    const nodeRect = node.getBoundingClientRect();
+    const padding = isCompactZoneMap() ? 5 : 10;
+    let nextX = x;
+    let nextY = y;
+
+    if (nodeRect.left < paperRect.left + padding) {
+      nextX += ((paperRect.left + padding - nodeRect.left) / paperRect.width) * 100;
+    }
+    if (nodeRect.right > paperRect.right - padding) {
+      nextX -= ((nodeRect.right - (paperRect.right - padding)) / paperRect.width) * 100;
+    }
+    if (nodeRect.top < paperRect.top + padding) {
+      nextY += ((paperRect.top + padding - nodeRect.top) / paperRect.height) * 100;
+    }
+    if (nodeRect.bottom > paperRect.bottom - padding) {
+      nextY -= ((nodeRect.bottom - (paperRect.bottom - padding)) / paperRect.height) * 100;
+    }
+
+    return {
+      x: Math.min(100, Math.max(0, nextX)),
+      y: Math.min(100, Math.max(0, nextY))
+    };
+  };
+
+  const clampRestingTitleCards = () => {
+    nodesLayer.querySelectorAll('.promenade-node').forEach((node) => {
+      const clamped = clampNodeToPaper(node, Number(node.dataset.homeX), Number(node.dataset.homeY));
+      node.dataset.homeX = String(clamped.x);
+      node.dataset.homeY = String(clamped.y);
+      node.style.setProperty('--node-x', `${clamped.x}%`);
+      node.style.setProperty('--node-y', `${clamped.y}%`);
+    });
+  };
+
+  const clampCameraPins = () => {
+    const pins = Array.from(photoPinsLayer?.querySelectorAll('.promenade-camera') || []);
+    const paperRect = nodesLayer.getBoundingClientRect();
+    if (!paperRect.width || !paperRect.height) return;
+
+    pins.forEach((pin) => {
+      const homeX = Number(pin.dataset.homeX);
+      const homeY = Number(pin.dataset.homeY);
+      if (!Number.isFinite(homeX) || !Number.isFinite(homeY)) return;
+
+      pin.style.setProperty('--spot-x', `${homeX}%`);
+      pin.style.setProperty('--spot-y', `${homeY}%`);
+
+      const pinRect = pin.getBoundingClientRect();
+      const padding = isCompactZoneMap() ? 8 : 18;
+      let nextX = homeX;
+      let nextY = homeY;
+
+      if (pinRect.left < paperRect.left + padding) {
+        nextX += ((paperRect.left + padding - pinRect.left) / paperRect.width) * 100;
+      }
+      if (pinRect.right > paperRect.right - padding) {
+        nextX -= ((pinRect.right - (paperRect.right - padding)) / paperRect.width) * 100;
+      }
+      if (pinRect.top < paperRect.top + padding) {
+        nextY += ((paperRect.top + padding - pinRect.top) / paperRect.height) * 100;
+      }
+      if (pinRect.bottom > paperRect.bottom - padding) {
+        nextY -= ((pinRect.bottom - (paperRect.bottom - padding)) / paperRect.height) * 100;
+      }
+
+      pin.style.setProperty('--spot-x', `${Math.min(100, Math.max(0, nextX))}%`);
+      pin.style.setProperty('--spot-y', `${Math.min(100, Math.max(0, nextY))}%`);
+    });
+  };
+
+  const updateBeam = (zoneId) => {
+    if (!beamsLayer) return;
+    const zone = promenadeZones.find((item) => item.id === zoneId);
+    const beam = beamsLayer.querySelector(`[data-zone-id="${zoneId}"]`);
+    const node = nodesLayer.querySelector(`[data-zone-id="${zoneId}"]`);
+    if (!zone || !beam || !node) return;
+
+    const center = getNodeCenter(node);
+    beam.setAttribute('x1', zone.anchor.x);
+    beam.setAttribute('y1', zone.anchor.y);
+    beam.setAttribute('x2', center.x.toFixed(2));
+    beam.setAttribute('y2', center.y.toFixed(2));
+  };
+
+  const updateAllBeams = () => promenadeZones.forEach((zone) => updateBeam(zone.id));
+
+  const resolveTitleCardOverlaps = () => {
+    const nodes = Array.from(nodesLayer.querySelectorAll('.promenade-node'));
+    const cameraPins = Array.from(photoPinsLayer?.querySelectorAll('.promenade-camera') || []);
+    const paperRect = nodesLayer.getBoundingClientRect();
+    if (!paperRect.width || !paperRect.height) return;
+
+    const overlaps = (rect, otherRect) => !(rect.right + 12 < otherRect.left ||
+      rect.left - 12 > otherRect.right ||
+      rect.bottom + 12 < otherRect.top ||
+      rect.top - 12 > otherRect.bottom);
+
+    nodes.forEach((node, index) => {
+      const current = promenadeZones.find((zone) => zone.id === node.dataset.zoneId);
+      if (!current) return;
+
+      for (let pass = 0; pass < 4; pass += 1) {
+        const rect = node.getBoundingClientRect();
+        const previousCard = nodes.find((other, otherIndex) => otherIndex < index && overlaps(rect, other.getBoundingClientRect()));
+        const cameraOverlap = cameraPins.find((pin) => overlaps(rect, pin.getBoundingClientRect()));
+        const overlap = previousCard || cameraOverlap;
+        if (!overlap) break;
+
+        const otherRect = overlap.getBoundingClientRect();
+        const direction = rect.top + rect.height / 2 > otherRect.top + otherRect.height / 2 ? 1 : -1;
+        const nextY = Math.min(62, Math.max(8, Number(node.dataset.homeY) + direction * 7));
+        node.dataset.homeY = String(nextY);
+        node.style.setProperty('--node-y', `${nextY}%`);
+      }
+    });
+
+    clampRestingTitleCards();
+
+    requestAnimationFrame(updateAllBeams);
+  };
+
+  const renderActivities = (activities) => {
+    zoneEls.activities.innerHTML = '';
+    activities.forEach((activity) => {
+      const item = document.createElement('li');
+      item.textContent = activity;
+      zoneEls.activities.appendChild(item);
+    });
+  };
+
+  const closePhotoCard = () => {
+    if (!photoCard) return;
+    photoCard.hidden = true;
+    photoCard.classList.remove('is-open');
+    root.querySelectorAll('.promenade-camera').forEach((pin) => pin.classList.remove('is-active'));
+  };
+
+  const openPhotoCard = (spot) => {
+    const zone = promenadeZones.find((item) => item.id === spot.zoneId);
+    if (!photoCard || !zone) return;
+
+    photoEls.image.style.backgroundImage = `url('${spot.image}')`;
+    photoEls.zone.textContent = zone.title;
+    photoEls.title.textContent = spot.title;
+    photoEls.description.textContent = spot.description;
+    photoCard.style.setProperty('--card-x', `${Math.min(Math.max(spot.x + 3, 18), 72)}%`);
+    photoCard.style.setProperty('--card-y', `${Math.min(Math.max(spot.y - 4, 14), 70)}%`);
+    photoCard.hidden = false;
+    requestAnimationFrame(() => photoCard.classList.add('is-open'));
+
+    root.querySelectorAll('.promenade-camera').forEach((pin) => {
+      pin.classList.toggle('is-active', pin.dataset.spotId === spot.id);
+    });
+  };
+
+  const renderGallery = (zone) => {
+    if (!zoneEls.gallery) return;
+    zoneEls.gallery.innerHTML = '';
+
+    zone.gallery.forEach((item) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'promenade-zone__thumb';
+      button.style.backgroundImage = `url('${item.image}')`;
+      button.setAttribute('aria-label', `Preview ${item.title}`);
+      button.addEventListener('click', () => openPhotoCard({
+        id: `${zone.id}-${item.title.toLowerCase().replace(/\W+/g, '-')}`,
+        zoneId: zone.id,
+        ...item,
+        x: zone.x,
+        y: zone.y
+      }));
+      zoneEls.gallery.appendChild(button);
+    });
+  };
+
+  const setActiveZone = (id) => {
+    const zone = promenadeZones.find((item) => item.id === id) || promenadeZones[0];
+    if (!zone) return;
+
+    root.dataset.activeZone = zone.id;
+    detail.style.setProperty('--zone-color', zone.color);
+    nodesLayer.querySelectorAll('.promenade-node').forEach((node) => {
+      const isActive = node.dataset.zoneId === zone.id;
+      node.classList.toggle('is-active', isActive);
+      node.setAttribute('aria-pressed', String(isActive));
+    });
+
+    zoneEls.image.style.backgroundImage = `url('${zone.image}')`;
+    zoneEls.kicker.textContent = zone.kicker;
+    zoneEls.title.textContent = zone.title;
+    zoneEls.tagline.textContent = zone.tagline;
+    zoneEls.description.textContent = zone.description;
+    zoneEls.free.textContent = zone.free;
+    zoneEls.premium.textContent = zone.premium;
+    renderActivities(zone.activities);
+    renderGallery(zone);
+    closePhotoCard();
+
+    if (iframe) {
+      const nextSrc = buildMapUrl(zone);
+      if (iframe.src !== nextSrc) iframe.src = nextSrc;
+      iframe.title = `Google Maps preview for ${zone.title}`;
+    }
+  };
+
+  if (hitLayer) hitLayer.innerHTML = '';
+
+  promenadeZones.forEach((zone) => {
+    if (beamsLayer) {
+      const beam = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      beam.classList.add('promenade-beam', `promenade-beam--${zone.id}`);
+      beam.dataset.zoneId = zone.id;
+      beam.style.setProperty('--zone-color', zone.color);
+      beamsLayer.appendChild(beam);
+    }
+  });
+
+  promenadeZones.forEach((zone) => {
+    const node = document.createElement('button');
+    node.type = 'button';
+    node.className = `promenade-node promenade-node--${zone.id}`;
+    node.dataset.zoneId = zone.id;
+    node.dataset.homeX = String(zone.x);
+    node.dataset.homeY = String(zone.y);
+    node.style.setProperty('--zone-color', zone.color);
+    node.style.setProperty('--node-x', `${zone.x}%`);
+    node.style.setProperty('--node-y', `${zone.y}%`);
+    node.setAttribute('aria-label', `Explore ${zone.title}`);
+    node.setAttribute('aria-pressed', 'false');
+
+    const label = document.createElement('span');
+    label.className = 'promenade-node__label';
+
+    const title = document.createElement('strong');
+    title.textContent = zone.title;
+
+    const subtitle = document.createElement('span');
+    subtitle.textContent = zone.titleKo;
+
+    label.append(title, subtitle);
+    node.append(label);
+
+    const getPointerPosition = (event) => {
+      const rect = nodesLayer.getBoundingClientRect();
+      return {
+        x: ((event.clientX - rect.left) / rect.width) * 100,
+        y: ((event.clientY - rect.top) / rect.height) * 100
+      };
+    };
+
+    let dragState = null;
+
+    node.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      setActiveZone(zone.id);
+      if (isCompactZoneMap()) return;
+      node.classList.add('is-dragging');
+      node.setPointerCapture?.(event.pointerId);
+      const start = getPointerPosition(event);
+      dragState = {
+        pointerId: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        offsetX: start.x - Number(node.style.getPropertyValue('--node-x').replace('%', '') || node.dataset.homeX),
+        offsetY: start.y - Number(node.style.getPropertyValue('--node-y').replace('%', '') || node.dataset.homeY),
+        moved: false
+      };
+      updateBeam(zone.id);
+    });
+
+    node.addEventListener('pointermove', (event) => {
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      const distance = Math.hypot(event.clientX - dragState.startClientX, event.clientY - dragState.startClientY);
+      dragState.moved = dragState.moved || distance > 4;
+      if (!dragState.moved) return;
+
+      const pointer = getPointerPosition(event);
+      const next = clampNodeToPaper(node, pointer.x - dragState.offsetX, pointer.y - dragState.offsetY);
+      node.style.setProperty('--node-x', `${next.x}%`);
+      node.style.setProperty('--node-y', `${next.y}%`);
+      updateBeam(zone.id);
+    });
+
+    const snapNodeHome = (event) => {
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      node.releasePointerCapture?.(event.pointerId);
+      node.classList.remove('is-dragging');
+      node.classList.add('is-snapping');
+      node.style.setProperty('--node-x', `${node.dataset.homeX}%`);
+      node.style.setProperty('--node-y', `${node.dataset.homeY}%`);
+
+      let snapFrame = null;
+      const followSnap = () => {
+        updateBeam(zone.id);
+        if (node.classList.contains('is-snapping')) {
+          snapFrame = requestAnimationFrame(followSnap);
+        }
+      };
+      followSnap();
+
+      const finishSnap = () => {
+        if (snapFrame) cancelAnimationFrame(snapFrame);
+        node.classList.remove('is-snapping');
+        updateBeam(zone.id);
+      };
+
+      node.addEventListener('transitionend', finishSnap, { once: true });
+      window.setTimeout(finishSnap, 280);
+      dragState = null;
+    };
+
+    node.addEventListener('pointerup', snapNodeHome);
+    node.addEventListener('pointercancel', snapNodeHome);
+    node.addEventListener('click', () => setActiveZone(zone.id));
+    nodesLayer.appendChild(node);
+  });
+
+  photoSpots.forEach((spot) => {
+    const zone = promenadeZones.find((item) => item.id === spot.zoneId);
+    if (!zone) return;
+
+    const pin = document.createElement('button');
+    pin.type = 'button';
+    pin.className = 'promenade-camera';
+    pin.dataset.zoneId = zone.id;
+    pin.dataset.spotId = spot.id;
+    pin.dataset.homeX = String(spot.x);
+    pin.dataset.homeY = String(spot.y);
+    pin.style.setProperty('--spot-x', `${spot.x}%`);
+    pin.style.setProperty('--spot-y', `${spot.y}%`);
+    pin.style.setProperty('--zone-color', zone.color);
+    pin.setAttribute('aria-label', `Open photo preview: ${spot.title}`);
+    pin.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4.5 16 7h3a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3l1.5-2.5z"/><circle cx="12" cy="13" r="3.2"/></svg>';
+    pin.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setActiveZone(spot.zoneId);
+      openPhotoCard(spot);
+    });
+    photoPinsLayer?.appendChild(pin);
+  });
+
+  photoEls.close?.addEventListener('click', closePhotoCard);
+  window.addEventListener('resize', () => requestAnimationFrame(() => {
+    clampCameraPins();
+    resolveTitleCardOverlaps();
+    updateAllBeams();
+  }));
+
+  setActiveZone('reading');
+  requestAnimationFrame(() => {
+    clampCameraPins();
+    resolveTitleCardOverlaps();
+    updateAllBeams();
+  });
 }
