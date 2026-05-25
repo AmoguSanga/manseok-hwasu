@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initScrollReveal();
   initActiveNavLink();
   initHeroCarousel();
+  initTideStatus();
   initCurrentEvents();
   initDiscoverMap();
   initCalendar();
@@ -194,6 +195,12 @@ function initDiscoverMap() {
   const pins = document.querySelectorAll('.discover-pin');
   const map = document.querySelector('.discover__map');
   const viewerLayer = document.querySelector('.discover__viewer');
+  const previewPanel = map?.querySelector('.discover__panel');
+  const previewImage = previewPanel?.querySelector('[data-node-preview]');
+  const previewTitle = previewPanel?.querySelector('[data-node-title]');
+  const previewDesc = previewPanel?.querySelector('[data-node-desc]');
+  const watchButton = previewPanel?.querySelector('[data-watch-360]');
+  const clearNodeButtons = map?.querySelectorAll('[data-node-clear]');
   const viewerFrame = viewerLayer?.querySelector('[data-panorama-viewer]');
   const fallbackFrame = viewerLayer?.querySelector('[data-panorama-fallback]');
   const viewerTitle = viewerLayer?.querySelector('[data-viewer-title]');
@@ -211,27 +218,37 @@ function initDiscoverMap() {
   let panoramaViewer;
   let activeScene;
   let activeId;
+  let selectedId;
   let viewerRequest = 0;
 
   const panoramaSpaces = {
-    waterfront: { image: 'assets/images/3dspaces/outside_benches.png', fallback: true },
-    lookout: { image: 'assets/images/3dspaces/outside_benches.png', fallback: true },
-    library: { image: 'assets/images/3dspaces/outside_benches.png', fallback: true },
-    cafe: { image: 'assets/images/3dspaces/slow-cafe_3d.png', fallback: false },
-    gallery: { image: 'assets/images/3dspaces/art-gallery_3d.png', fallback: false },
-    bike: { image: 'assets/images/3dspaces/bike-path_3d.png', fallback: false }
+    lounge: { image: 'assets/images/3dspaces/lounge.png', fallback: false },
+    terrace: { image: 'assets/images/3dspaces/terracereading.png', fallback: false },
+    parking: { image: 'assets/images/3dspaces/parking.png', fallback: false },
+    cafe: { image: 'assets/images/3dspaces/cafe.png', fallback: false },
+    gallery: { image: 'assets/images/3dspaces/gallery.png', fallback: false },
+    beachfront: { image: 'assets/images/3dspaces/beachfront_benches.png', fallback: false },
+    tidalstage: { image: 'assets/images/3dspaces/tidalstage_high.png', fallback: false },
+    readingshore: { image: 'assets/images/3dspaces/readingshore.png', fallback: false },
+    neighborpath: { image: 'assets/images/3dspaces/neighborpath.jpg', fallback: false },
+    catisland: { image: 'assets/images/3dspaces/catisland.png', fallback: false }
   };
 
   const pinImages = {
-    waterfront: 'assets/images/discover/waterfront-dock.webp',
-    lookout: 'assets/images/discover/sea-lookout.webp',
-    library: 'assets/images/discover/coastal-library.webp',
-    cafe: 'assets/images/discover/slow-cafe.webp',
-    gallery: 'assets/images/discover/art-gallery.webp',
-    bike: 'assets/images/discover/bike-path.webp'
+    house: 'assets/images/3dspaces/lounge.png',
+    lounge: 'assets/images/3dspaces/lounge.png',
+    terrace: 'assets/images/3dspaces/terracereading.png',
+    parking: 'assets/images/3dspaces/parking.png',
+    cafe: 'assets/images/3dspaces/cafe.png',
+    gallery: 'assets/images/3dspaces/gallery.png',
+    beachfront: 'assets/images/3dspaces/beachfront_benches.png',
+    tidalstage: 'assets/images/3dspaces/tidalstage_high.png',
+    readingshore: 'assets/images/3dspaces/readingshore.png',
+    neighborpath: 'assets/images/3dspaces/neighborpath.jpg',
+    catisland: 'assets/images/3dspaces/catisland.png'
   };
 
-  const spaceOrder = ['waterfront', 'lookout', 'library', 'cafe', 'gallery', 'bike'];
+  const spaceOrder = ['lounge', 'terrace', 'parking', 'cafe', 'gallery', 'beachfront', 'tidalstage', 'readingshore', 'neighborpath', 'catisland'];
 
   const hotspotPositions = [
     { type: 'story', yaw: -0.42, pitch: -0.05 },
@@ -260,7 +277,18 @@ function initDiscoverMap() {
 
   const getPoint = (id) => {
     const dict = window.i18n?.dict;
-    return dict?.discover?.points?.[id] || null;
+    const point = dict?.discover?.points?.[id];
+    if (point) return point;
+
+    const fallbackTitle = String(id || '')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, letter => letter.toUpperCase());
+
+    return {
+      title: fallbackTitle,
+      description: 'Preview this coastal node, then step into the matching 360 scene.'
+    };
   };
 
   const syncViewerCopy = (id) => {
@@ -327,6 +355,7 @@ function initDiscoverMap() {
 
   const openExpandedTour = () => {
     closeViewer();
+    if (!selectedId) clearNodePreview();
     map.classList.remove('is-locked');
     map.classList.toggle('is-mobile-expanded', isMobileTour());
     map.classList.toggle('is-expanded', !isMobileTour());
@@ -336,6 +365,9 @@ function initDiscoverMap() {
 
   const closeExpandedTour = () => {
     closeViewer();
+    clearNodePreview();
+    selectedId = null;
+    document.dispatchEvent(new CustomEvent('discover:hard-reset-view'));
     map.classList.add('is-locked');
     map.classList.remove('is-expanded', 'is-mobile-expanded');
     document.body.classList.remove('is-discover-modal');
@@ -349,6 +381,34 @@ function initDiscoverMap() {
   const showFallbackImage = (imagePath) => {
     fallbackFrame.style.backgroundImage = `url('${imagePath}')`;
     viewerLayer.classList.add('is-fallback');
+  };
+
+  const showNodePreview = (id) => {
+    const point = getPoint(id);
+    const imagePath = pinImages[id] || panoramaSpaces[id]?.image;
+    const activePin = Array.from(pins).find(pin => pin.dataset.id === id);
+    selectedId = id;
+    const isHouseCluster = id === 'house';
+    const isHouseDetail = activePin?.dataset.cluster === 'house';
+
+    if (previewImage && imagePath) previewImage.style.backgroundImage = `url('${imagePath}')`;
+    if (previewTitle) previewTitle.textContent = point.title;
+    if (previewDesc) previewDesc.textContent = point.description;
+    if (watchButton) watchButton.disabled = isHouseCluster || !panoramaSpaces[id];
+
+    previewPanel?.classList.add('is-visible');
+    map.classList.add('is-node-focused');
+    map.classList.toggle('is-house-expanded', isHouseCluster || isHouseDetail);
+    pins.forEach(p => p.classList.toggle('is-active', p.dataset.id === id));
+    document.dispatchEvent(new CustomEvent('discover:focus-node', { detail: { id } }));
+  };
+
+  const clearNodePreview = () => {
+    selectedId = null;
+    previewPanel?.classList.remove('is-visible');
+    map.classList.remove('is-node-focused', 'is-house-expanded');
+    pins.forEach(p => p.classList.remove('is-active'));
+    document.dispatchEvent(new CustomEvent('discover:reset-view', { detail: { preserveOrientation: true } }));
   };
 
   const destroyPanorama = () => {
@@ -452,7 +512,7 @@ function initDiscoverMap() {
   };
 
   const openViewer = async (id) => {
-    const space = panoramaSpaces[id] || panoramaSpaces.waterfront;
+    const space = panoramaSpaces[id] || panoramaSpaces.lounge;
     const requestId = viewerRequest + 1;
     viewerRequest = requestId;
     destroyPanorama();
@@ -509,11 +569,23 @@ function initDiscoverMap() {
     activeScene = null;
     activeId = null;
     setSpaceJumpOpen(false);
-    pins.forEach(p => p.classList.remove('is-active'));
+    pins.forEach(p => p.classList.toggle('is-active', Boolean(selectedId) && p.dataset.id === selectedId));
   }
 
   pins.forEach(pin => {
-    pin.addEventListener('click', () => openViewer(pin.dataset.id));
+    pin.addEventListener('click', () => showNodePreview(pin.dataset.id));
+  });
+
+  watchButton?.addEventListener('click', () => {
+    if (selectedId) openViewer(selectedId);
+  });
+
+  clearNodeButtons?.forEach(button => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      clearNodePreview();
+    });
   });
 
   const handleViewerChromeClick = (event) => {
@@ -631,13 +703,127 @@ function initDiscoverMap() {
       map.classList.remove('is-mobile-expanded');
       map.classList.add('is-locked');
       document.body.classList.remove('is-discover-modal');
+      selectedId = null;
+      clearNodePreview();
       closeViewer();
     }
   });
 
   document.addEventListener('i18n:applied', () => {
     if (activeId) syncViewerCopy(activeId);
+    if (selectedId && !activeId) showNodePreview(selectedId);
   });
+}
+
+/* ─── Tide Status ─────────────────────────────────── */
+function initTideStatus() {
+  const root = document.querySelector('[data-tide-status]');
+  if (!root) return;
+
+  const stageEl = root.querySelector('[data-tide-stage]');
+  const labelEl = root.querySelector('[data-tide-label]');
+  const detailEl = root.querySelector('[data-tide-detail]');
+  const miniBadges = document.querySelectorAll('[data-tide-mini]');
+
+  const formatTime = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat(document.documentElement.lang?.startsWith('ko') ? 'ko-KR' : 'en-US', {
+      hour: 'numeric',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  const publish = (payload) => {
+    const stage = payload?.stage || 'unknown';
+    const displayStage = payload?.displayStage || stage;
+    const next = payload?.nextExtreme;
+    const previous = payload?.previousExtreme;
+    const lang = document.documentElement.lang?.startsWith('ko') ? 'ko' : 'en';
+
+    const stageLabel = {
+      en: {
+        high: 'High tide',
+        low: 'Low tide',
+        rising: 'Rising tide',
+        falling: 'Falling tide',
+        unknown: 'Tide pending'
+      },
+      ko: {
+        high: '만조',
+        low: '간조',
+        rising: '밀물',
+        falling: '썰물',
+        unknown: '조위 확인 중'
+      }
+    };
+
+    const moodText = {
+      en: {
+        high: 'Perfect time to go',
+        low: 'Wide mudflat mood',
+        rising: 'Sea is coming in',
+        falling: 'Quiet shore window',
+        unknown: 'High-tide preview'
+      },
+      ko: {
+        high: '방문하기 좋은 물때',
+        low: '넓은 갯벌 분위기',
+        rising: '물이 들어오는 중',
+        falling: '조용한 해안 시간',
+        unknown: '만조 미리보기'
+      }
+    };
+
+    const detailText = {
+      en: {
+        high: 'Full water, brighter reflections, and a good coast-walk mood.',
+        low: 'The shore opens up with a calmer mudflat atmosphere.',
+        rising: 'Nice for arriving now and watching the water return.',
+        falling: 'A softer, slower edge for looking across the flats.',
+        unknown: 'Production tide will update this automatically.'
+      },
+      ko: {
+        high: '물이 차 있어 반사가 밝고 산책하기 좋은 분위기입니다.',
+        low: '해안이 넓게 열리고 차분한 갯벌 분위기가 살아납니다.',
+        rising: '지금 도착하면 물이 들어오는 장면을 보기 좋습니다.',
+        falling: '갯벌 쪽으로 천천히 시선이 열리는 시간입니다.',
+        unknown: '운영 환경에서 조위 정보가 자동으로 갱신됩니다.'
+      }
+    };
+
+    if (labelEl) labelEl.textContent = stageLabel[lang][displayStage] || stageLabel[lang].unknown;
+    if (stageEl) stageEl.textContent = moodText[lang][displayStage] || moodText[lang].unknown;
+    miniBadges.forEach(badge => {
+      const badgeStage = displayStage === 'unknown' ? 'preview' : displayStage;
+      badge.dataset.tideVisualStage = badgeStage;
+      const text = displayStage === 'unknown'
+        ? (lang === 'ko' ? '조위 미리보기' : 'Tide preview')
+        : stageLabel[lang][displayStage] || stageLabel[lang].unknown;
+      const miniLabel = badge.querySelector('[data-tide-mini-label]');
+      if (miniLabel) miniLabel.textContent = text;
+    });
+    if (detailEl) {
+      const nextTime = formatTime(next?.time);
+      const previousTime = formatTime(previous?.time);
+      detailEl.textContent = payload?.source === 'preview_pending' || payload?.source === 'static_pending'
+        ? detailText[lang].unknown
+        : nextTime
+        ? `${detailText[lang][displayStage] || detailText[lang].unknown} Next ${next?.type === 'low' ? 'low' : 'high'} tide around ${nextTime}.`
+        : previousTime
+          ? `${detailText[lang][displayStage] || detailText[lang].unknown} Last tide marker was around ${previousTime}.`
+          : detailText[lang][displayStage] || detailText[lang].unknown;
+    }
+
+    root.dataset.tideStage = stage;
+    document.dispatchEvent(new CustomEvent('mh:tide-updated', { detail: payload || { stage } }));
+  };
+
+  fetch('/api/tide', { headers: { Accept: 'application/json' } })
+    .then(response => response.ok ? response.json() : Promise.reject(new Error(`Tide status ${response.status}`)))
+    .then(publish)
+    .catch(() => publish({ stage: 'high', displayStage: 'unknown', source: 'static_pending' }));
 }
 
 /* ─── Current Reading Themes ──────────────────────── */

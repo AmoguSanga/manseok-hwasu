@@ -6,7 +6,35 @@ Interactive coastal website for Dong-gu, Incheon. Clean minimal feel with subtle
 
 ## How to run locally
 
-This is a static site. Browsers block `fetch()` on `file://` URLs, so the locale loader needs a local server. Pick one:
+This now includes a tiny Node server for the live tide cache. Use it when you want `/api/tide` and Stormglass integration:
+
+```bash
+cd manseok-hwasu
+cp .env.example .env
+# Add your rotated Stormglass key to .env
+node server.mjs
+# Then open http://localhost:8080
+```
+
+The Stormglass key must stay in `.env`; never put it in browser JavaScript or HTML. The server refreshes the tide cache at most 6 times per day and the page reads the cached result from `/api/tide`.
+
+## Cloudflare Pages tide setup
+
+Cloudflare Pages will deploy `functions/api/tide.js` as the live `/api/tide` endpoint. Preview deployments return a pending tide placeholder in high-tide visual mode and do not call Stormglass. Production deployments use Stormglass only when the KV cache is missing or older than 4 hours.
+
+To keep the 24-hour / 6-refresh system working after git pushes:
+
+1. In Cloudflare, create a Workers KV namespace for the tide cache.
+2. In your Pages project Production environment, go to Settings > Bindings and add that namespace with the variable name `TIDE_CACHE`.
+3. In Production Settings > Variables and Secrets, add `STORMGLASS_API_KEY` as an encrypted secret.
+4. Optional: add plain variables `TIDE_LAT=37.488407` and `TIDE_LNG=126.612296`.
+5. Add `TIDE_API_ENABLED=true` in Production.
+6. Add `TIDE_API_ENABLED=false` in Preview, and do not add `STORMGLASS_API_KEY` to Preview.
+7. Redeploy the Pages project after adding the binding and secret.
+
+The KV cache persists across deployments, so normal git pushes will not reset the 4-hour refresh window. Preview deployments should remain unconfigured for Stormglass; they will show tide pending while the scene stays in high-tide mode.
+
+For a static-only preview without live tide data, pick one:
 
 ```bash
 # Python (recommended — already installed almost everywhere)

@@ -43,17 +43,21 @@
     "subtitle": "Tap any pin to explore",
     "tour_label": "3D Coastal Tour",
     "points": {
-      "waterfront": {
-        "title": "Waterfront Dock",
-        "description": "The Manseok-Hwasu Waterfront Dock is the top local spot for watching the sunset. It provides a wide, open view of the sky and the West Sea, making it easy to capture great photos. It is a go-to destination for anyone looking for the best sunset views and a peaceful sound of waves."
+      "house": {
+        "title": "Crocat House",
+        "description": "A grouped house node for the dense program area. Zoom in here to open the detailed lounge, terrace, parking, cafe, and gallery points."
       },
-      "lookout": {
-        "title": "Sea Lookout",
-        "description": "Equipped with shared binoculars, this elevated lookout offers a panoramic view of passing ships, distant islands, and the changing tides."
+      "lounge": {
+        "title": "Waterfront Lounge",
+        "description": "A relaxed deck node for sitting close to the water, watching the route slow down, and previewing the larger coastal scene."
       },
-      "library": {
-        "title": "Coastal Reading Pavilion",
-        "description": "An open-air pavilion stocked with donated books. Pick one up, sit by the railing, and read while the sea reads itself."
+      "terrace": {
+        "title": "Terrace Reading",
+        "description": "A stepped reading terrace where the shore becomes a quiet outdoor room for borrowed books, shade, and sea air."
+      },
+      "parking": {
+        "title": "Parking Approach",
+        "description": "The arrival node that connects visitors from parking into the walking route without losing the first view of the coast."
       },
       "cafe": {
         "title": "Slow Café",
@@ -63,9 +67,25 @@
         "title": "Rotating Art Gallery",
         "description": "A small exhibition space featuring works from local artists, refreshed every season."
       },
-      "bike": {
-        "title": "Coastal Bike Path",
-        "description": "A 4 km flat path connecting the dock to the southern lighthouse. Bikes are available for free hourly checkout."
+      "beachfront": {
+        "title": "Beachfront Benches",
+        "description": "A front-row rest point for sunset photos, open water views, and the slow sound of waves along the benches."
+      },
+      "tidalstage": {
+        "title": "Tidal Stage",
+        "description": "A flexible program edge that changes character with the tide: water-facing during high tide and mudflat-facing during low tide."
+      },
+      "readingshore": {
+        "title": "Reading Shore",
+        "description": "A sea-facing reading stop for quiet breaks, book sharing, and staying longer than a normal walk would ask."
+      },
+      "neighborpath": {
+        "title": "Neighbor Path",
+        "description": "A local connector path that brings nearby residents into the coast through a softer, everyday entrance."
+      },
+      "catisland": {
+        "title": "Cat Island Memory",
+        "description": "A heritage node that recalls the former Cat Island geography and links today's route to Manseok-Hwasu's port memory."
       }
     },
     "close": "Close"
