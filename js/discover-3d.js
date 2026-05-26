@@ -234,6 +234,21 @@ function initDiscover3DScene(map, canvas) {
   let pinchStartCameraDistance = HOME_DISTANCE;
   const activePointers = new Map();
 
+  const resetPointerState = () => {
+    activePointers.forEach((_, pointerId) => {
+      try {
+        if (map.hasPointerCapture?.(pointerId)) map.releasePointerCapture(pointerId);
+      } catch (error) {
+        // Pointer capture may already be gone after fullscreen or tab changes.
+      }
+    });
+    activePointers.clear();
+    isDragging = false;
+    isPinching = false;
+    pinchStartDistance = 0;
+    map.classList.remove('is-dragging');
+  };
+
   const shouldIgnoreDrag = (target) => (
     target.closest('.discover-pin') ||
     target.closest('.discover__panel') ||
@@ -302,6 +317,13 @@ function initDiscover3DScene(map, canvas) {
 
   map.addEventListener('pointerup', releaseDrag);
   map.addEventListener('pointercancel', releaseDrag);
+  map.addEventListener('pointerleave', resetPointerState);
+  window.addEventListener('blur', resetPointerState);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) resetPointerState();
+  });
+  document.addEventListener('fullscreenchange', resetPointerState);
+  document.addEventListener('discover:interaction-reset', resetPointerState);
 
   panInput?.addEventListener('pointerdown', event => event.stopPropagation());
   panInput?.addEventListener('pointermove', event => event.stopPropagation());

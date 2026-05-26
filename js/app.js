@@ -235,36 +235,515 @@ function initDiscoverMap() {
   };
 
   const pinImages = {
-    house: 'assets/images/3dspaces/lounge.png',
+    house: 'assets/images/discover/sea-lookout.webp',
     lounge: 'assets/images/3dspaces/lounge.png',
     terrace: 'assets/images/3dspaces/terracereading.png',
     parking: 'assets/images/3dspaces/parking.png',
     cafe: 'assets/images/3dspaces/cafe.png',
-    gallery: 'assets/images/3dspaces/gallery.png',
-    beachfront: 'assets/images/3dspaces/beachfront_benches.png',
+    gallery: 'assets/images/discover/art-gallery.webp',
+    beachfront: 'assets/images/seasonal/summer.webp',
     tidalstage: 'assets/images/3dspaces/tidalstage_high.png',
-    readingshore: 'assets/images/3dspaces/readingshore.png',
-    neighborpath: 'assets/images/3dspaces/neighborpath.jpg',
-    catisland: 'assets/images/3dspaces/catisland.png'
+    readingshore: 'assets/images/events/readingevent.webp',
+    neighborpath: 'assets/images/discover/morning_circuit.webp',
+    catisland: 'assets/images/discover/heritage_stop.webp'
   };
 
   const spaceOrder = ['lounge', 'terrace', 'parking', 'cafe', 'gallery', 'beachfront', 'tidalstage', 'readingshore', 'neighborpath', 'catisland'];
 
-  const hotspotPositions = [
-    { type: 'story', yaw: -0.42, pitch: -0.05 },
-    { type: 'detail', yaw: 0.72, pitch: 0.08 }
-  ];
-
-  const hotspotLabels = {
-    story: {
-      en: { trigger: 'Story', title: 'Place note', body: 'A small orientation note is pinned into this scene for the prototype.' },
-      ko: { trigger: '이야기', title: '장소 메모', body: '프로토타입을 위해 이 공간 안에 간단한 안내 노드를 배치했습니다.' }
+  // Edit 360 scene hotspots here. Each key matches a panoramaSpaces node id.
+  // Each hotspot can have its own image, trigger label, title, body, yaw, and pitch.
+  // If title/body are omitted, the card falls back to the node's translated title and description.
+  const panoramaHotspots = {
+  // Lounge 360 scene hotspot cards.
+  lounge: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/3dspaces/lounge.png',
+      en: {
+        trigger: 'Story',
+        title: 'Neighborhood Deck',
+        body: 'This deck acts like the living room of the coast. It gives visitors a soft place to pause between walking, reading, and watching the harbor light shift throughout the day.'
+      },
+      ko: {
+        trigger: '이야기',
+        title: '네이버후드 데크',
+        body: '이 데크는 해안의 거실 같은 역할을 합니다. 산책, 독서, 항구의 빛을 바라보는 시간 사이에 방문자가 잠시 머물 수 있는 부드러운 쉼터입니다.'
+      }
     },
-    detail: {
-      en: { trigger: 'Details', title: 'Area card', body: 'This uses the same content card from the coastal map, now anchored inside the panorama.' },
-      ko: { trigger: '상세', title: '공간 카드', body: '해안 지도에서 사용하던 콘텐츠 카드를 파노라마 안에 고정했습니다.' }
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/lounge.png',
+      en: {
+        trigger: 'Details',
+        title: 'A Slower Social Zone',
+        body: 'Unlike a normal bench area, this space is designed for staying. Wide seating, shade, and small tables make it useful for book clubs, casual conversations, morning coffee, and small community programs.'
+      },
+      ko: {
+        trigger: '상세',
+        title: '천천히 머무는 소셜 존',
+        body: '일반적인 벤치 공간이 아니라 오래 머물 수 있도록 구성된 장소입니다. 넓은 좌석, 그늘, 작은 테이블은 북클럽, 가벼운 대화, 모닝 커피, 소규모 커뮤니티 프로그램에 활용됩니다.'
+      }
+    },
+    {
+      yaw: 1.28,
+      pitch: 0.02,
+      image: 'assets/images/3dspaces/lounge.png',
+      en: {
+        trigger: 'Program',
+        title: 'A Flexible Event Point',
+        body: 'During seasonal programs, this deck can become a check-in point, a post-walk stretching area, or a discussion circle. The goal is not to build a large facility, but to make simple coastal space work harder.'
+      },
+      ko: {
+        trigger: '프로그램',
+        title: '유연한 이벤트 거점',
+        body: '계절 프로그램이 열릴 때 이 데크는 체크인 장소, 산책 후 스트레칭 공간, 토론 모임 장소로 바뀔 수 있습니다. 큰 시설을 새로 짓기보다 단순한 해안 공간을 더 잘 활용하는 것이 핵심입니다.'
+      }
     }
-  };
+  ],
+
+  // Terrace Reading 360 scene hotspot cards.
+  terrace: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/3dspaces/terracereading.png',
+      en: {
+        trigger: 'Reading',
+        title: 'Golden Hour Reading Terrace',
+        body: 'This terrace is imagined as a quiet reading balcony facing the water. In the late afternoon, the sea becomes brighter and the space turns into one of the most atmospheric reading spots on the route.'
+      },
+      ko: {
+        trigger: '독서',
+        title: '골든아워 리딩 테라스',
+        body: '이 테라스는 바다를 향한 조용한 독서 발코니처럼 기획된 공간입니다. 늦은 오후에는 바다가 더 밝게 빛나며, 이곳은 동선에서 가장 분위기 있는 독서 장소 중 하나가 됩니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/terracereading.png',
+      en: {
+        trigger: 'Shade',
+        title: 'Low-Cost, Warm Shade Design',
+        body: 'The shade structure can use simple wood framing and fabric panels instead of expensive architecture. This keeps the proposal economical while still making the space feel cozy, intentional, and premium.'
+      },
+      ko: {
+        trigger: '그늘',
+        title: '경제적이지만 따뜻한 그늘 디자인',
+        body: '그늘 구조물은 비싼 건축물보다 단순한 목재 프레임과 패브릭 패널을 활용할 수 있습니다. 비용은 낮추면서도 공간이 아늑하고 기획된 장소처럼 느껴지게 합니다.'
+      }
+    },
+    {
+      yaw: 1.36,
+      pitch: -0.02,
+      image: 'assets/images/3dspaces/terracereading.png',
+      en: {
+        trigger: 'Use',
+        title: 'Not Just Silent Reading',
+        body: 'This spot can support quiet reading during the day and small literary circles in the evening. Programs like the Han Kang Book Club would feel especially strong here because the changing tide becomes part of the discussion atmosphere.'
+      },
+      ko: {
+        trigger: '활용',
+        title: '조용한 독서 그 이상',
+        body: '이 공간은 낮에는 조용한 독서 장소가 되고, 저녁에는 작은 문학 모임 장소가 될 수 있습니다. 한강 작가 북클럽 같은 프로그램은 조수의 변화가 토론 분위기의 일부가 되기 때문에 특히 잘 어울립니다.'
+      }
+    }
+  ],
+
+  // Parking Approach 360 scene hotspot cards.
+  parking: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/3dspaces/parking.png',
+      en: {
+        trigger: 'Arrival',
+        title: 'First Step Into the Coast',
+        body: 'For many visitors, this is where the experience begins. The design challenge is to make the transition from parking to coastline feel welcoming instead of purely functional.'
+      },
+      ko: {
+        trigger: '도착',
+        title: '해안으로 들어가는 첫 지점',
+        body: '많은 방문자에게 이곳은 경험이 시작되는 장소입니다. 주차장에서 해안으로 넘어가는 순간이 단순한 이동이 아니라 환영받는 느낌이 되도록 만드는 것이 디자인의 과제입니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/parking.png',
+      en: {
+        trigger: 'Wayfinding',
+        title: 'Clear Route, Less Friction',
+        body: 'Because access is still car-heavy, this node should reduce confusion. Simple signage, route markers, and a visible coastal map can help visitors understand where to go before they even reach the promenade.'
+      },
+      ko: {
+        trigger: '길찾기',
+        title: '명확한 동선, 낮은 진입 장벽',
+        body: '현재 접근은 자동차 중심이기 때문에 이 지점에서는 혼란을 줄이는 것이 중요합니다. 간단한 안내판, 동선 표시, 눈에 잘 보이는 해안 지도는 방문자가 산책로에 도착하기 전부터 방향을 이해하도록 돕습니다.'
+      }
+    },
+    {
+      yaw: 1.18,
+      pitch: 0.0,
+      image: 'assets/images/3dspaces/parking.png',
+      en: {
+        trigger: 'Insight',
+        title: 'Fixing the Weakest Moment',
+        body: 'The project is not only about beautiful waterfront scenes. It also has to solve the less attractive moments, like arrival, parking pressure, and uncertainty. A better first impression makes the rest of the route easier to enjoy.'
+      },
+      ko: {
+        trigger: '인사이트',
+        title: '가장 약한 순간을 개선하기',
+        body: '이 프로젝트는 아름다운 해안 장면만 다루는 것이 아닙니다. 도착, 주차 부담, 길을 찾는 불확실함처럼 덜 매력적인 순간도 개선해야 합니다. 첫인상이 좋아지면 이후 동선 전체를 더 쉽게 즐길 수 있습니다.'
+      }
+    }
+  ],
+
+  // Slow Cafe 360 scene hotspot cards.
+  cafe: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/3dspaces/cafe.png',
+      en: {
+        trigger: 'Pause',
+        title: 'Crocat House Pause',
+        body: 'Crocat House becomes more than a cafe when it is connected to the walking route. It can work as a warm social anchor where visitors begin, end, or extend their coastal visit.'
+      },
+      ko: {
+        trigger: '휴식',
+        title: '크로캣 하우스의 쉼',
+        body: '크로캣 하우스는 산책 동선과 연결될 때 단순한 카페 이상의 역할을 합니다. 방문자가 해안 방문을 시작하거나 마무리하고, 더 오래 머무는 따뜻한 사회적 거점이 될 수 있습니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/cafe.png',
+      en: {
+        trigger: 'Coffee',
+        title: 'Morning Route Reward',
+        body: 'After a phone-free jog or power walk, coffee becomes a small reward. This makes the route feel complete: movement first, then stretching, conversation, and a drink by the water.'
+      },
+      ko: {
+        trigger: '커피',
+        title: '아침 루트의 보상',
+        body: '휴대폰 없는 조깅이나 파워 워킹이 끝난 뒤 커피는 작은 보상이 됩니다. 먼저 움직이고, 그다음 스트레칭과 대화, 물가의 음료로 이어지면서 동선이 하나의 완성된 경험처럼 느껴집니다.'
+      }
+    },
+    {
+      yaw: 1.32,
+      pitch: 0.02,
+      image: 'assets/images/3dspaces/cafe.png',
+      en: {
+        trigger: 'Identity',
+        title: 'Local Character, Not Chain Branding',
+        body: 'The cafe can help the project avoid feeling generic. Its local mascot, small menu rituals, and waterfront position give Manseok-Hwasu a friendlier identity than a standard public walkway.'
+      },
+      ko: {
+        trigger: '정체성',
+        title: '프랜차이즈가 아닌 지역 캐릭터',
+        body: '카페는 프로젝트가 흔한 공공 산책로처럼 보이는 것을 막아줍니다. 지역 마스코트, 작은 메뉴 경험, 해안가 위치는 만석·화수에 더 친근한 정체성을 부여합니다.'
+      }
+    }
+  ],
+
+  // Rotating Art Gallery 360 scene hotspot cards.
+  gallery: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/discover/art-gallery.webp',
+      en: {
+        trigger: 'Gallery',
+        title: 'Rotating Local Art Wall',
+        body: 'This small gallery point gives local creatives a visible place inside the coastal route. Instead of treating art as decoration, the wall becomes a changing record of the neighborhood.'
+      },
+      ko: {
+        trigger: '전시',
+        title: '지역 작가 순환 전시 월',
+        body: '이 작은 갤러리 지점은 지역 창작자들이 해안 동선 안에서 보일 수 있는 장소를 제공합니다. 예술을 단순한 장식으로 두지 않고, 동네의 변화하는 기록으로 활용합니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/gallery.png',
+      en: {
+        trigger: 'Season',
+        title: 'A Reason to Return',
+        body: 'The exhibition can refresh with each season: spring reading posters, summer coastal photography, autumn Cat Island stories, and winter poetry. This gives visitors a reason to come back, not just pass through once.'
+      },
+      ko: {
+        trigger: '시즌',
+        title: '다시 방문할 이유',
+        body: '전시는 계절마다 바뀔 수 있습니다. 봄에는 독서 포스터, 여름에는 해안 사진, 가을에는 묘도 이야기, 겨울에는 시와 짧은 글을 소개할 수 있습니다. 이는 방문자가 한 번 지나가는 것이 아니라 다시 오게 만드는 이유가 됩니다.'
+      }
+    },
+    {
+      yaw: 1.24,
+      pitch: -0.01,
+      image: 'assets/images/3dspaces/gallery.png',
+      en: {
+        trigger: 'Creative',
+        title: 'Supporting Local Makers',
+        body: 'This node can also connect to small art markets, workshops, or the Sunny Side Up style community exhibition model. The coast becomes a platform for local creative presence rather than only a scenic backdrop.'
+      },
+      ko: {
+        trigger: '창작',
+        title: '지역 창작자 지원',
+        body: '이 지점은 작은 아트마켓, 워크숍, 써니사이드업 방식의 커뮤니티 전시 모델과도 연결될 수 있습니다. 해안은 단순한 배경이 아니라 지역 창작자들이 드러나는 플랫폼이 됩니다.'
+      }
+    }
+  ],
+
+  // Beachfront Benches 360 scene hotspot cards.
+  beachfront: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/seasonal/summer.webp',
+      en: {
+        trigger: 'View',
+        title: 'High Tide Benchline',
+        body: 'At high tide, the water comes visually closer and the benches feel more immersive. This is one of the simplest but most powerful moments in the route: sitting still while the sea changes the mood around you.'
+      },
+      ko: {
+        trigger: '전망',
+        title: '만조의 벤치 라인',
+        body: '만조 때는 물이 시각적으로 더 가까워지고 벤치 공간이 더 몰입감 있게 느껴집니다. 가만히 앉아 있는 동안 바다가 주변 분위기를 바꾸는, 단순하지만 강력한 순간입니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/beachfront_benches.png',
+      en: {
+        trigger: 'Rest',
+        title: 'Designed for Doing Nothing',
+        body: 'Not every activation needs a program. Some spaces should protect the right to do nothing: watch sunlight on the water, listen to the port, or sit with a book without being rushed.'
+      },
+      ko: {
+        trigger: '휴식',
+        title: '아무것도 하지 않기 위한 디자인',
+        body: '모든 활성화가 프로그램일 필요는 없습니다. 어떤 공간은 아무것도 하지 않을 권리를 지켜야 합니다. 물 위의 햇빛을 보고, 항구 소리를 듣고, 책과 함께 서두르지 않고 앉아 있을 수 있어야 합니다.'
+      }
+    },
+    {
+      yaw: 1.3,
+      pitch: 0.02,
+      image: 'assets/images/3dspaces/beachfront_benches.png',
+      en: {
+        trigger: 'Detox',
+        title: 'Phone-Free Sunset Seat',
+        body: 'This bench line can become part of the digital detox identity. Visitors are encouraged to put their phones away for a few minutes and experience the coastline through sound, light, and air instead of a screen.'
+      },
+      ko: {
+        trigger: '디톡스',
+        title: '휴대폰 없는 노을 좌석',
+        body: '이 벤치 라인은 디지털 디톡스 정체성의 일부가 될 수 있습니다. 방문자는 잠시 휴대폰을 내려놓고 화면이 아니라 소리, 빛, 공기로 해안을 경험하도록 유도됩니다.'
+      }
+    }
+  ],
+
+  // Tidal Stage 360 scene hotspot cards.
+  tidalstage: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/3dspaces/tidalstage_high.png',
+      en: {
+        trigger: 'Tide',
+        title: 'Tidal Stage',
+        body: 'This point turns the tide into a visible event. As the water level changes, the same deck can feel like a quiet observatory, a performance edge, or a reflective sunset platform.'
+      },
+      ko: {
+        trigger: '물때',
+        title: '타이달 스테이지',
+        body: '이 지점은 조수의 변화를 하나의 보이는 이벤트로 만듭니다. 수위가 바뀌면서 같은 데크가 조용한 전망대, 작은 공연 경계, 사색적인 노을 플랫폼처럼 달라질 수 있습니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/tidalstage_high.png',
+      en: {
+        trigger: 'Info',
+        title: 'Why Tide Matters Here',
+        body: 'Manseok-Hwasu is not a static park. The waterline, port light, and sea breeze change the experience throughout the day. Showing tide information helps visitors choose when the route will feel most alive.'
+      },
+      ko: {
+        trigger: '정보',
+        title: '이곳에서 물때가 중요한 이유',
+        body: '만석·화수는 고정된 공원이 아닙니다. 수면 높이, 항구의 빛, 바닷바람이 하루 동안 경험을 계속 바꿉니다. 물때 정보를 보여주면 방문자가 가장 생동감 있는 시간을 선택할 수 있습니다.'
+      }
+    },
+    {
+      yaw: 1.25,
+      pitch: -0.03,
+      image: 'assets/images/3dspaces/tidalstage_high.png',
+      en: {
+        trigger: 'Event',
+        title: 'Small Performances by the Water',
+        body: 'This stage does not need heavy infrastructure. It can host poetry readings, acoustic sets, tide talks, or final sharing sessions after photography walks. The sea becomes the backdrop and the timer.'
+      },
+      ko: {
+        trigger: '이벤트',
+        title: '물가의 작은 공연',
+        body: '이 스테이지에는 큰 시설이 필요하지 않습니다. 시 낭독, 어쿠스틱 공연, 조수 이야기, 사진 워크숍 후 공유 세션을 열 수 있습니다. 바다는 배경이자 시간의 기준이 됩니다.'
+      }
+    }
+  ],
+
+  // Reading Shore 360 scene hotspot cards.
+  readingshore: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/events/readingevent.webp',
+      en: {
+        trigger: 'Reading',
+        title: 'Reading Shore',
+        body: 'Reading Shore is the intellectual anchor of the project. It gives the coast a clear reason to visit: not only to look at the sea, but to spend meaningful time with books, ideas, and other readers.'
+      },
+      ko: {
+        trigger: '독서',
+        title: '리딩 쇼어',
+        body: '리딩 쇼어는 이 프로젝트의 지적 중심 공간입니다. 해안을 단순히 바라보는 장소가 아니라 책, 생각, 다른 독자들과 의미 있는 시간을 보내는 방문 이유로 만듭니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/readingshore.png',
+      en: {
+        trigger: 'Program',
+        title: 'Bookable Seats and Weekly Themes',
+        body: 'This area can connect directly to the website: reserve a reading seat, check this week’s theme, join a book club, or leave a short shelf note for the next visitor.'
+      },
+      ko: {
+        trigger: '프로그램',
+        title: '예약 좌석과 주간 테마',
+        body: '이 공간은 웹사이트와 직접 연결될 수 있습니다. 독서 좌석 예약, 이번 주 테마 확인, 북클럽 참여, 다음 방문자를 위한 짧은 책장 메모 남기기가 가능합니다.'
+      }
+    },
+    {
+      yaw: 1.34,
+      pitch: 0.01,
+      image: 'assets/images/3dspaces/readingshore.png',
+      en: {
+        trigger: 'Club',
+        title: 'From Quiet Reading to Debate',
+        body: 'Some weeks can stay silent and meditative. Others can become active, like the Han Kang Book Club, where readers bring passages, compare interpretations, and debate under the open sky.'
+      },
+      ko: {
+        trigger: '북클럽',
+        title: '조용한 독서에서 토론까지',
+        body: '어떤 주는 조용하고 명상적인 독서 시간으로 운영되고, 어떤 주는 한강 작가 북클럽처럼 활발한 토론으로 바뀔 수 있습니다. 독자들은 문장을 가져오고, 해석을 비교하며, 열린 하늘 아래 토론합니다.'
+      }
+    }
+  ],
+
+  // Neighbor Path 360 scene hotspot cards.
+  neighborpath: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/discover/morning_circuit.webp',
+      en: {
+        trigger: 'Path',
+        title: 'Morning Circuit',
+        body: 'This path links the project back to everyday life. It is where residents, workers, and visitors can use the coast casually: a brisk walk before work, a slow route after lunch, or a quiet reset after sunset.'
+      },
+      ko: {
+        trigger: '길',
+        title: '모닝 서킷',
+        body: '이 길은 프로젝트를 일상으로 다시 연결합니다. 주민, 직장인, 방문자가 출근 전 빠른 산책, 점심 후 느린 산책, 해질 무렵 조용한 리셋처럼 해안을 자연스럽게 사용할 수 있는 구간입니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/neighborpath.jpg',
+      en: {
+        trigger: 'Health',
+        title: 'A Route for Walkers Too',
+        body: 'The route should not only serve athletic runners. Power walkers, older visitors, beginners, and people looking for light movement need clear distance markers, rest points, and a rhythm that feels welcoming.'
+      },
+      ko: {
+        trigger: '건강',
+        title: '걷는 사람을 위한 루트',
+        body: '이 루트는 운동을 잘하는 러너만을 위한 공간이 아니어야 합니다. 파워 워커, 고령 방문자, 초보자, 가벼운 움직임을 원하는 사람들을 위해 거리 표시, 휴식 지점, 편안한 리듬이 필요합니다.'
+      }
+    },
+    {
+      yaw: 1.22,
+      pitch: -0.01,
+      image: 'assets/images/3dspaces/neighborpath.jpg',
+      en: {
+        trigger: 'Connection',
+        title: 'Making the Coast Feel Close',
+        body: 'The strongest version of Manseok-Hwasu is not a destination you visit once. It is a route that slowly becomes familiar, where the coast feels close enough to become part of the week.'
+      },
+      ko: {
+        trigger: '연결',
+        title: '해안을 가까운 장소로 만들기',
+        body: '만석·화수의 가장 강한 형태는 한 번 방문하는 목적지가 아닙니다. 점점 익숙해지는 동선이며, 해안이 일주일의 일부가 될 만큼 가까운 장소로 느껴지는 것입니다.'
+      }
+    }
+  ],
+
+  // Cat Island Memory 360 scene hotspot cards.
+  catisland: [
+    {
+      yaw: -0.42,
+      pitch: -0.05,
+      image: 'assets/images/discover/heritage_stop.webp',
+      en: {
+        trigger: 'Memory',
+        title: 'Cat Island Memory',
+        body: 'This stop recalls the lost island identity and the fishing culture that shaped the shore. It gives the route a layer of memory instead of treating the coastline as empty scenery.'
+      },
+      ko: {
+        trigger: '기억',
+        title: '묘도의 기억',
+        body: '이 지점은 사라진 섬의 정체성과 이 해안을 형성한 어업 문화를 떠올리게 합니다. 해안을 빈 풍경으로 두지 않고 기억의 층을 부여합니다.'
+      }
+    },
+    {
+      yaw: 0.72,
+      pitch: 0.08,
+      image: 'assets/images/3dspaces/catisland.png',
+      en: {
+        trigger: 'Story',
+        title: 'Fish-Tailed Cats and Local Myth',
+        body: 'The cat motif can become a playful way to introduce local history. Small illustrated cats, fish-tail details, or hidden trail markers can make heritage feel approachable instead of heavy.'
+      },
+      ko: {
+        trigger: '이야기',
+        title: '물고기 꼬리 고양이와 지역 이야기',
+        body: '고양이 모티프는 지역 역사를 재미있게 소개하는 장치가 될 수 있습니다. 작은 일러스트 고양이, 물고기 꼬리 디테일, 숨은 길 표시를 통해 역사 정보를 무겁지 않게 전달할 수 있습니다.'
+      }
+    },
+    {
+      yaw: 1.31,
+      pitch: 0.02,
+      image: 'assets/images/3dspaces/catisland.png',
+      en: {
+        trigger: 'Discovery',
+        title: 'A Trail That Rewards Attention',
+        body: 'This node can encourage visitors to look closer. Instead of one big monument, the story can unfold through small clues: plaques, QR stories, object markers, and seasonal Cat Island storytelling walks.'
+      },
+      ko: {
+        trigger: '발견',
+        title: '자세히 볼수록 보이는 길',
+        body: '이 지점은 방문자가 더 자세히 보도록 유도할 수 있습니다. 하나의 큰 기념물보다 작은 단서들, 안내판, QR 이야기, 오브젝트 마커, 계절별 묘도 스토리텔링 산책을 통해 이야기가 펼쳐질 수 있습니다.'
+      }
+    }
+  ]
+};
 
   const developmentText = {
     en: 'This area is currently under development. Preview image shown for now.',
@@ -332,6 +811,7 @@ function initDiscoverMap() {
     map.classList.toggle('is-mobile-expanded', isFullscreen);
     map.classList.add('is-expanded');
     document.body.classList.toggle('is-discover-modal', isFullscreen);
+    document.dispatchEvent(new CustomEvent('discover:interaction-reset'));
     requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
   };
 
@@ -376,6 +856,7 @@ function initDiscoverMap() {
     map.classList.add('is-expanded');
     map.classList.remove('is-mobile-expanded');
     document.body.classList.remove('is-discover-modal');
+    document.dispatchEvent(new CustomEvent('discover:interaction-reset'));
   };
 
   const closeExpandedTour = () => {
@@ -387,6 +868,7 @@ function initDiscoverMap() {
     map.classList.remove('is-expanded', 'is-mobile-expanded');
     document.body.classList.remove('is-discover-modal');
     pins.forEach(p => p.classList.remove('is-active'));
+    document.dispatchEvent(new CustomEvent('discover:interaction-reset'));
     exitTourFullscreen();
     requestAnimationFrame(() => {
       map.querySelector('[data-tour-enter]')?.focus({ preventScroll: true });
@@ -476,44 +958,33 @@ function initDiscoverMap() {
     });
   };
 
-  const getLocalizedHotspotText = (type) => {
+  const getLocalizedHotspotText = (spot, point, imagePath) => {
     const lang = getCurrentLang().startsWith('ko') ? 'ko' : 'en';
-    return hotspotLabels[type]?.[lang] || hotspotLabels[type]?.en;
+    const copy = spot?.[lang] || spot?.en || {};
+    return {
+      trigger: copy.trigger || 'Details',
+      title: copy.title || point.title,
+      body: copy.body || point.description,
+      image: copy.image || spot.image || imagePath
+    };
   };
 
   const closeOpenHotspots = (exceptElement) => {
     viewerFrame.querySelectorAll('.discover-hotspot.is-open').forEach((node) => {
       if (node !== exceptElement) {
         node.classList.remove('is-open');
-        node.style.removeProperty('--hotspot-card-nudge-y');
       }
     });
-  };
-
-  const positionOpenHotspotCard = (hotspot) => {
-    const card = hotspot?.querySelector('.discover-hotspot__card');
-    if (!card) return;
-
-    hotspot.style.removeProperty('--hotspot-card-nudge-y');
-    const viewerRect = viewerLayer.getBoundingClientRect();
-    const barRect = viewerLayer.querySelector('.discover__viewer-bar')?.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    const minTop = Math.max(
-      viewerRect.top + viewerRect.height * 0.35,
-      (barRect?.bottom || viewerRect.top) + 14
-    );
-
-    if (cardRect.top < minTop) {
-      hotspot.style.setProperty('--hotspot-card-nudge-y', `${Math.ceil(minTop - cardRect.top)}px`);
-    }
   };
 
   const addSceneHotspots = (scene, id, space) => {
     const point = getPoint(id);
     if (!point || !scene?.hotspotContainer) return;
 
-    hotspotPositions.forEach((spot) => {
-      const copy = getLocalizedHotspotText(spot.type);
+    const hotspots = panoramaHotspots[id] || [];
+
+    hotspots.forEach((spot) => {
+      const copy = getLocalizedHotspotText(spot, point, pinImages[id] || space.image);
       const hotspot = document.createElement('div');
       hotspot.className = 'discover-hotspot';
       hotspot.dataset.hotspotYaw = String(spot.yaw);
@@ -531,13 +1002,13 @@ function initDiscoverMap() {
 
       const image = document.createElement('span');
       image.className = 'discover-hotspot__image';
-      image.style.backgroundImage = `url('${spot.type === 'detail' ? pinImages[id] : space.image}')`;
+      image.style.backgroundImage = `url('${copy.image}')`;
 
       const title = document.createElement('strong');
-      title.textContent = spot.type === 'detail' ? point.title : copy.title;
+      title.textContent = copy.title;
 
       const body = document.createElement('span');
-      body.textContent = spot.type === 'detail' ? point.description : copy.body;
+      body.textContent = copy.body;
 
       const close = document.createElement('button');
       close.className = 'discover-hotspot__close';
@@ -644,7 +1115,6 @@ function initDiscoverMap() {
       event.stopPropagation();
       const hotspot = hotspotClose.closest('.discover-hotspot');
       hotspot?.classList.remove('is-open');
-      hotspot?.style.removeProperty('--hotspot-card-nudge-y');
       return;
     }
 
@@ -659,19 +1129,6 @@ function initDiscoverMap() {
       const nextOpen = !hotspot.classList.contains('is-open');
       closeOpenHotspots(hotspot);
       hotspot.classList.toggle('is-open', nextOpen);
-      hotspot.style.removeProperty('--hotspot-card-nudge-y');
-
-      if (nextOpen && activeScene?.lookTo) {
-        activeScene.lookTo({
-          yaw: Number(hotspot.dataset.hotspotYaw) || 0,
-          pitch: Number(hotspot.dataset.hotspotPitch) || 0,
-          fov: Math.PI / 2.65
-        }, { transitionDuration: 450 });
-      }
-      if (nextOpen) {
-        requestAnimationFrame(() => positionOpenHotspotCard(hotspot));
-        window.setTimeout(() => positionOpenHotspotCard(hotspot), 480);
-      }
       return;
     }
 
