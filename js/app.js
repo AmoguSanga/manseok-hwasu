@@ -483,8 +483,29 @@ function initDiscoverMap() {
 
   const closeOpenHotspots = (exceptElement) => {
     viewerFrame.querySelectorAll('.discover-hotspot.is-open').forEach((node) => {
-      if (node !== exceptElement) node.classList.remove('is-open');
+      if (node !== exceptElement) {
+        node.classList.remove('is-open');
+        node.style.removeProperty('--hotspot-card-nudge-y');
+      }
     });
+  };
+
+  const positionOpenHotspotCard = (hotspot) => {
+    const card = hotspot?.querySelector('.discover-hotspot__card');
+    if (!card) return;
+
+    hotspot.style.removeProperty('--hotspot-card-nudge-y');
+    const viewerRect = viewerLayer.getBoundingClientRect();
+    const barRect = viewerLayer.querySelector('.discover__viewer-bar')?.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const minTop = Math.max(
+      viewerRect.top + viewerRect.height * 0.35,
+      (barRect?.bottom || viewerRect.top) + 14
+    );
+
+    if (cardRect.top < minTop) {
+      hotspot.style.setProperty('--hotspot-card-nudge-y', `${Math.ceil(minTop - cardRect.top)}px`);
+    }
   };
 
   const addSceneHotspots = (scene, id, space) => {
@@ -621,7 +642,9 @@ function initDiscoverMap() {
     if (hotspotClose) {
       event.preventDefault();
       event.stopPropagation();
-      hotspotClose.closest('.discover-hotspot')?.classList.remove('is-open');
+      const hotspot = hotspotClose.closest('.discover-hotspot');
+      hotspot?.classList.remove('is-open');
+      hotspot?.style.removeProperty('--hotspot-card-nudge-y');
       return;
     }
 
@@ -636,6 +659,7 @@ function initDiscoverMap() {
       const nextOpen = !hotspot.classList.contains('is-open');
       closeOpenHotspots(hotspot);
       hotspot.classList.toggle('is-open', nextOpen);
+      hotspot.style.removeProperty('--hotspot-card-nudge-y');
 
       if (nextOpen && activeScene?.lookTo) {
         activeScene.lookTo({
@@ -643,6 +667,10 @@ function initDiscoverMap() {
           pitch: Number(hotspot.dataset.hotspotPitch) || 0,
           fov: Math.PI / 2.65
         }, { transitionDuration: 450 });
+      }
+      if (nextOpen) {
+        requestAnimationFrame(() => positionOpenHotspotCard(hotspot));
+        window.setTimeout(() => positionOpenHotspotCard(hotspot), 480);
       }
       return;
     }
@@ -746,7 +774,8 @@ function initDiscoverMap() {
   if (discoverSection && 'IntersectionObserver' in window) {
     const discoverObserver = new IntersectionObserver((entries) => {
       const entry = entries[0];
-      if (!entry?.isIntersecting && !map.classList.contains('is-locked')) {
+      const isFullscreenVisit = document.fullscreenElement || map.classList.contains('is-mobile-expanded');
+      if (!entry?.isIntersecting && !isFullscreenVisit && !map.classList.contains('is-locked')) {
         closeExpandedTour();
       }
     }, { threshold: 0.08 });
