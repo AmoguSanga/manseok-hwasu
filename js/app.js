@@ -2481,12 +2481,47 @@ const calendarState = {
   selected: null
 };
 
+function formatDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateInputValue(value) {
+  const [year, month, day] = String(value || '').split('-').map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+}
+
+function syncNativeBookingDate() {
+  const input = document.getElementById('bookingDateNative');
+  if (!input || !calendarState.selected) return;
+  input.value = formatDateInputValue(calendarState.selected);
+}
+
 function initCalendar() {
   const root = document.querySelector('.calendar');
   if (!root) return;
 
   const today = new Date();
-  calendarState.view = new Date(today.getFullYear(), today.getMonth(), 1);
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const nativeDateInput = document.getElementById('bookingDateNative');
+  calendarState.view = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
+  calendarState.selected = todayStart;
+
+  if (nativeDateInput) {
+    nativeDateInput.min = formatDateInputValue(todayStart);
+    nativeDateInput.value = formatDateInputValue(todayStart);
+    nativeDateInput.addEventListener('change', () => {
+      const nextDate = parseDateInputValue(nativeDateInput.value);
+      if (!nextDate) return;
+      calendarState.selected = nextDate;
+      calendarState.view = new Date(nextDate.getFullYear(), nextDate.getMonth(), 1);
+      renderCalendar();
+      updateBookingSummary();
+    });
+  }
 
   root.querySelector('.calendar__nav--prev')?.addEventListener('click', () => {
     calendarState.view = new Date(calendarState.view.getFullYear(), calendarState.view.getMonth() - 1, 1);
@@ -2507,6 +2542,7 @@ function initCalendar() {
 
   document.addEventListener('i18n:applied', renderCalendar);
   renderCalendar();
+  updateBookingSummary();
 }
 
 function renderCalendar() {
@@ -2577,6 +2613,8 @@ function renderCalendar() {
     btn.textContent = i;
     grid.appendChild(btn);
   }
+
+  syncNativeBookingDate();
 }
 
 /* ─── Area Booking ────────────────────────────────── */
@@ -3335,7 +3373,14 @@ function initPromenadeMap() {
     });
   };
 
-  const setActiveZone = (id) => {
+  const scrollZoneDetailIntoView = () => {
+    if (!isCompactZoneMap()) return;
+    requestAnimationFrame(() => {
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
+  const setActiveZone = (id, options = {}) => {
     const zone = promenadeZones.find((item) => item.id === id) || promenadeZones[0];
     if (!zone) return;
 
@@ -3363,6 +3408,8 @@ function initPromenadeMap() {
       if (iframe.src !== nextSrc) iframe.src = nextSrc;
       iframe.title = `Google Maps preview for ${zone.title}`;
     }
+
+    if (options.scrollDetail) scrollZoneDetailIntoView();
   };
 
   if (hitLayer) hitLayer.innerHTML = '';
@@ -3414,8 +3461,11 @@ function initPromenadeMap() {
 
     node.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
+      if (isCompactZoneMap()) {
+        setActiveZone(zone.id);
+        return;
+      }
       setActiveZone(zone.id);
-      if (isCompactZoneMap()) return;
       node.classList.add('is-dragging');
       node.setPointerCapture?.(event.pointerId);
       const start = getPointerPosition(event);
@@ -3473,7 +3523,7 @@ function initPromenadeMap() {
 
     node.addEventListener('pointerup', snapNodeHome);
     node.addEventListener('pointercancel', snapNodeHome);
-    node.addEventListener('click', () => setActiveZone(zone.id));
+    node.addEventListener('click', () => setActiveZone(zone.id, { scrollDetail: isCompactZoneMap() }));
     nodesLayer.appendChild(node);
   });
 
@@ -3495,7 +3545,7 @@ function initPromenadeMap() {
     pin.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4.5 16 7h3a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3l1.5-2.5z"/><circle cx="12" cy="13" r="3.2"/></svg>';
     pin.addEventListener('click', (event) => {
       event.stopPropagation();
-      setActiveZone(spot.zoneId);
+      setActiveZone(spot.zoneId, { scrollDetail: isCompactZoneMap() });
       openPhotoCard(spot);
     });
     photoPinsLayer?.appendChild(pin);

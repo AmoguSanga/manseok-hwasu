@@ -20,6 +20,7 @@ const AUTO_ORBIT_DELAY = 10000;
 const PAN_LEFT_RANGE = 2.08;
 const PAN_RIGHT_RANGE = 1.95;
 const HOUSE_FOCUS_YAW = -0.46;
+const HOUSE_DETAIL_PIN_IDS = new Set(['lounge', 'terrace', 'parking', 'cafe', 'gallery']);
 
 const fallbackPinPoints = {
   house: new THREE.Vector3(-0.25, 0.42, -0.35),
@@ -173,10 +174,12 @@ function initDiscover3DScene(map, canvas) {
       return;
     }
 
+    const isHouse = id === 'house';
+    const isHouseDetail = HOUSE_DETAIL_PIN_IDS.has(id);
     const worldPoint = localPoint.clone();
     mapRoot.localToWorld(worldPoint);
     cameraState.nextTarget.copy(worldPoint);
-    if (id === 'house') {
+    if (isHouse) {
       cameraState.nextTarget.x -= 0.04;
       cameraState.nextTarget.y += 0.1;
       cameraState.nextTarget.z -= 0.24;
@@ -185,9 +188,17 @@ function initDiscover3DScene(map, canvas) {
       cameraState.nextTarget.y += 0.24;
     }
     const isMobileFocus = window.matchMedia('(max-width: 640px)').matches;
-    cameraState.nextDistance = id === 'house'
-      ? (isMobileFocus ? Math.max(MIN_DISTANCE, HOUSE_FOCUS_DISTANCE * 0.78) : HOUSE_FOCUS_DISTANCE)
-      : (isMobileFocus ? FOCUS_DISTANCE * 0.72 : FOCUS_DISTANCE);
+    if (isHouse) {
+      cameraState.nextDistance = isMobileFocus
+        ? Math.max(MIN_DISTANCE, HOUSE_FOCUS_DISTANCE * 0.78)
+        : HOUSE_FOCUS_DISTANCE;
+    } else if (isHouseDetail) {
+      cameraState.nextDistance = isMobileFocus
+        ? Math.max(MIN_DISTANCE, HOUSE_FOCUS_DISTANCE * 0.86)
+        : HOUSE_FOCUS_DISTANCE * 1.12;
+    } else {
+      cameraState.nextDistance = isMobileFocus ? FOCUS_DISTANCE * 0.72 : FOCUS_DISTANCE;
+    }
     cameraState.orbitAngle = 0;
     setPan(0);
     cameraState.isFocused = true;
