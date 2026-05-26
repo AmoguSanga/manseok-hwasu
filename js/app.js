@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initActiveNavLink();
   initHeroCarousel();
   initTideStatus();
+  initSurveyPage();
   initCurrentEvents();
   initDiscoverMap();
   initCalendar();
@@ -129,6 +130,242 @@ function initIncheonLinks() {
 
   apply();
   document.addEventListener('i18n:applied', (event) => apply(event.detail?.lang));
+}
+
+/* ─── Discover What Suits You Survey ───────────────── */
+function initSurveyPage() {
+  const root = document.querySelector('[data-survey]');
+  if (!root) return;
+
+  const questionEl = root.querySelector('[data-survey-question]');
+  const introEl = root.querySelector('[data-survey-intro]');
+  const optionsEl = root.querySelector('[data-survey-options]');
+  const progressEl = root.querySelector('[data-survey-progress]');
+  const nextButton = root.querySelector('[data-survey-next]');
+  const resultPanel = document.querySelector('[data-survey-result]');
+  const restartButton = resultPanel?.querySelector('[data-survey-restart]');
+  const resultTitle = resultPanel?.querySelector('[data-result-title]');
+  const resultCopy = resultPanel?.querySelector('[data-result-copy]');
+  const resultPass = resultPanel?.querySelector('[data-result-pass]');
+  const resultReward = resultPanel?.querySelector('[data-result-reward]');
+  const resultLink = resultPanel?.querySelector('[data-result-link]');
+  if (!questionEl || !optionsEl || !progressEl || !nextButton || !resultPanel || !resultTitle || !resultCopy || !resultPass || !resultReward || !resultLink) return;
+
+  const questions = [
+    {
+      text: 'You stand at the starting point of a new path. What calls to you first?',
+      options: [
+        { text: 'A gentle breeze carrying the scent of new blooms.', season: 'spring' },
+        { text: 'The intense glare of the sun dancing on the water.', season: 'summer' },
+        { text: 'The deep, warm gradient of the evening sunset.', season: 'autumn' },
+        { text: 'The sharp, frosty bite of the clear open air.', season: 'winter' }
+      ]
+    },
+    {
+      text: 'You find a hidden spot right at the entrance. Your instinct is to?',
+      options: [
+        { text: 'Pause your pace entirely and settle into the stillness.', style: 'quiet' },
+        { text: 'Keep moving forward to see what lies around the corner.', style: 'active' }
+      ]
+    },
+    {
+      text: 'You encounter a lively flow of people on the trail. How do you tune in?',
+      options: [
+        { text: 'Find a quiet corner to observe the energy from a distance.', style: 'quiet' },
+        { text: 'Join them and blend into the shared movement.', style: 'active' }
+      ]
+    },
+    {
+      text: 'You notice a series of markers along the path. What sparks your curiosity?',
+      options: [
+        { text: 'The hidden layers of meaning and history behind them.', style: 'quiet' },
+        { text: 'The physical journey of tracking them down one by one.', style: 'active' }
+      ]
+    },
+    {
+      text: 'You finally reach the edge of the coast where the land ends. What completes this moment?',
+      options: [
+        { text: 'The fading sounds and space for your own thoughts.', style: 'quiet' },
+        { text: 'The lingering energy and the shared vibe of the crowd.', style: 'active' }
+      ]
+    }
+  ];
+
+  const results = {
+    spring: {
+      quiet: {
+        title: 'Spring Quiet: Shore Reader',
+        copy: 'Your best match is a gentle spring visit with reading zones, slow deck pauses, and solo ocean-horizon viewing.',
+        pass: '60-Minute Reading Zone Reservation Coupon',
+        reward: 'Use this digital pass for a calm reading-zone reservation or a quiet deck seat during spring bloom weeks.',
+        link: 'index.html#reading'
+      },
+      active: {
+        title: 'Spring Active: Bloom Explorer',
+        copy: 'Your route likes fresh morning air, light movement, and an art stop at Crocat House after the coast wakes up.',
+        pass: 'Crocat House Exhibition Perk',
+        reward: 'Use this pass for an exhibition-linked visitor perk or a small partner discount after your morning route.',
+        link: 'index.html#seasonal'
+      }
+    },
+    summer: {
+      quiet: {
+        title: 'Summer Quiet: Shade Keeper',
+        copy: 'You fit a cool summer plan: shaded canopy shelters, reading-zone breaks, and slow water watching away from the heat.',
+        pass: 'Canopy Reading Shelter Coupon',
+        reward: 'Use this digital pass toward a shaded reading-zone reservation during peak summer hours.',
+        link: 'index.html#reading'
+      },
+      active: {
+        title: 'Summer Active: Tide Chaser',
+        copy: 'Your best route follows QR tracking points, open-air sunset watching, and the changing tide along the promenade.',
+        pass: 'Promenade Pop-Up Voucher',
+        reward: 'Use this pass for a promenade pop-up market voucher after completing your QR route.',
+        link: 'index.html#discover'
+      }
+    },
+    autumn: {
+      quiet: {
+        title: 'Autumn Quiet: Memory Walker',
+        copy: 'Your route is a slow promenade walk with time for the layered history of Manseok-Hwasu and the warm evening gradient.',
+        pass: 'Heritage Route Reward Pass',
+        reward: 'Use this pass for a guided-story add-on or a quiet reading reward tied to the history route.',
+        link: 'index.html#current'
+      },
+      active: {
+        title: 'Autumn Active: Festival Tracker',
+        copy: 'You match exhibition stops, seasonal event walks, and promenade market moments while the coast turns golden.',
+        pass: 'Promenade Market Voucher',
+        reward: 'Use this digital pass for a small pop-up market voucher during autumn event days.',
+        link: 'index.html#seasonal'
+      }
+    },
+    winter: {
+      quiet: {
+        title: 'Winter Quiet: Sunset Sipper',
+        copy: 'Your best match is crisp air, a warm drink at a sunset-view cafe, and a tucked-away Crocat House pause.',
+        pass: 'Sunset Drink Discount Coupon',
+        reward: 'Use this pass for a drink discount at a participating cafe after your winter coast visit.',
+        link: 'index.html#current'
+      },
+      active: {
+        title: 'Winter Active: Crisp-Air Runner',
+        copy: 'You fit a winter sea jog: clear air, bright water, and a clean route that keeps the body moving.',
+        pass: 'Winter Route Finisher Pass',
+        reward: 'Use this pass for a route-finisher perk or partner drink discount after your winter jog.',
+        link: 'index.html#seasonal'
+      }
+    }
+  };
+
+  const state = {
+    index: 0,
+    answers: Array(questions.length).fill(null)
+  };
+
+  const render = () => {
+    const question = questions[state.index];
+    questionEl.textContent = `Q${state.index + 1}. ${question.text}`;
+    if (introEl) introEl.textContent = `Question ${state.index + 1} of ${questions.length}`;
+    progressEl.style.width = `${((state.index + 1) / questions.length) * 100}%`;
+    optionsEl.querySelectorAll('label').forEach(label => label.remove());
+
+    question.options.forEach((option, optionIndex) => {
+      const id = `survey-q${state.index}-o${optionIndex}`;
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      const span = document.createElement('span');
+      input.type = 'radio';
+      input.name = `survey-q${state.index}`;
+      input.id = id;
+      input.value = String(optionIndex);
+      input.checked = state.answers[state.index] === optionIndex;
+      span.textContent = option.text;
+      label.htmlFor = id;
+      label.classList.toggle('is-selected', input.checked);
+      label.append(input, span);
+
+      input.addEventListener('change', () => {
+        state.answers[state.index] = optionIndex;
+        nextButton.disabled = false;
+        optionsEl.querySelectorAll('label').forEach(item => item.classList.remove('is-selected'));
+        label.classList.add('is-selected');
+      });
+
+      optionsEl.appendChild(label);
+    });
+
+    nextButton.disabled = state.answers[state.index] === null;
+    nextButton.querySelector('span').textContent = state.index === questions.length - 1 ? 'Reveal Result' : 'Next';
+  };
+
+  const moveToNextQuestion = () => {
+    const startHeight = root.offsetHeight;
+    root.style.height = `${startHeight}px`;
+    root.classList.add('is-switching');
+    nextButton.disabled = true;
+
+    window.setTimeout(() => {
+      state.index += 1;
+      render();
+      const endHeight = root.scrollHeight;
+      root.style.height = `${startHeight}px`;
+
+      window.requestAnimationFrame(() => {
+        root.style.height = `${endHeight}px`;
+        root.classList.remove('is-switching');
+      });
+
+      window.setTimeout(() => {
+        root.style.height = '';
+      }, 260);
+    }, 180);
+  };
+
+  const showResult = () => {
+    const seasonOption = questions[0].options[state.answers[0]];
+    const scores = state.answers.slice(1).reduce((total, answerIndex, offset) => {
+      const style = questions[offset + 1].options[answerIndex]?.style;
+      if (style) total[style] += 1;
+      return total;
+    }, { quiet: 0, active: 0 });
+    const season = seasonOption?.season || 'spring';
+    const style = scores.active > scores.quiet ? 'active' : 'quiet';
+    const result = results[season][style];
+
+    resultTitle.textContent = result.title;
+    resultCopy.textContent = result.copy;
+    resultPass.textContent = result.pass;
+    resultReward.textContent = result.reward;
+    resultLink.href = result.link;
+    root.hidden = true;
+    resultPanel.hidden = false;
+    resultPanel.dataset.season = season;
+    resultPanel.dataset.style = style;
+    window.requestAnimationFrame(() => resultPanel.classList.add('is-visible'));
+    resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  nextButton.addEventListener('click', () => {
+    if (state.answers[state.index] === null) return;
+    if (state.index < questions.length - 1) {
+      moveToNextQuestion();
+      return;
+    }
+    showResult();
+  });
+
+  restartButton?.addEventListener('click', () => {
+    state.index = 0;
+    state.answers = Array(questions.length).fill(null);
+    root.hidden = false;
+    resultPanel.hidden = true;
+    resultPanel.classList.remove('is-visible');
+    render();
+    root.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  render();
 }
 
 /* ─── Scroll reveals ──────────────────────────────── */
@@ -973,8 +1210,17 @@ function initDiscoverMap() {
     viewerFrame.querySelectorAll('.discover-hotspot.is-open').forEach((node) => {
       if (node !== exceptElement) {
         node.classList.remove('is-open');
+        node.style.removeProperty('--hotspot-card-screen-x');
+        node.style.removeProperty('--hotspot-card-screen-y');
       }
     });
+  };
+
+  const centerHotspotCard = (hotspot) => {
+    if (!hotspot) return;
+    const rect = viewerLayer.getBoundingClientRect();
+    hotspot.style.setProperty('--hotspot-card-screen-x', `${Math.round(rect.left + rect.width / 2)}px`);
+    hotspot.style.setProperty('--hotspot-card-screen-y', `${Math.round(rect.top + rect.height * 0.52)}px`);
   };
 
   const addSceneHotspots = (scene, id, space) => {
@@ -1115,6 +1361,8 @@ function initDiscoverMap() {
       event.stopPropagation();
       const hotspot = hotspotClose.closest('.discover-hotspot');
       hotspot?.classList.remove('is-open');
+      hotspot?.style.removeProperty('--hotspot-card-screen-x');
+      hotspot?.style.removeProperty('--hotspot-card-screen-y');
       return;
     }
 
@@ -1129,6 +1377,17 @@ function initDiscoverMap() {
       const nextOpen = !hotspot.classList.contains('is-open');
       closeOpenHotspots(hotspot);
       hotspot.classList.toggle('is-open', nextOpen);
+      if (nextOpen) {
+        centerHotspotCard(hotspot);
+        activeScene?.lookTo?.({
+          yaw: Number(hotspot.dataset.hotspotYaw) || 0,
+          pitch: Number(hotspot.dataset.hotspotPitch) || 0,
+          fov: Math.PI / 2.65
+        }, { transitionDuration: 420 });
+      } else {
+        hotspot.style.removeProperty('--hotspot-card-screen-x');
+        hotspot.style.removeProperty('--hotspot-card-screen-y');
+      }
       return;
     }
 
@@ -1174,6 +1433,9 @@ function initDiscoverMap() {
   viewerLayer.addEventListener('pointerdown', stopViewerChromePointer, true);
   viewerLayer.addEventListener('pointerup', stopViewerChromePointer, true);
   viewerLayer.addEventListener('click', handleViewerChromeClick, true);
+  window.addEventListener('resize', () => {
+    viewerFrame.querySelectorAll('.discover-hotspot.is-open').forEach(centerHotspotCard);
+  });
 
   const handleStageControlClick = (event) => {
     const enterButton = event.target.closest('[data-tour-enter]');

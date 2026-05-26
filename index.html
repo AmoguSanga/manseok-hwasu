@@ -38,13 +38,16 @@
     </span>
   </a>
 
+  <a href="discover-you.html" class="nav__survey">
+    <span data-i18n="hero.cta_survey">DISCOVER YOURSELF</span>
+  </a>
+
   <ul class="nav__menu" role="menubar">
-    <li><a href="#visit"     class="nav__link" data-target="visit"     data-i18n="nav.visit">VISIT</a></li>
-    <li><a href="#current"   class="nav__link" data-target="current" data-i18n="nav.current">CURRENT</a></li>
+    <li class="nav__survey-mobile"><a href="discover-you.html" class="nav__link" data-i18n="hero.cta_survey">DISCOVER YOURSELF</a></li>
+    <li><a href="#current"   class="nav__link" data-target="current" data-i18n="nav.current">CURRENT EVENTS</a></li>
     <li><a href="#discover"  class="nav__link" data-target="discover"  data-i18n="nav.discover">DISCOVER</a></li>
     <li><a href="#reading"   class="nav__link" data-target="reading"   data-i18n="nav.reading">READING &amp; BOOKING</a></li>
     <li><a href="#seasonal"  class="nav__link" data-target="seasonal"  data-i18n="nav.seasonal">SEASONAL ACTIVITIES</a></li>
-    <li><a href="#community" class="nav__link" data-target="community" data-i18n="nav.community">JOIN COMMUNITY</a></li>
   </ul>
 
   <button class="nav__lang" aria-label="Switch language">
@@ -87,8 +90,12 @@ My Secret Coast</h1>
     <div class="hero__visual">
       <div class="hero__tide" data-tide-status aria-live="polite">
         <span class="hero__tide-kicker" data-tide-label>High tide</span>
-        <strong data-tide-stage>Perfect time to go</strong>
-        <span data-tide-detail>Server tide cache will update this view.</span>
+        <div class="hero__tide-ticker">
+          <div class="hero__tide-marquee">
+            <strong data-tide-stage>Perfect time to go</strong>
+            <span data-tide-detail>Server tide cache will update this view.</span>
+          </div>
+        </div>
       </div>
       <div class="hero__carousel" id="heroCarousel" aria-label="Manseok-Hwasu photo highlights">
         <img class="hero__photo is-active" src="assets/images/discover/waterfront-dock.webp" alt="Waterfront dock at Manseok-Hwasu" />

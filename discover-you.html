@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discover What Suits You | Manseok-Hwasu</title>
+  <meta name="description" content="A playful Manseok-Hwasu survey that will recommend routes, generate a character, and prepare participant rewards." />
+
+  <script>
+    (function(){try{var t=localStorage.getItem('mh-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/sections.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/logos/manseok-logo.svg" />
+</head>
+<body>
+<nav class="nav" aria-label="Main navigation">
+  <a href="index.html#hero" class="nav__brand">
+    <span class="nav__logo">
+      <img src="assets/logos/manseok-logo.svg" alt="" aria-hidden="true" />
+    </span>
+    <span class="nav__brand-text">
+      <strong>MANSEOK-HWASU</strong>
+    </span>
+  </a>
+
+  <a href="discover-you.html" class="nav__survey">
+    <span>DISCOVER YOURSELF</span>
+  </a>
+
+  <ul class="nav__menu" role="menubar">
+    <li class="nav__survey-mobile"><a href="discover-you.html" class="nav__link">DISCOVER YOURSELF</a></li>
+    <li><a href="index.html#current" class="nav__link">CURRENT EVENTS</a></li>
+    <li><a href="index.html#discover" class="nav__link">DISCOVER</a></li>
+    <li><a href="index.html#reading" class="nav__link">READING &amp; BOOKING</a></li>
+    <li><a href="index.html#seasonal" class="nav__link">SEASONAL ACTIVITIES</a></li>
+  </ul>
+
+  <button class="nav__lang" aria-label="Switch language">
+    <span>KOR</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</nav>
+
+<main class="survey-page">
+  <section class="survey-shell">
+    <a class="survey-home" href="index.html#hero" aria-label="Go back home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+      <span>Go Back Home</span>
+    </a>
+    <div class="container survey-shell__inner">
+      <section class="survey-panel survey-panel--question" aria-labelledby="surveyTitle" data-survey>
+        <span class="eyebrow">Route Match</span>
+        <h1 id="surveyTitle" data-survey-question>Discover What Suits You</h1>
+        <p data-survey-intro>Answer five abstract questions, then receive your season, activity style, coastal character, and digital reward pass.</p>
+
+        <div class="survey-progress" aria-label="Survey progress">
+          <span data-survey-progress style="width: 20%"></span>
+        </div>
+
+        <fieldset class="survey-options" data-survey-options>
+          <legend>Choose one answer</legend>
+        </fieldset>
+
+        <div class="survey-actions">
+          <button class="btn btn--survey" type="button" data-survey-next disabled>
+            <span>Next</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <aside class="survey-panel survey-panel--preview" id="surveyPreview" data-survey-result aria-live="polite" hidden>
+        <div class="survey-character" aria-hidden="true">
+          <span class="survey-character__face"></span>
+        </div>
+        <span class="eyebrow">Your Coastal Character</span>
+        <h2 data-result-title>Shore Reader</h2>
+        <p data-result-copy>A calm route type who likes shaded seats, tide sounds, and a small reward after finishing the walk.</p>
+
+        <div class="survey-reward">
+          <strong data-result-pass>Digital Reward Pass</strong>
+          <span data-result-reward>Coupon generation, participant email, and result sharing will connect here in the next build step.</span>
+        </div>
+        <div class="survey-actions">
+          <a class="btn btn--primary" href="index.html#current" data-result-link>Find Out More</a>
+          <button class="btn" type="button" data-survey-restart>Retake Survey</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

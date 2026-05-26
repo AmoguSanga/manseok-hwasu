@@ -6,7 +6,7 @@
   },
   "nav": {
     "visit": "VISIT",
-    "current": "CURRENT",
+    "current": "CURRENT EVENTS",
     "discover": "DISCOVER",
     "reading": "READING & BOOKING",
     "seasonal": "SEASONAL ACTIVITIES",
@@ -18,7 +18,8 @@
     "title": "나만 아는 해안\nMy Secret Coast",
     "description": "Hidden behind Incheon's industrial waterfront, two overlooked coastlines are being reintroduced as a living cultural destination: a connected walking route, discovery waypoints, a library-linked reading space, outdoor art and open-air programs, and a digital guide that leads people back to the real shore.",
     "cta_primary": "Start Your Route",
-    "cta_secondary": "Discover the Coast"
+    "cta_secondary": "Discover the Coast",
+    "cta_survey": "DISCOVER YOURSELF"
   },
   "visit": {
     "title": "Plan Your Visit",
