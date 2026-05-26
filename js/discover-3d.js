@@ -50,7 +50,8 @@ function initDiscover3D() {
 
   const activate = () => {
     map.classList.remove('is-locked');
-    map.classList.add(window.matchMedia('(max-width: 640px)').matches ? 'is-mobile-expanded' : 'is-expanded');
+    map.classList.add('is-expanded');
+    map.classList.remove('is-mobile-expanded');
     document.dispatchEvent(new CustomEvent('discover:tour-activated', { detail: { map } }));
     requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
 

@@ -1,119 +1,119 @@
 window.MH_READING_EVENTS = [
   {
-    id: 'starlit-scifi',
-    status: 'Now reading',
-    category: 'Sci-Fi Week',
-    start: '2026-05-18',
-    end: '2026-05-24',
-    image: 'assets/images/seasonal/summer.webp',
+    id: 'coastal-jog-morning-coffee',
+    status: 'Coming soon',
+    category: 'Early Risers',
+    start: '2026-06-20',
+    end: '2026-06-26',
+    image: 'assets/images/events/runevent.webp',
     seats: 18,
     accent: '#97D5FF',
     title: {
-      en: 'Starlit Sci-Fi by the Sea',
-      ko: '바닷가 별빛 SF 주간'
+      en: 'Coastal Jog & Morning Coffee',
+      ko: '해안 조깅과 모닝 커피'
     },
     excerpt: {
-      en: 'A week of speculative short stories, quiet night reading, and conversations about cities, oceans, and future repair.',
-      ko: '미래 도시와 바다, 회복을 상상하는 단편 SF와 야간 독서, 대화가 이어지는 한 주입니다.'
+      en: 'A phone-free morning reset along the coastal route, followed by open-air stretching and coffee at the waterfront deck.',
+      ko: '해안 산책로를 따라 진행되는 휴대폰 없는 아침 리셋 프로그램으로, 야외 스트레칭과 워터프런트 데크 커피 시간이 이어집니다.'
     },
     body: {
       en: [
-        'This week turns the waterfront into a small speculative reading room. Visitors will read short science-fiction pieces about climate, coastal cities, memory, and future communities.',
-        'The program is designed for light participation: borrow a short text, sit near the water, then join a small conversation circle if you want to stay longer.',
-        'Recommended for readers who like quiet futurism, soft worldbuilding, and stories that ask how people take care of each other after change.'
+        'This program reclaims the quietest hours of the morning before the city wakes up. Designed for both casual joggers and brisk walkers, this guided session follows the connected coastal route with a focus on intentional breathing and rhythmic movement against the backdrop of the morning sea.',
+        'The experience is strictly phone-free. Participants are encouraged to stow away their devices to fully absorb the sound of the waves and the cool harbor air.',
+        'After completing the route, the group gathers at the waterfront deck for an open-air cool-down stretch and coffee provided by Crocat House Cafe. Recommended for early risers, busy professionals looking to reset their weekly sleep cycles, and anyone hoping to experience the coastline in its purest, most tranquil light.'
       ],
       ko: [
-        '이번 주에는 해안을 작은 SF 독서실처럼 운영합니다. 기후, 해안 도시, 기억, 미래 공동체를 다룬 짧은 SF 작품을 함께 읽습니다.',
-        '가볍게 참여할 수 있도록 구성했습니다. 짧은 글을 빌려 바다 근처에서 읽고, 더 머물고 싶다면 작은 대화 모임에 참여할 수 있습니다.',
-        '조용한 미래 상상, 섬세한 세계관, 변화 이후 서로를 돌보는 이야기를 좋아하는 분에게 어울립니다.'
+        '이 프로그램은 도시가 깨어나기 전 가장 조용한 아침 시간을 되찾는 경험입니다. 가벼운 조깅을 즐기는 사람과 빠르게 걷는 사람 모두를 위해 구성되었으며, 연결된 해안 루트를 따라 아침 바다를 배경으로 의식적인 호흡과 리듬감 있는 움직임에 집중합니다.',
+        '참여 시간 동안 휴대폰 사용은 제한됩니다. 참가자들은 기기를 잠시 넣어두고 파도 소리와 시원한 항구 공기를 온전히 느끼도록 안내됩니다.',
+        '루트를 마친 뒤에는 워터프런트 데크에 모여 야외 쿨다운 스트레칭을 진행하고, 크로캣 하우스 카페에서 제공하는 커피를 함께 즐깁니다. 이른 아침을 좋아하는 사람, 주간 수면 리듬을 다시 잡고 싶은 직장인, 그리고 가장 맑고 고요한 빛 속에서 해안을 경험하고 싶은 사람에게 추천합니다.'
       ]
     },
     schedule: [
-      { date: '2026-05-18', time: '18:30', label: 'Opening circle' },
-      { date: '2026-05-20', time: '20:00', label: 'Night reading' },
-      { date: '2026-05-24', time: '16:00', label: 'Future postcards' }
+      { date: '2026-06-20', time: '06:30', label: 'First Light Run · Gentle paced 3km jog along the new promenade waypoints' },
+      { date: '2026-06-23', time: '07:00', label: 'Mid-Week Reset · Brisk power-walk focused on mindfulness and stride intervals' },
+      { date: '2026-06-26', time: '08:00', label: 'The Harbor Circle · Final morning run followed by communal beachside stretching' }
     ],
     comments: [
-      { name: 'Minseo', text: 'I want one story about the old port becoming a garden.' },
-      { name: 'Jiyun', text: 'Night reading sounds perfect for this theme.' }
+      { name: 'Minwoo', text: 'Getting up early is tough, but doing a jog right next to the sea sounds incredibly therapeutic.' },
+      { name: 'Sujin', text: 'Is this beginner-friendly? I haven\'t run in a year but I desperately need some fresh air.' }
     ]
   },
   {
-    id: 'small-novella',
-    status: 'Coming soon',
-    category: 'Novella Focus',
-    start: '2026-05-27',
-    end: '2026-06-02',
-    image: 'assets/images/reading/reading-zone-2.webp',
+    id: 'han-kang-book-club',
+    status: 'Upcoming',
+    category: 'Discussion & Debate',
+    start: '2026-07-04',
+    end: '2026-07-10',
+    image: 'assets/images/events/readingevent.webp',
     seats: 24,
     accent: '#FFC229',
     title: {
-      en: 'One-Sitting Novellas',
-      ko: '한 번에 읽는 중편소설'
+      en: 'Author Han Kang Book Club',
+      ko: '한강 작가 북클럽'
     },
     excerpt: {
-      en: 'Compact stories for a slow afternoon: one book, one seat, one tide cycle.',
-      ko: '느린 오후를 위한 짧고 깊은 이야기. 책 한 권, 자리 하나, 조수 한 번의 시간.'
+      en: 'An open-air coastal forum for readers to share passages, debate themes, and discuss Han Kang\'s atmospheric works by the water.',
+      ko: '바닷가 야외 독서 공간에서 한강 작가의 작품을 함께 읽고, 인상 깊은 문장과 주제를 나누며 토론하는 프로그램입니다.'
     },
     body: {
       en: [
-        'This theme celebrates books that can be started and finished in a single coastal visit. The selection favors novellas with strong atmosphere and clear emotional arcs.',
-        'Readers can reserve a place for a two-hour quiet block, then leave a short shelf note for the next visitor.',
-        'The goal is not speed. It is the pleasure of completing a whole literary world before the light changes.'
+        'This week, our premium coastal reading zones transform into an open-air forum dedicated to the deeply atmospheric works of author Han Kang. Moving beyond silent reading, this event is designed for readers who want to gather at the edge of the sea to actively share their thoughts, dissect complex themes, and engage in meaningful literary dialogue.',
+        'Participants will bring their favorite Han Kang books, highlight their most impactful passages, and join a facilitated circle right by the water.',
+        'The program emphasizes lively, collaborative exchange, allowing space for readers to present differing interpretations, debate the historical and emotional nuances of the texts, and connect deeply through shared perspectives as the tide changes. Recommended for passionate readers, admirers of contemporary Korean literature, and anyone who loves a spirited book club debate under the open sky.'
       ],
       ko: [
-        '이번 테마는 한 번의 해안 방문 안에서 시작하고 끝낼 수 있는 중편소설을 소개합니다. 분위기가 강하고 감정선이 선명한 작품을 중심으로 구성됩니다.',
-        '방문자는 두 시간의 조용한 독서 시간을 예약하고, 다음 사람을 위한 짧은 책장 메모를 남길 수 있습니다.',
-        '목표는 빠르게 읽는 것이 아니라, 빛이 바뀌기 전 하나의 문학 세계를 온전히 마치는 즐거움입니다.'
+        '이번 주에는 해안 독서 공간이 한강 작가의 깊고 분위기 있는 작품 세계를 위한 야외 포럼으로 변합니다. 조용한 독서를 넘어, 바다 가장자리에서 생각을 적극적으로 나누고 복합적인 주제를 분석하며 의미 있는 문학적 대화를 나누고 싶은 독자를 위해 기획되었습니다.',
+        '참가자들은 자신이 좋아하는 한강 작가의 책을 가져오고, 가장 강하게 다가온 문장을 표시한 뒤, 물가에서 진행되는 대화 모임에 참여합니다.',
+        '이 프로그램은 활발하고 협력적인 교류를 중심으로 합니다. 서로 다른 해석을 제시하고, 텍스트의 역사적·정서적 뉘앙스를 토론하며, 조수가 바뀌는 풍경 속에서 공유된 관점을 통해 깊이 연결됩니다. 현대 한국문학을 사랑하는 독자와 열린 하늘 아래 생동감 있는 북클럽 토론을 즐기는 사람에게 추천합니다.'
       ]
     },
     schedule: [
-      { date: '2026-05-27', time: '13:00', label: 'Quiet block' },
-      { date: '2026-05-30', time: '15:00', label: 'Shelf notes' },
-      { date: '2026-06-02', time: '17:00', label: 'Closing tea' }
+      { date: '2026-07-04', time: '17:00', label: 'The First Impression & Favorite Lines · Golden-hour circle for chosen passages and emotional responses' },
+      { date: '2026-07-07', time: '19:30', label: 'Deep Dive & Theme Debate · Night-reading discussion on memory, resilience, and central themes' },
+      { date: '2026-07-10', time: '16:30', label: 'The Final Review & Perspective Sharing · Roundtable for interpretations, reviews, and local insights' }
     ],
     comments: [
-      { name: 'Sora', text: 'Please include a mystery novella too.' },
-      { name: 'Haneul', text: 'Two hours by the sea is exactly right.' }
+      { name: 'Hyunji', text: 'Hearing how differently everyone interprets Han Kang\'s words while listening to the actual tide change... count me in.' },
+      { name: 'Taeho', text: 'I love that this is a lively debate club rather than just quiet reading. Will there be blankets available for the evening session? The sea breeze gets cool.' }
     ]
   },
   {
-    id: 'living-biographies',
-    status: 'Next month',
-    category: 'Biography',
-    start: '2026-06-06',
-    end: '2026-06-14',
-    image: 'assets/images/community/story-1.webp',
+    id: 'photography-walk',
+    status: 'Upcoming',
+    category: 'Creative',
+    start: '2026-08-15',
+    end: '2026-08-21',
+    image: 'assets/images/events/photographyevent.webp',
     seats: 20,
     accent: '#84E3E9',
     title: {
-      en: 'Lives That Changed a City',
-      ko: '도시를 바꾼 삶들'
+      en: 'Photography Walk',
+      ko: '해안 포토그래피 워크'
     },
     excerpt: {
-      en: 'Biography readings about real people, public memory, craft, service, and the choices that shape a place.',
-      ko: '실존 인물의 삶을 통해 공공의 기억, 기술, 봉사, 장소를 바꾸는 선택을 읽습니다.'
+      en: 'A golden-hour photography workshop capturing the meeting point between Incheon\'s industrial port lines and the western sea sunset.',
+      ko: '인천 항구의 산업적 선과 서해의 노을이 만나는 골든아워를 담아보는 해안 사진 워크숍입니다.'
     },
     body: {
       en: [
-        'This program invites readers to approach biography as a map of decisions. Each session pairs one life story with a simple question about community life today.',
-        'Selections include artists, planners, librarians, teachers, and local figures whose work changed how people gather.',
-        'Visitors are encouraged to bring a name: someone whose ordinary effort deserves to be remembered.'
+        'Manseok-Hwasu possesses a highly unique golden hour where the industrial lines of the shipping port meet the soft gradient of the western sea sunset. This workshop invites amateur photographers to capture this intersection under the guidance of a professional landscape mentor.',
+        'To align with our digital detox philosophy, this workshop encourages the use of traditional film cameras or DSLR cameras operated entirely on manual settings.',
+        'Participants will learn how to read changing natural light, frame architectural structures against the water, and tell a visual story of a city slowing down for the night. Recommended for visual creators, film photography enthusiasts, and anyone looking to truly notice the hidden aesthetic details of Incheon\'s coast.'
       ],
       ko: [
-        '이번 프로그램은 전기를 선택의 지도처럼 읽어봅니다. 각 회차는 한 사람의 삶과 오늘의 공동체에 관한 질문을 함께 다룹니다.',
-        '예술가, 기획자, 사서, 교사, 사람들이 모이는 방식을 바꾼 지역 인물의 이야기를 포함합니다.',
-        '방문자는 기억할 만한 평범한 노력을 남긴 사람의 이름을 가져와도 좋습니다.'
+        '만석·화수는 선박 항구의 산업적 선과 서해 노을의 부드러운 그라데이션이 만나는 독특한 골든아워를 가지고 있습니다. 이 워크숍은 아마추어 사진가들이 전문 풍경 사진 멘토의 안내 아래 그 교차점을 포착하도록 돕습니다.',
+        '디지털 디톡스 철학에 맞춰, 이 워크숍은 전통 필름 카메라나 완전 수동 설정으로 작동하는 DSLR 카메라 사용을 권장합니다.',
+        '참가자들은 변화하는 자연광을 읽고, 물가를 배경으로 건축 구조물을 프레이밍하며, 밤을 향해 천천히 속도를 낮추는 도시의 시각적 이야기를 만드는 방법을 배웁니다. 비주얼 크리에이터, 필름 사진 애호가, 인천 해안의 숨은 미학적 디테일을 제대로 발견하고 싶은 사람에게 추천합니다.'
       ]
     },
     schedule: [
-      { date: '2026-06-06', time: '11:00', label: 'Portrait reading' },
-      { date: '2026-06-10', time: '14:00', label: 'Memory table' },
-      { date: '2026-06-14', time: '16:30', label: 'Name archive' }
+      { date: '2026-08-15', time: '18:00', label: 'Framing the Harbor · Composition walk during the first transition of golden-hour light' },
+      { date: '2026-08-18', time: '18:15', label: 'Light & Industry · Capturing textures, silhouettes, and geometric shapes of the nearby docks' },
+      { date: '2026-08-21', time: '18:30', label: 'The Blue Hour Review · Final shoot followed by informal critique of printed proofs under the pavilion' }
     ],
     comments: [
-      { name: 'Daehyun', text: 'Would love a local librarian story.' },
-      { name: 'Ara', text: 'The name archive idea feels meaningful.' }
+      { name: 'Soyoon', text: 'The spots on this promenade look incredibly photogenic. Definitely securing a slot for this.' },
+      { name: 'Sunghoon', text: 'Can I bring an old vintage film camera? I love the analog vibe of this project.' }
     ]
   }
 ];

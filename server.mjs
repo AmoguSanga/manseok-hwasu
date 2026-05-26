@@ -184,7 +184,7 @@ function cacheAge(cache) {
 function buildFallbackTide(reason) {
   return {
     stage: 'high',
-    displayStage: 'unknown',
+    displayStage: 'high',
     previousExtreme: null,
     nextExtreme: null,
     extremes: [],

@@ -327,15 +327,29 @@ function initDiscoverMap() {
     if (viewerStatus) viewerStatus.textContent = isLoading ? 'Loading 3D space...' : '';
   };
 
+  const setMapFullscreenMode = (isFullscreen) => {
+    if (!isMobileTour()) return;
+    map.classList.toggle('is-mobile-expanded', isFullscreen);
+    map.classList.add('is-expanded');
+    document.body.classList.toggle('is-discover-modal', isFullscreen);
+    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+  };
+
   const requestTourFullscreen = async (target = map) => {
     try {
       const currentFullscreen = document.fullscreenElement;
-      if (currentFullscreen && (currentFullscreen === target || currentFullscreen.contains(target))) {
-        await document.exitFullscreen();
+      const isMapTarget = target === map;
+      const isTargetFullscreen = currentFullscreen && (currentFullscreen === target || currentFullscreen.contains(target));
+      const isMapCssFullscreen = isMapTarget && map.classList.contains('is-mobile-expanded');
+
+      if (isTargetFullscreen || isMapCssFullscreen) {
+        if (currentFullscreen) await document.exitFullscreen();
+        if (isMapTarget) setMapFullscreenMode(false);
         return;
       }
       if (currentFullscreen) await document.exitFullscreen();
 
+      if (isMapTarget) setMapFullscreenMode(true);
       if (target.requestFullscreen) {
         await target.requestFullscreen();
       }
@@ -359,10 +373,9 @@ function initDiscoverMap() {
     closeViewer();
     if (!selectedId) clearNodePreview();
     map.classList.remove('is-locked');
-    map.classList.toggle('is-mobile-expanded', isMobileTour());
-    map.classList.toggle('is-expanded', !isMobileTour());
-    document.body.classList.toggle('is-discover-modal', isMobileTour());
-    if (isMobileTour()) requestTourFullscreen(map);
+    map.classList.add('is-expanded');
+    map.classList.remove('is-mobile-expanded');
+    document.body.classList.remove('is-discover-modal');
   };
 
   const closeExpandedTour = () => {
@@ -505,7 +518,14 @@ function initDiscoverMap() {
       const body = document.createElement('span');
       body.textContent = spot.type === 'detail' ? point.description : copy.body;
 
-      card.append(image, title, body);
+      const close = document.createElement('button');
+      close.className = 'discover-hotspot__close';
+      close.type = 'button';
+      close.dataset.hotspotClose = 'true';
+      close.setAttribute('aria-label', 'Close hotspot card');
+      close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+      card.append(close, image, title, body);
       hotspot.append(button, card);
 
       card.addEventListener('click', (event) => event.stopPropagation());
@@ -597,6 +617,14 @@ function initDiscoverMap() {
   });
 
   const handleViewerChromeClick = (event) => {
+    const hotspotClose = event.target.closest('[data-hotspot-close]');
+    if (hotspotClose) {
+      event.preventDefault();
+      event.stopPropagation();
+      hotspotClose.closest('.discover-hotspot')?.classList.remove('is-open');
+      return;
+    }
+
     const hotspotTrigger = event.target.closest('[data-hotspot-trigger]');
     if (hotspotTrigger) {
       event.preventDefault();
@@ -727,8 +755,7 @@ function initDiscoverMap() {
 
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && map.classList.contains('is-mobile-expanded')) {
-      document.body.classList.add('is-discover-modal');
-      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+      setMapFullscreenMode(false);
     }
   });
 
@@ -759,8 +786,18 @@ function initTideStatus() {
   };
 
   const publish = (payload) => {
-    const stage = payload?.stage || 'unknown';
-    const displayStage = payload?.displayStage || stage;
+    const fallbackPreviewSources = new Set([
+      'preview_pending',
+      'static_pending',
+      'missing_api_key',
+      'missing_kv_binding',
+      'empty_cache',
+      'stormglass_error'
+    ]);
+    const rawStage = payload?.stage || 'unknown';
+    const stage = rawStage === 'unknown' && fallbackPreviewSources.has(payload?.source) ? 'high' : rawStage;
+    const rawDisplayStage = payload?.displayStage || stage;
+    const displayStage = rawDisplayStage === 'unknown' && stage !== 'unknown' ? stage : rawDisplayStage;
     const next = payload?.nextExtreme;
     const previous = payload?.previousExtreme;
     const lang = document.documentElement.lang?.startsWith('ko') ? 'ko' : 'en';
@@ -840,13 +877,13 @@ function initTideStatus() {
     }
 
     root.dataset.tideStage = stage;
-    document.dispatchEvent(new CustomEvent('mh:tide-updated', { detail: payload || { stage } }));
+    document.dispatchEvent(new CustomEvent('mh:tide-updated', { detail: { ...(payload || {}), stage, displayStage } }));
   };
 
   fetch('/api/tide', { headers: { Accept: 'application/json' } })
     .then(response => response.ok ? response.json() : Promise.reject(new Error(`Tide status ${response.status}`)))
     .then(publish)
-    .catch(() => publish({ stage: 'high', displayStage: 'unknown', source: 'static_pending' }));
+    .catch(() => publish({ stage: 'high', displayStage: 'high', source: 'static_pending' }));
 }
 
 /* ─── Current Reading Themes ──────────────────────── */
