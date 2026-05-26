@@ -8,7 +8,7 @@
 
   <!-- Theme: set data-theme before first paint to prevent flash -->
   <script>
-    (function(){try{var t=localStorage.getItem('mh-theme');if(!t)t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+    (function(){try{var t=localStorage.getItem('mh-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
   </script>
 
   <!-- Fonts -->

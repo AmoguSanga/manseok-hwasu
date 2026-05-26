@@ -329,10 +329,12 @@ function initDiscoverMap() {
 
   const requestTourFullscreen = async (target = map) => {
     try {
-      if (document.fullscreenElement) {
+      const currentFullscreen = document.fullscreenElement;
+      if (currentFullscreen && (currentFullscreen === target || currentFullscreen.contains(target))) {
         await document.exitFullscreen();
         return;
       }
+      if (currentFullscreen) await document.exitFullscreen();
 
       if (target.requestFullscreen) {
         await target.requestFullscreen();
@@ -558,7 +560,7 @@ function initDiscoverMap() {
   async function closeViewer() {
     viewerRequest += 1;
     const fullElement = document.fullscreenElement;
-    if (fullElement && (fullElement === viewerLayer || fullElement.contains(viewerLayer) || viewerLayer.contains(fullElement))) {
+    if (fullElement && (fullElement === viewerLayer || viewerLayer.contains(fullElement))) {
       await exitTourFullscreen();
     }
 
@@ -573,7 +575,13 @@ function initDiscoverMap() {
   }
 
   pins.forEach(pin => {
-    pin.addEventListener('click', () => showNodePreview(pin.dataset.id));
+    pin.addEventListener('pointerdown', (event) => event.stopPropagation());
+    pin.addEventListener('pointerup', (event) => event.stopPropagation());
+    pin.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showNodePreview(pin.dataset.id);
+    });
   });
 
   watchButton?.addEventListener('click', () => {
@@ -698,14 +706,29 @@ function initDiscoverMap() {
 
   document.addEventListener('discover:tour-activated', openExpandedTour);
 
+  document.querySelectorAll('.nav__link[data-target]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (link.dataset.target !== 'discover' && !map.classList.contains('is-locked')) {
+        closeExpandedTour();
+      }
+    });
+  });
+
+  const discoverSection = map.closest('.discover');
+  if (discoverSection && 'IntersectionObserver' in window) {
+    const discoverObserver = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (!entry?.isIntersecting && !map.classList.contains('is-locked')) {
+        closeExpandedTour();
+      }
+    }, { threshold: 0.08 });
+    discoverObserver.observe(discoverSection);
+  }
+
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && map.classList.contains('is-mobile-expanded')) {
-      map.classList.remove('is-mobile-expanded');
-      map.classList.add('is-locked');
-      document.body.classList.remove('is-discover-modal');
-      selectedId = null;
-      clearNodePreview();
-      closeViewer();
+      document.body.classList.add('is-discover-modal');
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     }
   });
 

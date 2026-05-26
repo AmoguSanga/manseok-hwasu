@@ -781,7 +781,7 @@
 /* Detail panel that slides in */
 .discover__panel {
   position: absolute;
-  z-index: 5;
+  z-index: 1006;
   top: 24px;
   right: 24px;
   width: min(360px, calc(100% - 48px));
@@ -970,7 +970,7 @@
 
 .discover__zoom {
   position: absolute;
-  z-index: 3;
+  z-index: 1005;
   right: 24px;
   top: 50%;
   transform: translateY(-50%);
@@ -993,7 +993,7 @@
 
 .discover__pan {
   position: absolute;
-  z-index: 3;
+  z-index: 1005;
   left: 50%;
   bottom: 24px;
   width: min(360px, calc(100% - 190px));
@@ -1559,8 +1559,16 @@
   .discover__panel-close {
     margin: -2px -4px 6px 10px;
   }
-  .discover-pin { width: 52px; height: 52px; }
-  .discover-pin__icon svg { width: 18px; height: 18px; }
+  .discover-pin { width: 48px; height: 48px; }
+  .discover-pin__icon svg { width: 16px; height: 16px; }
+  .discover__map.is-house-expanded .discover-pin[data-cluster="house"] {
+    width: 40px;
+    height: 40px;
+  }
+  .discover__map.is-house-expanded .discover-pin[data-cluster="house"] .discover-pin__icon svg {
+    width: 14px;
+    height: 14px;
+  }
   /* Tour badge smaller on mobile */
   .discover__tour-badge {
     top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px));
@@ -1644,7 +1652,26 @@
     font-size: 0.64rem;
   }
   .discover-hotspot__card {
-    width: min(260px, 72vw);
+    left: 50%;
+    top: auto;
+    bottom: 18px;
+    width: min(340px, calc(100vw - 32px));
+    max-height: min(62dvh, 430px);
+    padding: 14px;
+    overflow-y: auto;
+    border-radius: 18px;
+    transform: translateX(-50%) scale(0.96);
+    transform-origin: 50% 100%;
+  }
+  .discover-hotspot.is-open .discover-hotspot__card {
+    transform: translateX(-50%) scale(1);
+  }
+  .discover-hotspot.is-open .discover-hotspot__trigger {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .discover-hotspot__image {
+    border-radius: 14px;
   }
   .discover__space-jump {
     left: 18px;

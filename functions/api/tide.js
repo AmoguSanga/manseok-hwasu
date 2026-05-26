@@ -199,7 +199,7 @@ function isProductionDeployment(context) {
   const pagesProject = env?.CF_PAGES_PROJECT || env?.PAGES_PROJECT || '';
   if (pagesProject && hostname === `${pagesProject}.pages.dev`) return true;
 
-  return false;
+  return !['localhost', '127.0.0.1', '::1'].includes(hostname);
 }
 
 function json(payload, status = 200) {

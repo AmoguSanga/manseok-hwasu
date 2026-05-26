@@ -185,7 +185,7 @@ function initDiscover3DScene(map, canvas) {
     }
     const isMobileFocus = window.matchMedia('(max-width: 640px)').matches;
     cameraState.nextDistance = id === 'house'
-      ? (isMobileFocus ? HOUSE_FOCUS_DISTANCE * 0.9 : HOUSE_FOCUS_DISTANCE)
+      ? (isMobileFocus ? Math.max(MIN_DISTANCE, HOUSE_FOCUS_DISTANCE * 0.78) : HOUSE_FOCUS_DISTANCE)
       : (isMobileFocus ? FOCUS_DISTANCE * 0.72 : FOCUS_DISTANCE);
     cameraState.orbitAngle = 0;
     setPan(0);
@@ -227,7 +227,11 @@ function initDiscover3DScene(map, canvas) {
   });
 
   let isDragging = false;
+  let isPinching = false;
   let lastX = 0;
+  let pinchStartDistance = 0;
+  let pinchStartCameraDistance = HOME_DISTANCE;
+  const activePointers = new Map();
 
   const shouldIgnoreDrag = (target) => (
     target.closest('.discover-pin') ||
@@ -241,14 +245,35 @@ function initDiscover3DScene(map, canvas) {
 
   map.addEventListener('pointerdown', (event) => {
     if (shouldIgnoreDrag(event.target)) return;
-    isDragging = true;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     noteInteraction();
     lastX = event.clientX;
+    if (activePointers.size >= 2) {
+      isDragging = false;
+      isPinching = true;
+      pinchStartDistance = getPointerSpacing(activePointers);
+      pinchStartCameraDistance = cameraState.nextDistance;
+    } else {
+      isDragging = true;
+    }
     map.classList.add('is-dragging');
     map.setPointerCapture?.(event.pointerId);
   });
 
   map.addEventListener('pointermove', (event) => {
+    if (activePointers.has(event.pointerId)) {
+      activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+
+    if (isPinching && activePointers.size >= 2) {
+      const spacing = getPointerSpacing(activePointers);
+      if (pinchStartDistance > 0 && spacing > 0) {
+        noteInteraction();
+        setDistance(pinchStartCameraDistance / (spacing / pinchStartDistance));
+      }
+      return;
+    }
+
     if (!isDragging) return;
     const dx = event.clientX - lastX;
     lastX = event.clientX;
@@ -257,9 +282,16 @@ function initDiscover3DScene(map, canvas) {
   });
 
   const releaseDrag = (event) => {
-    if (!isDragging) return;
-    isDragging = false;
-    map.classList.remove('is-dragging');
+    activePointers.delete(event.pointerId);
+    if (activePointers.size < 2) isPinching = false;
+    if (activePointers.size === 1) {
+      const remaining = activePointers.values().next().value;
+      lastX = remaining?.x || event.clientX;
+      isDragging = true;
+    } else {
+      isDragging = false;
+      map.classList.remove('is-dragging');
+    }
     try {
       if (map.hasPointerCapture?.(event.pointerId)) map.releasePointerCapture(event.pointerId);
     } catch (error) {
@@ -315,6 +347,12 @@ function initDiscover3DScene(map, canvas) {
     updatePins(camera, mapRoot, pins, pinPoints);
   };
   animate();
+}
+
+function getPointerSpacing(activePointers) {
+  const points = Array.from(activePointers.values());
+  if (points.length < 2) return 0;
+  return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
 }
 
 function updateCamera(camera, state) {
