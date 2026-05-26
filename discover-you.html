@@ -54,11 +54,14 @@
 
 <main class="survey-page">
   <section class="survey-shell">
-    <a class="survey-home" href="index.html#hero" aria-label="Go back home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
-      <span>Go Back Home</span>
-    </a>
     <div class="container survey-shell__inner">
+      <div class="survey-toolbar">
+        <a class="survey-home" href="index.html#hero" aria-label="Go back home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+          <span>Go Back Home</span>
+        </a>
+        <button class="survey-retake-top" type="button" data-survey-restart>Retake Survey</button>
+      </div>
       <section class="survey-panel survey-panel--question" aria-labelledby="surveyTitle" data-survey>
         <span class="eyebrow">Route Match</span>
         <h1 id="surveyTitle" data-survey-question>Discover What Suits You</h1>
@@ -81,21 +84,30 @@
       </section>
 
       <aside class="survey-panel survey-panel--preview" id="surveyPreview" data-survey-result aria-live="polite" hidden>
-        <div class="survey-character" aria-hidden="true">
-          <span class="survey-character__face"></span>
-        </div>
         <span class="eyebrow">Your Coastal Character</span>
         <h2 data-result-title>Shore Reader</h2>
         <p data-result-copy>A calm route type who likes shaded seats, tide sounds, and a small reward after finishing the walk.</p>
+
+        <figure class="survey-result-visual">
+          <img src="assets/images/catresults/SpringQuiet.webp" alt="" data-result-image />
+          <figcaption data-result-tag>Spring Quiet Cat</figcaption>
+        </figure>
+
+        <label class="survey-name">
+          <span>Name on your pass</span>
+          <input type="text" data-result-name maxlength="36" autocomplete="name" placeholder="Your name" />
+        </label>
 
         <div class="survey-reward">
           <strong data-result-pass>Digital Reward Pass</strong>
           <span data-result-reward>Coupon generation, participant email, and result sharing will connect here in the next build step.</span>
         </div>
         <div class="survey-actions">
+          <button class="btn btn--survey" type="button" data-result-save>Save PNG</button>
+          <button class="btn" type="button" data-result-share>Email / Share</button>
           <a class="btn btn--primary" href="index.html#current" data-result-link>Find Out More</a>
-          <button class="btn" type="button" data-survey-restart>Retake Survey</button>
         </div>
+        <p class="survey-export-status" data-result-status role="status" aria-live="polite"></p>
       </aside>
     </div>
   </section>

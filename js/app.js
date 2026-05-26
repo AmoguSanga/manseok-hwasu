@@ -149,7 +149,13 @@ function initSurveyPage() {
   const resultPass = resultPanel?.querySelector('[data-result-pass]');
   const resultReward = resultPanel?.querySelector('[data-result-reward]');
   const resultLink = resultPanel?.querySelector('[data-result-link]');
-  if (!questionEl || !optionsEl || !progressEl || !nextButton || !resultPanel || !resultTitle || !resultCopy || !resultPass || !resultReward || !resultLink) return;
+  const resultImage = resultPanel?.querySelector('[data-result-image]');
+  const resultTag = resultPanel?.querySelector('[data-result-tag]');
+  const resultName = resultPanel?.querySelector('[data-result-name]');
+  const resultSave = resultPanel?.querySelector('[data-result-save]');
+  const resultShare = resultPanel?.querySelector('[data-result-share]');
+  const resultStatus = resultPanel?.querySelector('[data-result-status]');
+  if (!questionEl || !optionsEl || !progressEl || !nextButton || !resultPanel || !resultTitle || !resultCopy || !resultPass || !resultReward || !resultLink || !resultImage || !resultTag) return;
 
   const questions = [
     {
@@ -191,68 +197,150 @@ function initSurveyPage() {
     }
   ];
 
+  // Edit result content here: each season/style maps to one cat image,
+  // personality text, reward copy, coupon code, and fallback PNG colors.
   const results = {
     spring: {
       quiet: {
+        key: 'spring_quiet_cat',
+        season: 'Spring',
+        style: 'Quiet',
+        petName: 'Momo',
+        catName: 'The Shore Reader',
+        traits: ['Quiet', 'Reflective', 'Bloom-Led'],
         title: 'Spring Quiet: Shore Reader',
         copy: 'Your best match is a gentle spring visit with reading zones, slow deck pauses, and solo ocean-horizon viewing.',
+        personality: 'Gentle, reflective, and detail-loving. You notice small changes in light, the texture of the deck, and the first bloom before anyone else does.',
         pass: '60-Minute Reading Zone Reservation Coupon',
         reward: 'Use this digital pass for a calm reading-zone reservation or a quiet deck seat during spring bloom weeks.',
+        coupon: 'MHS-SPQ-READ',
+        image: 'assets/images/catresults/SpringQuiet.webp',
+        palette: ['#d9f1d4', '#84e3e9', '#ffcf66'],
         link: 'index.html#reading'
       },
       active: {
+        key: 'spring_active_cat',
+        season: 'Spring',
+        style: 'Active',
+        petName: 'Bori',
+        catName: 'The Bloom Explorer',
+        traits: ['Curious', 'Fresh-Air', 'Art-Loving'],
         title: 'Spring Active: Bloom Explorer',
         copy: 'Your route likes fresh morning air, light movement, and an art stop at Crocat House after the coast wakes up.',
+        personality: 'Bright, curious, and lightly restless. You follow fresh air, new posters, morning routes, and the first open door on the coast.',
         pass: 'Crocat House Exhibition Perk',
         reward: 'Use this pass for an exhibition-linked visitor perk or a small partner discount after your morning route.',
+        coupon: 'MHS-SPA-ART',
+        image: 'assets/images/catresults/SpringActive.webp',
+        palette: ['#c9f3d3', '#ffb95f', '#7fd8e5'],
         link: 'index.html#seasonal'
       }
     },
     summer: {
       quiet: {
+        key: 'summer_quiet_cat',
+        season: 'Summer',
+        style: 'Quiet',
+        petName: 'Nori',
+        catName: 'The Shade Keeper',
+        traits: ['Quiet', 'Thoughtful', 'Protective'],
         title: 'Summer Quiet: Shade Keeper',
         copy: 'You fit a cool summer plan: shaded canopy shelters, reading-zone breaks, and slow water watching away from the heat.',
+        personality: 'Soft-spoken, observant, and excellent at finding comfort. You know where the shade lands and when the water feels calmest.',
         pass: 'Canopy Reading Shelter Coupon',
         reward: 'Use this digital pass toward a shaded reading-zone reservation during peak summer hours.',
+        coupon: 'MHS-SUQ-SHADE',
+        image: 'assets/images/catresults/SummerQuiet.webp',
+        palette: ['#97d5ff', '#fff2b8', '#65cfdc'],
         link: 'index.html#reading'
       },
       active: {
+        key: 'summer_active_cat',
+        season: 'Summer',
+        style: 'Active',
+        petName: 'Toto',
+        catName: 'The Tide Chaser',
+        traits: ['Active', 'Social', 'Tide-Tuned'],
         title: 'Summer Active: Tide Chaser',
         copy: 'Your best route follows QR tracking points, open-air sunset watching, and the changing tide along the promenade.',
+        personality: 'Energetic, social, and tide-tuned. You like a route with checkpoints, changing views, and a little sparkle at the finish.',
         pass: 'Promenade Pop-Up Voucher',
         reward: 'Use this pass for a promenade pop-up market voucher after completing your QR route.',
+        coupon: 'MHS-SUA-TIDE',
+        image: 'assets/images/catresults/SummerActive.webp',
+        palette: ['#54c6e8', '#ffce53', '#ff7b46'],
         link: 'index.html#discover'
       }
     },
     autumn: {
       quiet: {
+        key: 'autumn_quiet_cat',
+        season: 'Autumn',
+        style: 'Quiet',
+        petName: 'Daru',
+        catName: 'The Memory Walker',
+        traits: ['Quiet', 'Historic', 'Warm-Eyed'],
         title: 'Autumn Quiet: Memory Walker',
         copy: 'Your route is a slow promenade walk with time for the layered history of Manseok-Hwasu and the warm evening gradient.',
+        personality: 'Thoughtful, steady, and memory-led. You prefer places that hold stories, old edges, and warm colors that take time to read.',
         pass: 'Heritage Route Reward Pass',
         reward: 'Use this pass for a guided-story add-on or a quiet reading reward tied to the history route.',
+        coupon: 'MHS-AUQ-MEMORY',
+        image: 'assets/images/catresults/AutumnQuiet.webp',
+        palette: ['#e7a94c', '#a96238', '#ffe0a6'],
         link: 'index.html#current'
       },
       active: {
+        key: 'autumn_active_cat',
+        season: 'Autumn',
+        style: 'Active',
+        petName: 'Sari',
+        catName: 'The Festival Tracker',
+        traits: ['Active', 'Expressive', 'Event-Led'],
         title: 'Autumn Active: Festival Tracker',
         copy: 'You match exhibition stops, seasonal event walks, and promenade market moments while the coast turns golden.',
+        personality: 'Warm, expressive, and event-hungry. You collect moments, stops, and seasonal energy like stamps along the promenade.',
         pass: 'Promenade Market Voucher',
         reward: 'Use this digital pass for a small pop-up market voucher during autumn event days.',
+        coupon: 'MHS-AUA-MARKET',
+        image: 'assets/images/catresults/AutumnActive..webp',
+        palette: ['#ffb84f', '#f06b3f', '#7f4a2f'],
         link: 'index.html#seasonal'
       }
     },
     winter: {
       quiet: {
+        key: 'winter_quiet_cat',
+        season: 'Winter',
+        style: 'Quiet',
+        petName: 'Nunu',
+        catName: 'The Sunset Sipper',
+        traits: ['Quiet', 'Cozy', 'Composed'],
         title: 'Winter Quiet: Sunset Sipper',
         copy: 'Your best match is crisp air, a warm drink at a sunset-view cafe, and a tucked-away Crocat House pause.',
+        personality: 'Calm, composed, and comfort-seeking. You turn cold air into a ritual with warm drinks, slow views, and quiet windows.',
         pass: 'Sunset Drink Discount Coupon',
         reward: 'Use this pass for a drink discount at a participating cafe after your winter coast visit.',
+        coupon: 'MHS-WIQ-CAFE',
+        image: 'assets/images/catresults/WinterQuiet.webp',
+        palette: ['#eaf6ff', '#98c9ec', '#5f7fa0'],
         link: 'index.html#current'
       },
       active: {
+        key: 'winter_active_cat',
+        season: 'Winter',
+        style: 'Active',
+        petName: 'Kkomi',
+        catName: 'The Crisp-Air Runner',
+        traits: ['Active', 'Focused', 'Brave'],
         title: 'Winter Active: Crisp-Air Runner',
         copy: 'You fit a winter sea jog: clear air, bright water, and a clean route that keeps the body moving.',
+        personality: 'Focused, brave, and refresh-seeking. You like the coast when it feels sharp, clean, and wide open for motion.',
         pass: 'Winter Route Finisher Pass',
         reward: 'Use this pass for a route-finisher perk or partner drink discount after your winter jog.',
+        coupon: 'MHS-WIA-RUN',
+        image: 'assets/images/catresults/WinterActive.webp',
+        palette: ['#cfe9ff', '#6f9ec4', '#f4fbff'],
         link: 'index.html#seasonal'
       }
     }
@@ -260,7 +348,8 @@ function initSurveyPage() {
 
   const state = {
     index: 0,
-    answers: Array(questions.length).fill(null)
+    answers: Array(questions.length).fill(null),
+    result: null
   };
 
   const render = () => {
@@ -322,6 +411,279 @@ function initSurveyPage() {
     }, 180);
   };
 
+  const sanitizeFilePart = (value) => {
+    const cleaned = String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, '_')
+      .replace(/^_+|_+$/g, '');
+    return cleaned || 'guest';
+  };
+
+  const loadResultImage = (src) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+
+  const hexToRgb = (hex) => {
+    const value = hex.replace('#', '');
+    return {
+      r: parseInt(value.slice(0, 2), 16),
+      g: parseInt(value.slice(2, 4), 16),
+      b: parseInt(value.slice(4, 6), 16)
+    };
+  };
+
+  const rgbToCss = ({ r, g, b }, alpha = 1) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+  const extractImagePalette = (image, fallback) => {
+    const canvas = document.createElement('canvas');
+    const size = 60;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return fallback.map(hexToRgb);
+
+    ctx.drawImage(image, 0, 0, size, size);
+    const pixels = ctx.getImageData(0, 0, size, size).data;
+    const samples = [];
+    for (let i = 0; i < pixels.length; i += 4 * 11) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const a = pixels[i + 3];
+      if (a < 180) continue;
+      const brightness = (r + g + b) / 3;
+      if (brightness > 245 || brightness < 18) continue;
+      samples.push({ r, g, b, brightness, warmth: r + g * 0.35 - b * 0.6 });
+    }
+    if (samples.length < 3) return fallback.map(hexToRgb);
+
+    samples.sort((a, b) => b.warmth - a.warmth);
+    const warm = samples[Math.floor(samples.length * 0.18)];
+    const cool = samples[Math.floor(samples.length * 0.78)];
+    const mid = samples.sort((a, b) => a.brightness - b.brightness)[Math.floor(samples.length * 0.58)];
+    return [warm, mid, cool].map(({ r, g, b }) => ({ r, g, b }));
+  };
+
+  const drawRoundedRect = (ctx, x, y, width, height, radius) => {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  const drawRoundedImage = (ctx, image, x, y, width, height, radius) => {
+    const imageRatio = image.width / image.height;
+    const targetRatio = width / height;
+    let sourceWidth = image.width;
+    let sourceHeight = image.height;
+    let sourceX = 0;
+    let sourceY = 0;
+    if (imageRatio > targetRatio) {
+      sourceWidth = image.height * targetRatio;
+      sourceX = (image.width - sourceWidth) / 2;
+    } else {
+      sourceHeight = image.width / targetRatio;
+      sourceY = (image.height - sourceHeight) / 2;
+    }
+
+    ctx.save();
+    drawRoundedRect(ctx, x, y, width, height, radius);
+    ctx.clip();
+    ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+    ctx.restore();
+  };
+
+  const drawContainedRoundedImage = (ctx, image, x, y, width, height, radius) => {
+    const imageRatio = image.width / image.height;
+    const targetRatio = width / height;
+    let drawWidth = width;
+    let drawHeight = height;
+    if (imageRatio > targetRatio) {
+      drawHeight = width / imageRatio;
+    } else {
+      drawWidth = height * imageRatio;
+    }
+    const drawX = x + (width - drawWidth) / 2;
+    const drawY = y + (height - drawHeight) / 2;
+
+    ctx.save();
+    drawRoundedRect(ctx, x, y, width, height, radius);
+    ctx.clip();
+    ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    ctx.restore();
+  };
+
+  const drawSoftCoverRoundedImage = (ctx, image, x, y, width, height, radius) => {
+    const imageRatio = image.width / image.height;
+    const targetRatio = width / height;
+    const scale = imageRatio > targetRatio ? height / image.height : width / image.width;
+    const drawWidth = image.width * scale * 1.04;
+    const drawHeight = image.height * scale * 1.04;
+    const drawX = x + (width - drawWidth) / 2;
+    const drawY = y + (height - drawHeight) / 2;
+
+    ctx.save();
+    drawRoundedRect(ctx, x, y, width, height, radius);
+    ctx.clip();
+    ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    ctx.restore();
+  };
+
+  const wrapText = (ctx, text, x, y, maxWidth, lineHeight, maxLines = Infinity) => {
+    const words = String(text).split(/\s+/);
+    let line = '';
+    let lines = 0;
+
+    words.forEach((word) => {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        if (lines < maxLines) ctx.fillText(line, x, y + lines * lineHeight);
+        lines += 1;
+        line = word;
+      } else {
+        line = test;
+      }
+    });
+
+    if (line && lines < maxLines) {
+      ctx.fillText(line, x, y + lines * lineHeight);
+      lines += 1;
+    }
+    return y + lines * lineHeight;
+  };
+
+  const code128Patterns = [
+    '212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'
+  ];
+
+  const encodeCode128B = (value) => {
+    const clean = String(value).toUpperCase().replace(/[^\x20-\x7E]/g, '').slice(0, 28);
+    const values = Array.from(clean).map(char => char.charCodeAt(0) - 32);
+    const checksum = (104 + values.reduce((sum, code, index) => sum + code * (index + 1), 0)) % 103;
+    return [104, ...values, checksum, 106];
+  };
+
+  const drawCode128Barcode = (ctx, code, x, y, width, height) => {
+    ctx.save();
+    ctx.fillStyle = '#fffaf3';
+    drawRoundedRect(ctx, x, y, width, height, 14);
+    ctx.fill();
+
+    const encoded = encodeCode128B(code);
+    const modules = encoded.reduce((sum, codeValue) => {
+      return sum + code128Patterns[codeValue].split('').reduce((patternSum, widthValue) => patternSum + Number(widthValue), 0);
+    }, 0);
+    const moduleWidth = (width - 52) / modules;
+    let cursor = x + 26;
+
+    ctx.fillStyle = '#1f1818';
+    encoded.forEach((codeValue) => {
+      const pattern = code128Patterns[codeValue];
+      Array.from(pattern).forEach((widthValue, index) => {
+        const segmentWidth = Number(widthValue) * moduleWidth;
+        if (index % 2 === 0) ctx.fillRect(cursor, y + 14, Math.ceil(segmentWidth), height - 28);
+        cursor += segmentWidth;
+      });
+    });
+    ctx.restore();
+  };
+
+  const canvasToBlob = (canvas) => new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+  const createResultPngBlob = async () => {
+    const result = state.result;
+    if (!result) throw new Error('No survey result selected.');
+    const name = resultName?.value?.trim() || 'Coastal Guest';
+    const image = await loadResultImage(result.image);
+    const palette = extractImagePalette(image, result.palette);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1350;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas is not available.');
+    const displayTitle = result.title.includes(':') ? result.title.split(':').pop().trim() : result.title;
+
+    ctx.fillStyle = '#fff8ee';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'rgba(255, 250, 243, 0.2)';
+    for (let i = 0; i < 190; i += 1) {
+      const x = (i * 79) % canvas.width;
+      const y = (i * 137) % canvas.height;
+      ctx.fillRect(x, y, 2, 2);
+    }
+
+    ctx.fillStyle = 'rgba(255, 250, 243, 0.92)';
+    drawRoundedRect(ctx, 58, 58, 964, 1234, 54);
+    ctx.fill();
+
+    drawSoftCoverRoundedImage(ctx, image, 76, 26, 928, 930, 34);
+
+    ctx.textAlign = 'center';
+    ctx.font = '700 27px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText(`${result.petName.toUpperCase()} · ${displayTitle.toUpperCase()}`, 540, 988);
+
+    ctx.fillStyle = 'rgba(255, 250, 243, 0.94)';
+    drawRoundedRect(ctx, 76, 1014, 928, 240, 34);
+    ctx.fill();
+
+    ctx.textAlign = 'left';
+    ctx.font = '700 58px Fraunces, Georgia, serif';
+    ctx.fillStyle = '#211919';
+    wrapText(ctx, name, 112, 1084, 540, 60, 1);
+
+    let traitX = 112;
+    result.traits.forEach((trait) => {
+      ctx.font = '700 20px Inter, Arial, sans-serif';
+      const pillWidth = Math.min(210, ctx.measureText(trait).width + 42);
+      ctx.fillStyle = 'rgba(255, 250, 243, 0.86)';
+      drawRoundedRect(ctx, traitX, 1118, pillWidth, 42, 21);
+      ctx.fill();
+      ctx.fillStyle = '#405261';
+      ctx.fillText(trait, traitX + 22, 1146);
+      traitX += pillWidth + 12;
+    });
+
+    ctx.font = '500 21px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#5f666f';
+    wrapText(ctx, result.personality, 112, 1184, 520, 26, 2);
+
+    ctx.textAlign = 'left';
+    ctx.font = '700 29px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#211919';
+    wrapText(ctx, result.pass.toUpperCase(), 704, 1086, 264, 34, 3);
+
+    drawCode128Barcode(ctx, result.coupon, 704, 1200, 264, 58);
+
+    const blob = await canvasToBlob(canvas);
+    if (!blob) throw new Error('PNG generation failed.');
+    return blob;
+  };
+
+  const resultFilename = () => {
+    const name = sanitizeFilePart(resultName?.value);
+    const key = state.result?.key || 'coastal_cat';
+    return `${name}_${key}.png`;
+  };
+
+  const setExportStatus = (message) => {
+    if (resultStatus) resultStatus.textContent = message;
+  };
+
   const showResult = () => {
     const seasonOption = questions[0].options[state.answers[0]];
     const scores = state.answers.slice(1).reduce((total, answerIndex, offset) => {
@@ -332,12 +694,17 @@ function initSurveyPage() {
     const season = seasonOption?.season || 'spring';
     const style = scores.active > scores.quiet ? 'active' : 'quiet';
     const result = results[season][style];
+    state.result = result;
 
     resultTitle.textContent = result.title;
     resultCopy.textContent = result.copy;
     resultPass.textContent = result.pass;
     resultReward.textContent = result.reward;
     resultLink.href = result.link;
+    resultImage.src = result.image;
+    resultImage.alt = `${result.title} character image`;
+    resultTag.textContent = `${result.petName} · ${result.season} ${result.style} Cat`;
+    setExportStatus('');
     root.hidden = true;
     resultPanel.hidden = false;
     resultPanel.dataset.season = season;
@@ -358,11 +725,64 @@ function initSurveyPage() {
   restartButton?.addEventListener('click', () => {
     state.index = 0;
     state.answers = Array(questions.length).fill(null);
+    state.result = null;
     root.hidden = false;
     resultPanel.hidden = true;
     resultPanel.classList.remove('is-visible');
+    if (resultName) resultName.value = '';
+    setExportStatus('');
     render();
     root.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  resultSave?.addEventListener('click', async () => {
+    try {
+      setExportStatus('Generating your PNG...');
+      const blob = await createResultPngBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = resultFilename();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExportStatus('PNG ready for your device.');
+    } catch (error) {
+      console.error(error);
+      setExportStatus('PNG export could not be created on this device.');
+    }
+  });
+
+  resultShare?.addEventListener('click', async () => {
+    try {
+      setExportStatus('Preparing share image...');
+      const blob = await createResultPngBlob();
+      const file = new File([blob], resultFilename(), { type: 'image/png' });
+      const shareData = {
+        title: state.result?.title || 'Manseok-Hwasu result',
+        text: 'Here is my Manseok-Hwasu coastal character and reward pass.',
+        files: [file]
+      };
+
+      if (navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+        setExportStatus('Share sheet opened.');
+        return;
+      }
+
+      const subject = encodeURIComponent(state.result?.title || 'My Manseok-Hwasu result');
+      const body = encodeURIComponent('My Manseok-Hwasu result PNG is ready. On this browser, use Save PNG first, then attach it to your email.');
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      setExportStatus('Email opened. Attach the saved PNG if your browser cannot share files.');
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.error(error);
+        setExportStatus('Sharing is not available on this device. Try Save PNG.');
+      } else {
+        setExportStatus('');
+      }
+    }
   });
 
   render();
@@ -455,6 +875,22 @@ function initDiscoverMap() {
   let panoramaViewer;
   let activeScene;
   let activeId;
+
+  const hotspotOverlay = document.createElement('article');
+  hotspotOverlay.className = 'discover-hotspot-overlay';
+  hotspotOverlay.hidden = true;
+  hotspotOverlay.innerHTML = `
+    <button class="discover-hotspot__close" type="button" data-hotspot-overlay-close aria-label="Close hotspot card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="discover-hotspot__image" data-hotspot-overlay-image></span>
+    <strong data-hotspot-overlay-title></strong>
+    <span data-hotspot-overlay-body></span>
+  `;
+  viewerLayer.appendChild(hotspotOverlay);
+  const hotspotOverlayImage = hotspotOverlay.querySelector('[data-hotspot-overlay-image]');
+  const hotspotOverlayTitle = hotspotOverlay.querySelector('[data-hotspot-overlay-title]');
+  const hotspotOverlayBody = hotspotOverlay.querySelector('[data-hotspot-overlay-body]');
   let selectedId;
   let viewerRequest = 0;
 
@@ -1216,6 +1652,26 @@ function initDiscoverMap() {
     });
   };
 
+  const closeHotspotOverlay = () => {
+    hotspotOverlay.hidden = true;
+    hotspotOverlay.classList.remove('is-visible');
+    viewerFrame.querySelectorAll('.discover-hotspot.is-open').forEach((node) => {
+      node.classList.remove('is-open');
+      node.style.removeProperty('--hotspot-card-screen-x');
+      node.style.removeProperty('--hotspot-card-screen-y');
+    });
+  };
+
+  const showHotspotOverlay = (hotspot) => {
+    const copy = hotspot?._hotspotCopy;
+    if (!copy) return;
+    if (hotspotOverlayImage) hotspotOverlayImage.style.backgroundImage = `url('${copy.image}')`;
+    if (hotspotOverlayTitle) hotspotOverlayTitle.textContent = copy.title;
+    if (hotspotOverlayBody) hotspotOverlayBody.textContent = copy.body;
+    hotspotOverlay.hidden = false;
+    window.requestAnimationFrame(() => hotspotOverlay.classList.add('is-visible'));
+  };
+
   const centerHotspotCard = (hotspot) => {
     if (!hotspot) return;
     const rect = viewerLayer.getBoundingClientRect();
@@ -1235,6 +1691,7 @@ function initDiscoverMap() {
       hotspot.className = 'discover-hotspot';
       hotspot.dataset.hotspotYaw = String(spot.yaw);
       hotspot.dataset.hotspotPitch = String(spot.pitch);
+      hotspot._hotspotCopy = copy;
 
       const button = document.createElement('button');
       button.className = 'discover-hotspot__trigger';
@@ -1276,6 +1733,7 @@ function initDiscoverMap() {
     const requestId = viewerRequest + 1;
     viewerRequest = requestId;
     destroyPanorama();
+    closeHotspotOverlay();
     activeId = id;
     syncViewerCopy(id);
     pins.forEach(p => p.classList.toggle('is-active', p.dataset.id === id));
@@ -1355,14 +1813,19 @@ function initDiscoverMap() {
   });
 
   const handleViewerChromeClick = (event) => {
+    const overlayClose = event.target.closest('[data-hotspot-overlay-close]');
+    if (overlayClose) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeHotspotOverlay();
+      return;
+    }
+
     const hotspotClose = event.target.closest('[data-hotspot-close]');
     if (hotspotClose) {
       event.preventDefault();
       event.stopPropagation();
-      const hotspot = hotspotClose.closest('.discover-hotspot');
-      hotspot?.classList.remove('is-open');
-      hotspot?.style.removeProperty('--hotspot-card-screen-x');
-      hotspot?.style.removeProperty('--hotspot-card-screen-y');
+      closeHotspotOverlay();
       return;
     }
 
@@ -1379,12 +1842,14 @@ function initDiscoverMap() {
       hotspot.classList.toggle('is-open', nextOpen);
       if (nextOpen) {
         centerHotspotCard(hotspot);
+        showHotspotOverlay(hotspot);
         activeScene?.lookTo?.({
           yaw: Number(hotspot.dataset.hotspotYaw) || 0,
           pitch: Number(hotspot.dataset.hotspotPitch) || 0,
           fov: Math.PI / 2.65
         }, { transitionDuration: 420 });
       } else {
+        closeHotspotOverlay();
         hotspot.style.removeProperty('--hotspot-card-screen-x');
         hotspot.style.removeProperty('--hotspot-card-screen-y');
       }
@@ -1425,7 +1890,7 @@ function initDiscoverMap() {
   };
 
   const stopViewerChromePointer = (event) => {
-    if (event.target.closest('[data-viewer-close], [data-viewer-fullscreen], [data-space-jump], .discover-hotspot')) {
+    if (event.target.closest('[data-viewer-close], [data-viewer-fullscreen], [data-space-jump], .discover-hotspot, .discover-hotspot-overlay')) {
       event.stopPropagation();
     }
   };
