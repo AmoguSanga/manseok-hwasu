@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   await i18n.init();
 
   initThemeToggle();
+  initOceanMotion();
   initNav();
+  initPlaceholderLinks();
   initLangToggle();
   initIncheonLinks();
   initScrollReveal();
@@ -22,6 +24,74 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPromenadeMap();
   initBookingModal();
 });
+
+/* ─── Ocean Motion Layer ────────────────────── */
+function initOceanMotion() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const water = document.createElement('div');
+  water.className = 'page-water';
+  water.setAttribute('aria-hidden', 'true');
+
+  const rippleLayer = document.createElement('div');
+  rippleLayer.className = 'page-ripple-layer';
+  rippleLayer.setAttribute('aria-hidden', 'true');
+
+  document.body.prepend(water);
+  document.body.appendChild(rippleLayer);
+
+  let targetY = window.scrollY;
+  let currentY = targetY;
+  let lastY = targetY;
+  let raf = 0;
+
+  const setOceanVars = (value, velocity = 0) => {
+    document.body.style.setProperty('--ocean-x', `${Math.sin(value * 0.0028) * 28}px`);
+    document.body.style.setProperty('--ocean-y', `${(value % 900) * 0.035}px`);
+    document.body.style.setProperty('--ocean-drift', `${Math.max(-1.8, Math.min(1.8, velocity * 0.08))}deg`);
+    document.body.style.setProperty('--ocean-scroll', String(value));
+  };
+
+  const render = () => {
+    currentY += (targetY - currentY) * 0.075;
+    const velocity = currentY - lastY;
+    lastY = currentY;
+    setOceanVars(currentY, velocity);
+
+    if (Math.abs(targetY - currentY) < 0.2 && Math.abs(velocity) < 0.08) {
+      currentY = targetY;
+      setOceanVars(currentY, 0);
+      raf = 0;
+      return;
+    }
+
+    raf = requestAnimationFrame(render);
+  };
+
+  const startOceanMotion = () => {
+    targetY = window.scrollY;
+    if (!raf) raf = requestAnimationFrame(render);
+  };
+
+  setOceanVars(currentY, 0);
+  window.addEventListener('scroll', startOceanMotion, { passive: true });
+  window.addEventListener('pagehide', () => {
+    if (raf) cancelAnimationFrame(raf);
+  }, { once: true });
+
+  document.addEventListener('pointerdown', (event) => {
+    const eventTarget = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const target = eventTarget?.closest('button, .btn, a, [role="button"]');
+    if (!target) return;
+
+    const ripple = document.createElement('span');
+    ripple.className = 'page-ripple';
+    ripple.style.setProperty('--ripple-x', `${event.clientX}px`);
+    ripple.style.setProperty('--ripple-y', `${event.clientY}px`);
+    rippleLayer.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+  }, { passive: true });
+}
 
 /* ─── Theme Toggle (logo click) ───────────────────── */
 function initThemeToggle() {
@@ -105,6 +175,12 @@ function initNav() {
       nav.classList.remove('is-open');
       toggle?.setAttribute('aria-expanded', 'false');
     });
+  });
+}
+
+function initPlaceholderLinks() {
+  document.querySelectorAll('a[href="#"]').forEach(link => {
+    link.addEventListener('click', event => event.preventDefault());
   });
 }
 
@@ -2189,13 +2265,13 @@ function renderCurrentFeature() {
   actions.className = 'current__actions';
 
   const details = document.createElement('button');
-  details.className = 'btn btn--accent';
+  details.className = 'btn btn--info';
   details.type = 'button';
   details.textContent = 'Read Details';
   details.addEventListener('click', () => openEventModal(event.id));
 
   const reserve = document.createElement('button');
-  reserve.className = 'btn btn--primary';
+  reserve.className = 'btn btn--reserve-flat';
   reserve.type = 'button';
   reserve.textContent = 'Reserve';
   reserve.addEventListener('click', () => openEventModal(event.id, { focusReserve: true }));
@@ -2353,7 +2429,7 @@ function openEventModal(id, options = {}) {
   modal.classList.add('is-open');
   document.body.style.overflow = 'hidden';
   if (options.focusReserve) {
-    requestAnimationFrame(() => modal.querySelector('[data-event-reserve-form] input')?.focus());
+    requestAnimationFrame(() => modal.querySelector('[data-event-reserve-form] input')?.focus({ preventScroll: true }));
   }
 }
 
@@ -2396,7 +2472,7 @@ function populateEventModal(id) {
     row.addEventListener('click', () => {
       const select = modal.querySelector('[data-event-reserve-date]');
       if (select) select.value = item.date;
-      modal.querySelector('[data-event-reserve-form]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      modal.querySelector('[data-event-reserve-form] input')?.focus({ preventScroll: true });
     });
     schedule.appendChild(row);
   });
@@ -2665,14 +2741,19 @@ function initAreaBooking() {
 
   document.querySelectorAll('.area-tab').forEach(tab => {
     tab.addEventListener('click', () => {
+      if (tab.classList.contains('is-active')) return;
       document.querySelectorAll('.area-tab').forEach(t => t.classList.remove('is-active'));
       tab.classList.add('is-active');
       bookingState.area     = tab.dataset.area;
       bookingState.table    = null;
       bookingState.seatCode = null;
       picker?.classList.remove('is-open');
-      renderAreaMap(tab.dataset.area);
-      updateBookingSummary();
+      container.classList.add('is-switching');
+      window.setTimeout(() => {
+        renderAreaMap(tab.dataset.area);
+        updateBookingSummary();
+        requestAnimationFrame(() => container.classList.remove('is-switching'));
+      }, 120);
     });
   });
 
@@ -2694,6 +2775,18 @@ function renderAreaMap(areaKey) {
   container.innerHTML = (fns[areaKey] || coffeeSVG)();
 
   container.querySelectorAll('.map-table').forEach(tableEl => {
+    const area = AREA_DATA[areaKey];
+    const table = area?.tables[tableEl.dataset.table];
+    if (table) {
+      const bookedCount = Object.keys(table.booked || {}).length;
+      const openCount = Math.max(0, table.seats - bookedCount);
+      tableEl.classList.add(openCount === 0 ? 'map-table--full' : bookedCount > 0 ? 'map-table--partial' : 'map-table--open');
+      tableEl.setAttribute('aria-label', `${table.label}, ${openCount} available of ${table.seats}`);
+      tableEl.querySelector('text:last-child')?.classList.add('map-table__availability');
+      const availabilityText = tableEl.querySelector('text:last-child');
+      if (availabilityText) availabilityText.textContent = `${openCount}/${table.seats} open`;
+    }
+
     tableEl.addEventListener('click', () => {
       container.querySelectorAll('.map-table').forEach(t => t.classList.remove('is-active'));
       tableEl.classList.add('is-active');
@@ -2732,6 +2825,7 @@ function renderSeatPicker(areaKey, tableKey) {
       const initials = bookedBy.split(' ').map(p => p[0]).join('').toUpperCase();
       btn.innerHTML = `
         <span class="seat-btn__initials">${initials}</span>
+        <span class="seat-btn__status">Taken</span>
         <span class="seat-btn__name">${bookedBy}</span>
         <span class="seat-btn__code">${seatCode}</span>`;
     } else {
@@ -2739,6 +2833,7 @@ function renderSeatPicker(areaKey, tableKey) {
       btn.dataset.code    = seatCode;
       btn.innerHTML = `
         <span class="seat-btn__code">${seatCode}</span>
+        <span class="seat-btn__status">Available</span>
         <span class="seat-btn__sub">Seat ${i}</span>`;
       btn.addEventListener('click', () => {
         grid.querySelectorAll('.seat-btn').forEach(b => b.classList.remove('is-selected'));
@@ -2978,16 +3073,27 @@ function initSeasonalTabs() {
   };
 
   const show = (season) => {
-    tabs.forEach(t => t.classList.toggle('is-active', t.dataset.season === season));
-    panel.dataset.activeSeason = season;
-    const dict = window.i18n?.dict;
-    const data = dict?.seasonal?.[season];
-    if (data) {
-      eyebrow.textContent = data.label;
-      title.textContent = data.title;
-      desc.textContent = data.description;
+    const applySeason = () => {
+      tabs.forEach(t => t.classList.toggle('is-active', t.dataset.season === season));
+      panel.dataset.activeSeason = season;
+      const dict = window.i18n?.dict;
+      const data = dict?.seasonal?.[season];
+      if (data) {
+        eyebrow.textContent = data.label;
+        title.textContent = data.title;
+        desc.textContent = data.description;
+      }
+      if (seasonImgs[season]) img.style.backgroundImage = `url('${seasonImgs[season]}')`;
+      requestAnimationFrame(() => panel.classList.remove('is-changing'));
+    };
+
+    if (!panel.dataset.activeSeason) {
+      applySeason();
+      return;
     }
-    if (seasonImgs[season]) img.style.backgroundImage = `url('${seasonImgs[season]}')`;
+
+    panel.classList.add('is-changing');
+    window.setTimeout(applySeason, 140);
   };
 
   tabs.forEach(tab => tab.addEventListener('click', () => show(tab.dataset.season)));
