@@ -1974,9 +1974,22 @@ function initDiscoverMap() {
   document.addEventListener('discover:open-space', (event) => {
     const id = event.detail?.id;
     if (!id || !panoramaSpaces[id]) return;
+
+    const openSelectedSpace = () => {
+      showNodePreview(id);
+      window.setTimeout(() => openViewer(id), 220);
+    };
+
+    if (map.classList.contains('is-locked')) {
+      document.addEventListener('discover:tour-activated', () => {
+        window.setTimeout(openSelectedSpace, 180);
+      }, { once: true });
+      document.dispatchEvent(new CustomEvent('discover:activate-tour'));
+      return;
+    }
+
     openExpandedTour();
-    showNodePreview(id);
-    window.setTimeout(() => openViewer(id), 180);
+    openSelectedSpace();
   });
 
   clearNodeButtons?.forEach(button => {
