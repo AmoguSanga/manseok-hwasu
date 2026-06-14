@@ -203,13 +203,16 @@
   --hero-logo-ink: #8fd2fb;
   --hero-logo-text: #081b45;
   --hero-logo-rule: rgba(143, 210, 251, 0.9);
+  --hero-logo-size: clamp(86px, 8.2vw, 116px);
+  --hero-logo-gap: clamp(14px, 2vw, 26px);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 3vw, 32px);
+  gap: var(--hero-logo-gap);
   max-width: 100%;
   width: 100%;
+  min-width: 0;
   letter-spacing: 0;
   margin-bottom: 26px;
   color: var(--hero-logo-text);
@@ -219,8 +222,8 @@
 
 .hero__logo-mark {
   position: relative;
-  flex: 0 0 clamp(92px, 10vw, 124px);
-  width: clamp(92px, 10vw, 124px);
+  flex: 0 0 var(--hero-logo-size);
+  width: var(--hero-logo-size);
   aspect-ratio: 259.09 / 281.11;
   background: var(--hero-logo-ink);
   filter: drop-shadow(0 18px 28px rgba(0, 120, 180, 0.16));
@@ -234,8 +237,9 @@
   justify-items: center;
   gap: clamp(10px, 1.35vw, 16px);
   min-width: 0;
-  flex: 1 1 min(68%, 500px);
-  max-width: min(68%, 500px);
+  flex: 1 1 auto;
+  width: min(500px, calc(100% - var(--hero-logo-size) - var(--hero-logo-gap)));
+  max-width: min(500px, calc(100% - var(--hero-logo-size) - var(--hero-logo-gap)));
 }
 
 .hero__title-ko {
