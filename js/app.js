@@ -7,10 +7,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initThemeToggle();
   initOceanMotion();
+  initHeroPaintDrops();
   initNav();
   initPlaceholderLinks();
   initLangToggle();
   initIncheonLinks();
+  initVisitCardLinks();
   initScrollReveal();
   initActiveNavLink();
   initHeroCarousel();
@@ -24,6 +26,72 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPromenadeMap();
   initBookingModal();
 });
+
+/* ─── Hero Paint Drops ──────────────────────── */
+function initHeroPaintDrops() {
+  const heroCard = document.querySelector('.hero__copy');
+  if (!heroCard || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const layer = document.createElement('div');
+  layer.className = 'hero__paint-drop-layer';
+  layer.setAttribute('aria-hidden', 'true');
+  heroCard.appendChild(layer);
+
+  const positions = [
+    { x: -8, y: 42 }, { x: 0, y: 72 }, { x: 18, y: 104 },
+    { x: 48, y: 106 }, { x: 82, y: 104 }, { x: 108, y: 42 },
+    { x: 102, y: 70 }, { x: 94, y: 92 }, { x: 44, y: 64 },
+    { x: 58, y: 72 }, { x: 50, y: 86 }
+  ];
+  let timer = 0;
+  let activeDrops = 0;
+  let pendingInSequence = 0;
+
+  const scheduleNextSequence = () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(spawnDrop, 5000);
+  };
+
+  const spawnOneDrop = () => {
+    if (activeDrops >= 2) return;
+    const spot = positions[Math.floor(Math.random() * positions.length)];
+    const drop = document.createElement('span');
+    const size = Math.round(window.innerWidth <= 640
+      ? 320 + Math.random() * 180
+      : 480 + Math.random() * 300);
+    const duration = 9300 + Math.random() * 3600;
+
+    activeDrops += 1;
+    drop.className = 'hero__paint-drop';
+    drop.style.setProperty('--drop-x', `${spot.x + (Math.random() * 6 - 3)}%`);
+    drop.style.setProperty('--drop-y', `${spot.y + (Math.random() * 6 - 3)}%`);
+    drop.style.setProperty('--drop-size', `${size}px`);
+    drop.style.setProperty('--drop-duration', `${duration}ms`);
+    drop.style.setProperty('--drop-rotate', `${Math.random() * 80 - 40}deg`);
+    layer.appendChild(drop);
+    drop.addEventListener('animationend', () => {
+      activeDrops = Math.max(0, activeDrops - 1);
+      drop.remove();
+      if (activeDrops === 0 && pendingInSequence === 0) scheduleNextSequence();
+    }, { once: true });
+  };
+
+  const spawnDrop = () => {
+    const openSlots = Math.max(0, 2 - activeDrops);
+    const count = Math.min(openSlots, Math.random() < 0.25 ? 2 : 1);
+    pendingInSequence = count;
+    for (let i = 0; i < count; i++) {
+      window.setTimeout(() => {
+        pendingInSequence = Math.max(0, pendingInSequence - 1);
+        spawnOneDrop();
+        if (activeDrops === 0 && pendingInSequence === 0) scheduleNextSequence();
+      }, i * (1600 + Math.random() * 900));
+    }
+  };
+
+  timer = window.setTimeout(spawnDrop, 1800);
+  window.addEventListener('pagehide', () => window.clearTimeout(timer), { once: true });
+}
 
 /* ─── Ocean Motion Layer ────────────────────── */
 function initOceanMotion() {
@@ -206,6 +274,29 @@ function initIncheonLinks() {
 
   apply();
   document.addEventListener('i18n:applied', (event) => apply(event.detail?.lang));
+}
+
+function initVisitCardLinks() {
+  document.querySelectorAll('[data-open-discover-space]').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const id = link.dataset.openDiscoverSpace;
+      const discover = document.getElementById('discover');
+      if (!discover || !id) return;
+
+      let opened = false;
+      const openSpace = () => {
+        if (opened) return;
+        opened = true;
+        window.removeEventListener('scrollend', openSpace);
+        document.dispatchEvent(new CustomEvent('discover:open-space', { detail: { id } }));
+      };
+
+      discover.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.addEventListener('scrollend', openSpace, { once: true });
+      window.setTimeout(openSpace, 1100);
+    });
+  });
 }
 
 /* ─── Discover What Suits You Survey ───────────────── */
@@ -1880,6 +1971,14 @@ function initDiscoverMap() {
     if (selectedId) openViewer(selectedId);
   });
 
+  document.addEventListener('discover:open-space', (event) => {
+    const id = event.detail?.id;
+    if (!id || !panoramaSpaces[id]) return;
+    openExpandedTour();
+    showNodePreview(id);
+    window.setTimeout(() => openViewer(id), 180);
+  });
+
   clearNodeButtons?.forEach(button => {
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -2765,13 +2864,30 @@ function initAreaBooking() {
     updateBookingSummary();
   });
 
+  const mobileMapQuery = window.matchMedia('(max-width: 640px)');
+  const handleMapModeChange = () => {
+    bookingState.table = null;
+    bookingState.seatCode = null;
+    picker?.classList.remove('is-open');
+    renderAreaMap(bookingState.area);
+    updateBookingSummary();
+  };
+  if (typeof mobileMapQuery.addEventListener === 'function') {
+    mobileMapQuery.addEventListener('change', handleMapModeChange);
+  } else if (typeof mobileMapQuery.addListener === 'function') {
+    mobileMapQuery.addListener(handleMapModeChange);
+  }
+
   renderAreaMap('coffee');
 }
 
 function renderAreaMap(areaKey) {
   const container = document.getElementById('areaMapContainer');
   if (!container) return;
-  const fns = { coffee: coffeeSVG, benches: benchesSVG, terrace: terraceSVG };
+  const mobileMap = window.matchMedia('(max-width: 640px)').matches;
+  const fns = mobileMap
+    ? { coffee: coffeeMobileSVG, benches: benchesMobileSVG, terrace: terraceMobileSVG }
+    : { coffee: coffeeSVG, benches: benchesSVG, terrace: terraceSVG };
   container.innerHTML = (fns[areaKey] || coffeeSVG)();
 
   container.querySelectorAll('.map-table').forEach(tableEl => {
@@ -2846,6 +2962,117 @@ function renderSeatPicker(areaKey, tableKey) {
   }
 
   picker.classList.add('is-open');
+}
+
+function coffeeMobileSVG() {
+  return `<svg viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="10" width="340" height="340" rx="18" fill="none" stroke="#9aa3af" stroke-width="1.4" stroke-dasharray="5 7" opacity="0.34"/>
+    <rect x="54" y="22" width="252" height="42" rx="10" fill="rgba(255,194,32,0.12)" stroke="rgba(255,194,32,0.45)" stroke-width="1.1"/>
+    <text x="180" y="48" text-anchor="middle" font-size="13" letter-spacing="3" font-weight="600">COFFEE BAR</text>
+    <rect x="330" y="86" width="8" height="186" rx="4" fill="rgba(151,213,255,0.34)"/>
+    <text x="342" y="184" text-anchor="middle" font-size="10" letter-spacing="2" transform="rotate(90 342 184)">SEA VIEW</text>
+    <rect x="138" y="338" width="84" height="6" rx="3" fill="rgba(151,213,255,0.35)"/>
+    <text x="180" y="355" text-anchor="middle" font-size="10" letter-spacing="3">ENTRANCE</text>
+    <circle cx="42" cy="308" r="13" fill="rgba(80,180,80,0.14)" stroke="rgba(80,180,80,0.3)" stroke-width="1"/>
+    <circle cx="312" cy="306" r="13" fill="rgba(80,180,80,0.14)" stroke="rgba(80,180,80,0.3)" stroke-width="1"/>
+    <g class="map-table" data-table="A" role="button" tabindex="0" aria-label="Table A, 2 seats">
+      <rect x="226" y="88" width="86" height="58" rx="12"/>
+      <text x="269" y="113" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE A</text>
+      <text x="269" y="130" text-anchor="middle" font-size="10">2 seats</text>
+    </g>
+    <g class="map-table" data-table="B" role="button" tabindex="0" aria-label="Table B, 4 seats">
+      <rect x="36" y="92" width="112" height="78" rx="12"/>
+      <text x="92" y="126" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE B</text>
+      <text x="92" y="143" text-anchor="middle" font-size="10">4 seats</text>
+    </g>
+    <g class="map-table" data-table="C" role="button" tabindex="0" aria-label="Table C, 4 seats">
+      <rect x="102" y="194" width="156" height="76" rx="12"/>
+      <text x="180" y="227" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE C</text>
+      <text x="180" y="244" text-anchor="middle" font-size="10">4 seats</text>
+    </g>
+    <g class="map-table" data-table="D" role="button" tabindex="0" aria-label="Table D, 2 seats">
+      <rect x="34" y="276" width="88" height="54" rx="12"/>
+      <text x="78" y="299" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE D</text>
+      <text x="78" y="316" text-anchor="middle" font-size="10">2 seats</text>
+    </g>
+    <g class="map-table" data-table="E" role="button" tabindex="0" aria-label="Table E, 2 seats">
+      <rect x="238" y="276" width="88" height="54" rx="12"/>
+      <text x="282" y="299" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE E</text>
+      <text x="282" y="316" text-anchor="middle" font-size="10">2 seats</text>
+    </g>
+  </svg>`;
+}
+
+function benchesMobileSVG() {
+  return `<svg viewBox="0 0 360 288" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="seaGradMobile" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(151,213,255,0.24)"/>
+        <stop offset="100%" stop-color="rgba(132,227,233,0.07)"/>
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="340" height="86" rx="14" fill="url(#seaGradMobile)" stroke="rgba(151,213,255,0.35)" stroke-width="1"/>
+    <text x="180" y="42" text-anchor="middle" font-size="13" letter-spacing="4" font-weight="600">SEA VIEW</text>
+    <path d="M34 61 Q82 49 130 61 Q178 73 226 61 Q274 49 326 61" fill="none" stroke="rgba(151,213,255,0.44)" stroke-width="1.5"/>
+    <path d="M34 78 Q82 66 130 78 Q178 90 226 78 Q274 66 326 78" fill="none" stroke="rgba(151,213,255,0.24)" stroke-width="1.2"/>
+    <rect x="10" y="116" width="340" height="58" rx="0" fill="rgba(200,190,170,0.1)" stroke="rgba(200,190,170,0.25)" stroke-width="1"/>
+    <text x="180" y="151" text-anchor="middle" font-size="12" letter-spacing="3" font-weight="600">PROMENADE</text>
+    <rect x="10" y="192" width="340" height="86" rx="0" fill="rgba(80,180,80,0.07)" stroke="rgba(80,180,80,0.18)" stroke-width="1"/>
+    <circle cx="44" cy="235" r="21" fill="rgba(80,180,80,0.17)" stroke="rgba(80,180,80,0.3)" stroke-width="1"/>
+    <circle cx="316" cy="232" r="21" fill="rgba(80,180,80,0.17)" stroke="rgba(80,180,80,0.3)" stroke-width="1"/>
+    <g class="map-table" data-table="A" role="button" tabindex="0" aria-label="Bench A, 4 seats">
+      <rect x="30" y="105" width="94" height="48" rx="10"/>
+      <text x="77" y="126" text-anchor="middle" font-size="11" letter-spacing="1.5" font-weight="700">BENCH A</text>
+      <text x="77" y="141" text-anchor="middle" font-size="10">4 seats</text>
+    </g>
+    <g class="map-table" data-table="B" role="button" tabindex="0" aria-label="Bench B, 4 seats">
+      <rect x="133" y="136" width="94" height="48" rx="10"/>
+      <text x="180" y="157" text-anchor="middle" font-size="11" letter-spacing="1.5" font-weight="700">BENCH B</text>
+      <text x="180" y="172" text-anchor="middle" font-size="10">4 seats</text>
+    </g>
+    <g class="map-table" data-table="C" role="button" tabindex="0" aria-label="Bench C, 3 seats">
+      <rect x="236" y="105" width="94" height="48" rx="10"/>
+      <text x="283" y="126" text-anchor="middle" font-size="11" letter-spacing="1.5" font-weight="700">BENCH C</text>
+      <text x="283" y="141" text-anchor="middle" font-size="10">3 seats</text>
+    </g>
+  </svg>`;
+}
+
+function terraceMobileSVG() {
+  const railLines = Array.from({length: 8}, (_, i) =>
+    `<line x1="329" y1="${34 + i * 38}" x2="347" y2="${34 + i * 38}" stroke="rgba(151,213,255,0.3)" stroke-width="1.4"/>`
+  ).join('');
+  return `<svg viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="10" width="340" height="340" rx="18" fill="none" stroke="#9aa3af" stroke-width="1.4" opacity="0.34"/>
+    <rect x="326" y="20" width="20" height="302" rx="5" fill="rgba(151,213,255,0.08)" stroke="rgba(151,213,255,0.35)" stroke-width="1"/>
+    ${railLines}
+    <text x="350" y="174" text-anchor="middle" font-size="10" letter-spacing="2" transform="rotate(90 350 174)">SEA VIEW</text>
+    <rect x="126" y="338" width="108" height="6" rx="3" fill="rgba(151,213,255,0.35)"/>
+    <text x="180" y="355" text-anchor="middle" font-size="10" letter-spacing="3">ENTRANCE</text>
+    <circle cx="180" cy="180" r="19" fill="rgba(255,194,32,0.1)" stroke="rgba(255,194,32,0.28)" stroke-width="1"/>
+    <line x1="180" y1="161" x2="180" y2="199" stroke="rgba(255,194,32,0.34)" stroke-width="2"/>
+    <line x1="156" y1="172" x2="204" y2="172" stroke="rgba(255,194,32,0.3)" stroke-width="1.5"/>
+    <g class="map-table" data-table="A" role="button" tabindex="0" aria-label="Table A, 4 seats">
+      <ellipse cx="92" cy="98" rx="56" ry="42"/>
+      <text x="92" y="94" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE A</text>
+      <text x="92" y="111" text-anchor="middle" font-size="10">4 seats</text>
+    </g>
+    <g class="map-table" data-table="B" role="button" tabindex="0" aria-label="Table B, 4 seats">
+      <ellipse cx="250" cy="116" rx="56" ry="42"/>
+      <text x="250" y="112" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE B</text>
+      <text x="250" y="129" text-anchor="middle" font-size="10">4 seats</text>
+    </g>
+    <g class="map-table" data-table="C" role="button" tabindex="0" aria-label="Table C, 3 seats">
+      <ellipse cx="100" cy="252" rx="56" ry="42"/>
+      <text x="100" y="248" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE C</text>
+      <text x="100" y="265" text-anchor="middle" font-size="10">3 seats</text>
+    </g>
+    <g class="map-table" data-table="D" role="button" tabindex="0" aria-label="Table D, 2 seats">
+      <ellipse cx="250" cy="248" rx="56" ry="42"/>
+      <text x="250" y="244" text-anchor="middle" font-size="12" letter-spacing="2" font-weight="700">TABLE D</text>
+      <text x="250" y="261" text-anchor="middle" font-size="10">2 seats</text>
+    </g>
+  </svg>`;
 }
 
 function coffeeSVG() {

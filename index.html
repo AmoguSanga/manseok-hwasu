@@ -14,7 +14,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" />
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
@@ -73,8 +73,18 @@
   <div class="hero__bg" aria-hidden="true"></div>
   <div class="container hero__inner">
     <div class="hero__copy">
-      <h1 class="hero__title" data-i18n="hero.title">나만 아는 해안
-My Secret Coast</h1>
+      <h1 class="hero__title">
+        <span class="hero__logo-mark" aria-hidden="true"></span>
+        <span class="hero__wordmark">
+          <span class="hero__title-ko" aria-hidden="true"></span>
+          <span class="sr-only" data-i18n="hero.title_ko">나만 아는 해안</span>
+          <span class="hero__subtitle-line">
+            <span aria-hidden="true"></span>
+            <span data-i18n="hero.title_en">My Secret Coast</span>
+            <span aria-hidden="true"></span>
+          </span>
+        </span>
+      </h1>
       <p class="hero__desc" data-i18n="hero.description">Hidden behind Incheon's industrial waterfront, two overlooked coastlines are being reintroduced as a living cultural destination: a connected walking route, discovery waypoints, a library-linked reading space, outdoor art and open-air programs, and a digital guide that leads people back to the real shore.</p>
       <div class="hero__ctas">
         <a href="#visit" class="btn btn--primary">
@@ -132,7 +142,7 @@ My Secret Coast</h1>
         </span>
       </a>
 
-      <a class="visit-card reveal" href="#" aria-label="Parking Lot Guide">
+      <a class="visit-card reveal" href="#discover" data-open-discover-space="parking" aria-label="Parking Lot Guide">
         <div class="visit-card__icon">
           <!-- parking pin icon -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><path d="M9 7v10M9 7h4a3 3 0 0 1 0 6H9"/></svg>
@@ -144,7 +154,7 @@ My Secret Coast</h1>
         </span>
       </a>
 
-      <a class="visit-card reveal" href="https://www.figma.com/proto/eoGTGIapNAGc5xV3ehjOMk/Capstone-Group-2?node-id=91-1670&p=f&viewport=365%2C173%2C0.27&t=R0CX3pgQZeGCYvP3-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=91%3A13&page-id=89%3A188" target="_blank" rel="noopener" aria-label="Area Map">
+      <a class="visit-card reveal" href="#promenade-map" aria-label="Area Map">
         <div class="visit-card__icon">
           <!-- map icon -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>

@@ -64,6 +64,7 @@
   /* ── Type ──────────────────────────────────── */
   --font-display: "Fraunces", "Noto Serif KR", Georgia, serif;
   --font-body: "Inter", "Noto Sans KR", system-ui, sans-serif;
+  --font-logo-en: "Cormorant Garamond", "Noto Serif KR", Georgia, serif;
 
   /* ── Layout ────────────────────────────────── */
   --radius-sm: 10px;

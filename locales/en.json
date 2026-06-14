@@ -16,6 +16,8 @@
   "hero": {
     "subtitle": "Community-led coastal revitalization in Manseok-dong",
     "title": "나만 아는 해안\nMy Secret Coast",
+    "title_ko": "나만 아는 해안",
+    "title_en": "My Secret Coast",
     "description": "Hidden behind Incheon's industrial waterfront, two overlooked coastlines are being reintroduced as a living cultural destination: a connected walking route, discovery waypoints, a library-linked reading space, outdoor art and open-air programs, and a digital guide that leads people back to the real shore.",
     "cta_primary": "Start Your Route",
     "cta_secondary": "Discover the Coast",
