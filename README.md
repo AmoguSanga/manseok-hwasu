@@ -34,6 +34,17 @@ To keep the 24-hour / 6-refresh system working after git pushes:
 
 The KV cache persists across deployments, so normal git pushes will not reset the 4-hour refresh window. Preview deployments should remain unconfigured for Stormglass; they will show tide pending while the scene stays in high-tide mode.
 
+## Cloudflare Pages community setup
+
+The live forum, event comments, profile avatars, and anonymous engagement stats use `/api/community`. Nothing personal is required for tracking: the browser creates a random visitor id and the API stores aggregate page views, section views, dwell time, and comment counts.
+
+1. In Cloudflare, create a Workers KV namespace for engagement data.
+2. In your Pages project Production environment, add the namespace binding as `ENGAGEMENT_STORE`.
+3. In Production Settings > Variables and Secrets, add `ADMIN_PASSWORD` as an encrypted secret.
+4. Redeploy the Pages project.
+
+If `ENGAGEMENT_STORE` is missing, the function falls back to `TIDE_CACHE`, but a separate binding is cleaner. The admin password defaults to the project password unless `ADMIN_PASSWORD` is set as a secret. For local testing, run `node server.mjs`; plain `npx serve` cannot run the `/api/community` endpoint. Local comments and stats are written to `.cache/community-comments.json` and `.cache/community-stats.json`.
+
 For a static-only preview without live tide data, pick one:
 
 ```bash

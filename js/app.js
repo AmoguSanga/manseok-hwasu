@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPlaceholderLinks();
   initLangToggle();
   initIncheonLinks();
+  initCommunityEngagement();
   initVisitCardLinks();
   initScrollReveal();
   initActiveNavLink();
@@ -274,6 +275,431 @@ function initIncheonLinks() {
 
   apply();
   document.addEventListener('i18n:applied', (event) => apply(event.detail?.lang));
+}
+
+/* ─── Community Profile, Comments, Stats ───────────── */
+const COMMUNITY_PROFILE_KEY = 'mh-community-profile-v1';
+const COMMUNITY_ADMIN_KEY = 'mh-community-admin-token-v1';
+const COMMUNITY_CATS = [
+  { file: 'SpringQuiet.webp', label: 'Spring Quiet' },
+  { file: 'SpringActive.webp', label: 'Spring Active' },
+  { file: 'SummerQuiet.webp', label: 'Summer Quiet' },
+  { file: 'SummerActive.webp', label: 'Summer Active' },
+  { file: 'AutumnQuiet.webp', label: 'Autumn Quiet' },
+  { file: 'AutumnActive..webp', label: 'Autumn Active' },
+  { file: 'WinterQuiet.webp', label: 'Winter Quiet' },
+  { file: 'WinterActive.webp', label: 'Winter Active' }
+];
+
+const communityState = {
+  profile: null,
+  adminToken: null,
+  isAdmin: false,
+  activeSectionId: '',
+  activeSectionAt: 0
+};
+
+function initCommunityEngagement() {
+  communityState.profile = loadCommunityProfile();
+  try { communityState.adminToken = sessionStorage.getItem(COMMUNITY_ADMIN_KEY) || ''; } catch (e) {}
+  communityState.isAdmin = Boolean(communityState.adminToken);
+
+  renderCommunityProfile();
+  bindCommunityModal();
+  initEngagementTracking();
+  syncEventCommentProfile();
+}
+
+function loadCommunityProfile() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(COMMUNITY_PROFILE_KEY) || 'null'); } catch (e) {}
+  const randomId = window.crypto?.randomUUID
+    ? window.crypto.randomUUID()
+    : `visitor-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const profile = {
+    id: saved?.id || randomId,
+    name: cleanCommunityText(saved?.name, 40) || 'Coast Friend',
+    cat: COMMUNITY_CATS.some(cat => cat.file === saved?.cat) ? saved.cat : COMMUNITY_CATS[0].file
+  };
+  saveCommunityProfile(profile);
+  return profile;
+}
+
+function saveCommunityProfile(profile) {
+  communityState.profile = profile;
+  try { localStorage.setItem(COMMUNITY_PROFILE_KEY, JSON.stringify(profile)); } catch (e) {}
+}
+
+function renderCommunityProfile() {
+  const profile = communityState.profile;
+  const img = document.querySelector('[data-community-profile-img]');
+  const name = document.querySelector('[data-community-profile-name]');
+  const form = document.querySelector('[data-community-profile-form]');
+  const cats = document.querySelector('[data-community-cats]');
+  const admin = document.querySelector('[data-community-admin]');
+
+  if (img) img.src = catImage(profile.cat);
+  if (name) name.textContent = profile.name;
+  if (form?.elements.name) form.elements.name.value = profile.name;
+  if (admin) admin.hidden = profile.name.toLowerCase() !== 'sangaisadmin';
+
+  if (cats) {
+    cats.innerHTML = '';
+    COMMUNITY_CATS.forEach(cat => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `community-cat${cat.file === profile.cat ? ' is-active' : ''}`;
+      button.setAttribute('aria-label', cat.label);
+      button.innerHTML = `<img src="${catImage(cat.file)}" alt="">`;
+      button.addEventListener('click', () => {
+        saveCommunityProfile({ ...communityState.profile, cat: cat.file });
+        renderCommunityProfile();
+        syncEventCommentProfile();
+      });
+      cats.appendChild(button);
+    });
+  }
+}
+
+function bindCommunityModal() {
+  const modal = document.getElementById('communityModal');
+  const page = document.querySelector('[data-community-page]');
+  if (!modal && !page) return;
+
+  document.querySelectorAll('[data-community-open]').forEach(link => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      openCommunityModal();
+    });
+  });
+
+  modal?.querySelectorAll('[data-community-close]').forEach(button => {
+    button.addEventListener('click', closeCommunityModal);
+  });
+
+  document.querySelector('[data-community-profile-form]')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const nextName = cleanCommunityText(form.elements.name.value, 40) || 'Coast Friend';
+    saveCommunityProfile({ ...communityState.profile, name: nextName });
+    renderCommunityProfile();
+    syncEventCommentProfile();
+    trackCommunityEvent('profile_saved');
+  });
+
+  document.querySelector('[data-community-comment-form]')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const textarea = form.elements.comment;
+    const text = cleanCommunityText(textarea.value, 360);
+    if (!text) return;
+    await postCommunityComment('forum', text);
+    textarea.value = '';
+    await loadForumComments();
+  });
+
+  document.querySelector('[data-community-refresh]')?.addEventListener('click', loadForumComments);
+  document.querySelector('[data-community-admin-login]')?.addEventListener('submit', handleAdminLogin);
+  document.querySelector('[data-community-stats-refresh]')?.addEventListener('click', loadAdminStats);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal?.classList.contains('is-open')) closeCommunityModal();
+  });
+
+  if (page) {
+    loadForumComments();
+    if (communityState.isAdmin) loadAdminStats();
+    trackCommunityEvent('forum_page_open');
+  }
+}
+
+function openCommunityModal() {
+  const modal = document.getElementById('communityModal');
+  if (!modal) {
+    window.location.href = 'community.html';
+    return;
+  }
+  modal.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+  renderCommunityProfile();
+  loadForumComments();
+  if (communityState.isAdmin) loadAdminStats();
+  trackCommunityEvent('forum_open');
+}
+
+function closeCommunityModal() {
+  const modal = document.getElementById('communityModal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  if (!document.querySelector('.event-modal.is-open, .booking-modal.is-open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+async function loadForumComments() {
+  const list = document.querySelector('[data-community-comments]');
+  if (!list) return;
+  list.innerHTML = '<div class="community-comment"><div></div><div><strong>Loading shore notes...</strong></div></div>';
+
+  try {
+    const data = await communityApi(`?action=comments&channel=forum`);
+    renderCommunityComments(data.comments || []);
+  } catch (error) {
+    list.innerHTML = '<div class="community-comment"><div></div><div><strong>Could not load comments yet.</strong><p>Please try again in a moment.</p></div></div>';
+  }
+}
+
+function renderCommunityComments(comments) {
+  const list = document.querySelector('[data-community-comments]');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (!comments.length) {
+    list.innerHTML = '<div class="community-comment"><div></div><div><strong>No comments yet</strong><p>Leave the first note from the coast.</p></div></div>';
+    return;
+  }
+
+  comments.forEach(comment => {
+    const item = document.createElement('article');
+    item.className = 'community-comment';
+
+    const avatar = document.createElement('img');
+    avatar.src = catImage(comment.profile?.cat);
+    avatar.alt = '';
+
+    const body = document.createElement('div');
+    const author = document.createElement('strong');
+    author.textContent = comment.profile?.name || comment.name || 'Coast Friend';
+    const time = document.createElement('time');
+    time.textContent = formatCommunityDate(comment.createdAt);
+    const text = document.createElement('p');
+    text.textContent = comment.text || '';
+    body.append(author, time, text);
+
+    item.append(avatar, body);
+
+    if (communityState.isAdmin) {
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'community-comment__delete';
+      remove.setAttribute('aria-label', 'Delete comment');
+      remove.textContent = '×';
+      remove.addEventListener('click', () => deleteCommunityComment(comment.id));
+      item.appendChild(remove);
+    }
+
+    list.appendChild(item);
+  });
+}
+
+async function postCommunityComment(channel, text, eventId = '') {
+  const result = await communityApi('', {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'comment',
+      channel,
+      eventId,
+      text,
+      profile: communityState.profile
+    })
+  });
+  trackCommunityEvent('comment_posted_client', { channel });
+  return result.comment;
+}
+
+async function deleteCommunityComment(id) {
+  if (!communityState.adminToken || !id) return;
+  await communityApi(`?action=comment&id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${communityState.adminToken}` }
+  });
+  await loadForumComments();
+  await loadAdminStats();
+}
+
+async function handleAdminLogin(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = document.querySelector('[data-community-admin-status]');
+  const password = form.elements.password.value;
+
+  try {
+    const data = await communityApi('', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'admin-login',
+        name: communityState.profile.name,
+        password
+      })
+    });
+    communityState.adminToken = data.token;
+    communityState.isAdmin = true;
+    try { sessionStorage.setItem(COMMUNITY_ADMIN_KEY, data.token); } catch (e) {}
+    form.reset();
+    if (status) status.textContent = 'Admin unlocked.';
+    await loadAdminStats();
+    await loadForumComments();
+  } catch (error) {
+    if (status) status.textContent = 'Admin login failed. Check the password or server secret.';
+  }
+}
+
+async function loadAdminStats() {
+  const statsPanel = document.querySelector('[data-community-stats]');
+  const statGrid = document.querySelector('[data-community-stat-grid]');
+  const sectionStats = document.querySelector('[data-community-section-stats]');
+  if (!communityState.adminToken || !statsPanel || !statGrid || !sectionStats) return;
+
+  try {
+    const data = await communityApi('?action=admin-stats', {
+      headers: { Authorization: `Bearer ${communityState.adminToken}` }
+    });
+    const stats = data.stats || {};
+    statsPanel.hidden = false;
+    statGrid.innerHTML = '';
+    [
+      ['Page Views', stats.totalPageViews || 0],
+      ['Unique Visitors', stats.uniqueVisitors || 0],
+      ['Comments', (data.comments || []).length],
+      ['Forum Opens', stats.events?.forum_open || 0],
+      ['Bookings', stats.events?.booking_confirm || 0],
+      ['Event Opens', stats.events?.event_modal_open || 0]
+    ].forEach(([label, value]) => {
+      const item = document.createElement('div');
+      item.className = 'community-stat';
+      item.innerHTML = '<span></span><strong></strong>';
+      item.querySelector('span').textContent = label;
+      item.querySelector('strong').textContent = value;
+      statGrid.appendChild(item);
+    });
+
+    sectionStats.innerHTML = '';
+    Object.entries(stats.sections || {})
+      .sort((a, b) => (b[1].totalMs || 0) - (a[1].totalMs || 0))
+      .forEach(([section, value]) => {
+        const row = document.createElement('div');
+        row.className = 'community-section-stat';
+        row.innerHTML = '<strong></strong><span></span><span></span>';
+        row.querySelector('strong').textContent = section;
+        row.querySelectorAll('span')[0].textContent = `${value.views || 0} views`;
+        row.querySelectorAll('span')[1].textContent = `${formatDuration(value.totalMs || 0)} stayed`;
+        sectionStats.appendChild(row);
+      });
+  } catch (error) {
+    communityState.isAdmin = false;
+    try { sessionStorage.removeItem(COMMUNITY_ADMIN_KEY); } catch (e) {}
+  }
+}
+
+async function communityApi(query = '', options = {}) {
+  const response = await fetch(`/api/community${query}`, {
+    ...options,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error || 'community_api_error');
+    error.data = data;
+    throw error;
+  }
+  return data;
+}
+
+function initEngagementTracking() {
+  trackCommunityEvent('visit');
+
+  const sections = Array.from(document.querySelectorAll('section[id]'));
+  if (!sections.length || !('IntersectionObserver' in window)) return;
+
+  const visible = new Map();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio);
+      else visible.delete(entry.target.id);
+    });
+    const next = [...visible.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+    setActiveTrackedSection(next);
+  }, { threshold: [0.35, 0.55, 0.75] });
+
+  sections.forEach(section => observer.observe(section));
+  window.addEventListener('pagehide', flushActiveSectionDwell);
+}
+
+function setActiveTrackedSection(sectionId) {
+  if (!sectionId || communityState.activeSectionId === sectionId) return;
+  flushActiveSectionDwell();
+  communityState.activeSectionId = sectionId;
+  communityState.activeSectionAt = Date.now();
+  trackCommunityEvent('section_view', { section: sectionId });
+}
+
+function flushActiveSectionDwell() {
+  if (!communityState.activeSectionId || !communityState.activeSectionAt) return;
+  const durationMs = Date.now() - communityState.activeSectionAt;
+  if (durationMs > 1000) {
+    trackCommunityEvent('section_dwell', {
+      section: communityState.activeSectionId,
+      durationMs
+    }, true);
+  }
+  communityState.activeSectionAt = Date.now();
+}
+
+function trackCommunityEvent(event, extra = {}, immediate = false) {
+  const profile = communityState.profile || loadCommunityProfile();
+  const payload = JSON.stringify({
+    action: 'track',
+    visitorId: profile.id,
+    event,
+    ...extra
+  });
+
+  if (immediate && navigator.sendBeacon) {
+    navigator.sendBeacon('/api/community', new Blob([payload], { type: 'application/json' }));
+    return;
+  }
+
+  fetch('/api/community', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: payload,
+    keepalive: immediate
+  }).catch(() => {});
+}
+
+function syncEventCommentProfile() {
+  const form = document.querySelector('[data-event-comment-form]');
+  if (!form?.elements.name || !communityState.profile) return;
+  form.elements.name.value = communityState.profile.name;
+  form.elements.name.readOnly = true;
+  form.elements.name.title = 'Uses your community profile name';
+}
+
+function catImage(file) {
+  const safeFile = COMMUNITY_CATS.some(cat => cat.file === file) ? file : COMMUNITY_CATS[0].file;
+  return `assets/images/catresults/${safeFile}`;
+}
+
+function cleanCommunityText(value, max = 200) {
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+function formatCommunityDate(value) {
+  const date = new Date(value || Date.now());
+  if (!Number.isFinite(date.getTime())) return '';
+  return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDuration(ms) {
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return remainder ? `${minutes}m ${remainder}s` : `${minutes}m`;
 }
 
 function initVisitCardLinks() {
@@ -2509,23 +2935,36 @@ function initEventModal() {
     button.addEventListener('click', closeEventModal);
   });
 
-  modal.querySelector('[data-event-comment-form]')?.addEventListener('submit', (event) => {
+  modal.querySelector('[data-event-comment-form]')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const source = window.MH_READING_EVENTS?.find(item => item.id === currentEventsState.activeEventId);
     if (!source) return;
     const form = event.currentTarget;
-    const name = form.elements.name.value.trim() || 'Reader';
     const text = form.elements.comment.value.trim();
     if (!text) return;
-    source.comments = [...(source.comments || []), { name, text }];
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
+    try {
+      await postCommunityComment(`event:${source.id}`, text, source.id);
+      await loadEventComments(source);
+    } catch (error) {
+      source.liveComments = [
+        { profile: communityState.profile, text, createdAt: new Date().toISOString() },
+        ...(source.liveComments || source.comments || [])
+      ];
+      populateEventComments(source);
+    } finally {
+      if (button) button.disabled = false;
+    }
     form.reset();
-    populateEventComments(source);
+    syncEventCommentProfile();
   });
 
   modal.querySelector('[data-event-reserve-form]')?.addEventListener('submit', (event) => {
     event.preventDefault();
     const status = modal.querySelector('[data-event-reserve-status]');
-    if (status) status.textContent = 'Reservation preview created. This prototype is not saving the information yet.';
+    if (status) status.textContent = 'Reservation interest noted for planning. No personal details were stored.';
+    trackCommunityEvent('event_reservation_interest', { eventId: currentEventsState.activeEventId || '' });
   });
 
   document.addEventListener('keydown', (event) => {
@@ -2540,6 +2979,7 @@ function openEventModal(id, options = {}) {
   populateEventModal(id);
   modal.classList.add('is-open');
   document.body.style.overflow = 'hidden';
+  trackCommunityEvent('event_modal_open', { eventId: id });
   if (options.focusReserve) {
     requestAnimationFrame(() => modal.querySelector('[data-event-reserve-form] input')?.focus({ preventScroll: true }));
   }
@@ -2599,21 +3039,45 @@ function populateEventModal(id) {
   });
   const reserveStatus = modal.querySelector('[data-event-reserve-status]');
   if (reserveStatus) reserveStatus.textContent = '';
+  syncEventCommentProfile();
   populateEventComments(event);
+  loadEventComments(event);
 }
 
 function populateEventComments(event) {
   const comments = document.querySelector('[data-event-comments]');
   if (!comments) return;
   comments.innerHTML = '';
-  (event.comments || []).forEach(comment => {
+  const sourceComments = event.liveComments || event.comments || [];
+  if (!sourceComments.length) {
+    const empty = document.createElement('div');
+    empty.className = 'event-post__comment';
+    empty.innerHTML = '<strong></strong><p></p>';
+    empty.querySelector('strong').textContent = 'No comments yet';
+    empty.querySelector('p').textContent = 'Share the first note for this reading theme.';
+    comments.appendChild(empty);
+    return;
+  }
+  sourceComments.forEach(comment => {
     const item = document.createElement('div');
     item.className = 'event-post__comment';
     item.innerHTML = '<strong></strong><p></p>';
-    item.querySelector('strong').textContent = comment.name;
+    item.querySelector('strong').textContent = comment.profile?.name || comment.name || 'Coast Friend';
     item.querySelector('p').textContent = comment.text;
     comments.appendChild(item);
   });
+}
+
+async function loadEventComments(event) {
+  if (!event?.id) return;
+  try {
+    const data = await communityApi(`?action=comments&channel=${encodeURIComponent(`event:${event.id}`)}`);
+    if (currentEventsState.activeEventId !== event.id) return;
+    event.liveComments = data.comments || [];
+    populateEventComments(event);
+  } catch (error) {
+    populateEventComments(event);
+  }
 }
 
 function localizeEventField(value) {
@@ -3268,6 +3732,10 @@ function initBookingModal() {
     modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
     launchSparkles();
+    trackCommunityEvent('booking_confirm', {
+      area: areaKey || '',
+      seat: code || ''
+    });
   };
 
   const closeModal = () => {

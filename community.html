@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Forum | Manseok-Hwasu</title>
+  <meta name="description" content="Live community shore notes, cat profiles, and anonymous engagement stats for Manseok-Hwasu." />
+
+  <script>
+    (function(){try{var t=localStorage.getItem('mh-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Cormorant+Garamond:wght@300;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/sections.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/logos/manseok-logo.svg" />
+</head>
+<body>
+<nav class="nav" aria-label="Main navigation">
+  <a href="index.html#hero" class="nav__brand">
+    <span class="nav__logo">
+      <img src="assets/logos/manseok-logo.svg" alt="" aria-hidden="true" />
+    </span>
+    <span class="nav__brand-text">
+      <strong>MANSEOK-HWASU</strong>
+    </span>
+  </a>
+
+  <a href="discover-you.html" class="nav__survey">
+    <span>DISCOVER YOURSELF</span>
+  </a>
+
+  <ul class="nav__menu" role="menubar">
+    <li class="nav__survey-mobile"><a href="discover-you.html" class="nav__link">DISCOVER YOURSELF</a></li>
+    <li><a href="index.html#current" class="nav__link">CURRENT EVENTS</a></li>
+    <li><a href="index.html#discover" class="nav__link">DISCOVER</a></li>
+    <li><a href="index.html#reading" class="nav__link">READING &amp; BOOKING</a></li>
+    <li><a href="index.html#seasonal" class="nav__link">SEASONAL ACTIVITIES</a></li>
+    <li><a href="community.html" class="nav__link is-active">COMMUNITY</a></li>
+  </ul>
+
+  <button class="nav__lang" aria-label="Switch language">
+    <span>KOR</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</nav>
+
+<main class="community-page" data-community-page>
+  <section class="community-page__shell">
+    <div class="container">
+      <div class="community-page__toolbar">
+        <a class="survey-home" href="index.html#community" aria-label="Go back home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+          <span>Go Back Home</span>
+        </a>
+      </div>
+
+      <header class="community-page__head">
+        <span class="eyebrow">Live Community</span>
+        <h1>Community Shore Notes</h1>
+        <p>Choose a cat profile, leave a public note, and see what other visitors are sharing from the coast.</p>
+      </header>
+
+      <div class="community-forum">
+        <aside class="community-profile" aria-label="Community profile">
+          <span class="eyebrow">Community Profile</span>
+          <div class="community-profile__preview">
+            <img data-community-profile-img src="assets/images/catresults/SpringQuiet.webp" alt="" />
+            <div>
+              <strong data-community-profile-name>Coast Friend</strong>
+              <span>Your comments use this profile everywhere.</span>
+            </div>
+          </div>
+          <form class="community-profile__form" data-community-profile-form>
+            <label>
+              <span>Name</span>
+              <input type="text" name="name" maxlength="40" autocomplete="nickname" />
+            </label>
+            <div class="community-cats" data-community-cats aria-label="Choose a cat profile picture"></div>
+            <button class="btn" type="submit">Save Profile</button>
+          </form>
+
+          <div class="community-admin" data-community-admin hidden>
+            <span class="eyebrow">Admin</span>
+            <form class="community-admin__login" data-community-admin-login>
+              <input type="password" name="password" placeholder="Password" autocomplete="current-password" />
+              <button class="btn btn--primary" type="submit">Unlock Stats</button>
+            </form>
+            <div class="community-admin__status" data-community-admin-status></div>
+          </div>
+        </aside>
+
+        <section class="community-forum__main" aria-label="Community comments">
+          <div class="community-forum__head">
+            <div>
+              <span class="eyebrow">Forum</span>
+              <h2>Visitor Comments</h2>
+            </div>
+            <button class="btn" type="button" data-community-refresh>Refresh</button>
+          </div>
+          <form class="community-comment-form" data-community-comment-form>
+            <textarea name="comment" maxlength="360" placeholder="Share a memory, reading recommendation, or quiet coast tip."></textarea>
+            <button class="btn btn--primary" type="submit">Post Comment</button>
+          </form>
+          <div class="community-comment-list" data-community-comments></div>
+        </section>
+
+        <section class="community-stats" data-community-stats hidden aria-label="Community statistics">
+          <div class="community-forum__head">
+            <div>
+              <span class="eyebrow">Admin Stats</span>
+              <h2>Engagement Tracker</h2>
+            </div>
+            <button class="btn" type="button" data-community-stats-refresh>Update</button>
+          </div>
+          <div class="community-stat-grid" data-community-stat-grid></div>
+          <div class="community-section-stats" data-community-section-stats></div>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

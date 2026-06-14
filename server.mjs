@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { createReadStream, existsSync, readFileSync } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
@@ -7,12 +8,22 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const CACHE_DIR = join(ROOT, '.cache');
 const TIDE_CACHE = join(CACHE_DIR, 'tide.json');
+const COMMUNITY_COMMENTS = join(CACHE_DIR, 'community-comments.json');
+const COMMUNITY_STATS = join(CACHE_DIR, 'community-stats.json');
 const PORT = Number(process.env.PORT || 8080);
 const LAT = Number(process.env.TIDE_LAT || 37.488407);
 const LNG = Number(process.env.TIDE_LNG || 126.612296);
 const REQUESTS_PER_DAY = 6;
 const REFRESH_MS = Math.floor(24 * 60 * 60 * 1000 / REQUESTS_PER_DAY);
 const STORMGLASS_ENDPOINT = 'https://api.stormglass.io/v2/tide/extremes/point';
+const DEFAULT_ADMIN_PASSWORD = '9919BOMa1!';
+const COMMUNITY_MAX_COMMENTS = 240;
+const COMMUNITY_MAX_VISITORS = 2500;
+const ADMIN_TOKENS = new Map();
+const PROFANITY = [
+  'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'damn', 'dick',
+  'cunt', 'slut', 'whore', 'crap', 'piss'
+];
 
 loadDotEnv();
 
@@ -40,6 +51,10 @@ createServer(async (req, res) => {
       await sendTide(res);
       return;
     }
+    if (url.pathname === '/api/community') {
+      await sendCommunity(req, res, url);
+      return;
+    }
 
     await sendStatic(url.pathname, res);
   } catch (error) {
@@ -59,6 +74,150 @@ async function sendTide(res) {
   }
 
   sendJson(res, 200, cached || buildFallbackTide('empty_cache'));
+}
+
+async function sendCommunity(req, res, url) {
+  const action = url.searchParams.get('action') || 'comments';
+
+  try {
+    if (req.method === 'GET' && action === 'comments') {
+      const channel = cleanChannel(url.searchParams.get('channel'));
+      const comments = await readJsonFile(COMMUNITY_COMMENTS, []);
+      sendJson(res, 200, { comments: comments.filter(comment => comment.channel === channel).slice(0, 80) });
+      return;
+    }
+
+    if (req.method === 'GET' && action === 'admin-stats') {
+      requireLocalAdmin(req);
+      sendJson(res, 200, {
+        stats: await readJsonFile(COMMUNITY_STATS, emptyCommunityStats()),
+        comments: await readJsonFile(COMMUNITY_COMMENTS, [])
+      });
+      return;
+    }
+
+    if (req.method === 'POST') {
+      const body = await readRequestJson(req);
+      if (body.action === 'admin-login') {
+        await localAdminLogin(res, body);
+        return;
+      }
+      if (body.action === 'comment') {
+        await saveLocalComment(res, body);
+        return;
+      }
+      if (body.action === 'track') {
+        await incrementLocalStats(body);
+        sendJson(res, 200, { ok: true });
+        return;
+      }
+    }
+
+    if (req.method === 'DELETE' && action === 'comment') {
+      requireLocalAdmin(req);
+      const id = cleanText(url.searchParams.get('id'), 80);
+      const comments = await readJsonFile(COMMUNITY_COMMENTS, []);
+      const next = comments.filter(comment => comment.id !== id);
+      await writeJsonFile(COMMUNITY_COMMENTS, next);
+      sendJson(res, 200, { ok: true, removed: comments.length - next.length });
+      return;
+    }
+
+    sendJson(res, 404, { error: 'not_found' });
+  } catch (error) {
+    sendJson(res, error.status || 500, { error: error.publicMessage || 'server_error' });
+  }
+}
+
+async function localAdminLogin(res, body) {
+  const expected = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+  if (!expected) {
+    sendJson(res, 403, { ok: false, error: 'admin_disabled' });
+    return;
+  }
+
+  const name = cleanText(body.name, 40).toLowerCase();
+  if (name !== 'sangaisadmin' || String(body.password || '') !== expected) {
+    sendJson(res, 403, { ok: false, error: 'invalid_admin' });
+    return;
+  }
+
+  const token = randomUUID();
+  ADMIN_TOKENS.set(token, Date.now() + (2 * 60 * 60 * 1000));
+  await incrementLocalStats({ event: 'admin_login' });
+  sendJson(res, 200, { ok: true, token, expiresIn: 7200 });
+}
+
+function requireLocalAdmin(req) {
+  const auth = req.headers.authorization || '';
+  const token = auth.replace(/^Bearer\s+/i, '').trim();
+  const expires = ADMIN_TOKENS.get(token);
+  if (!expires || expires <= Date.now()) {
+    if (token) ADMIN_TOKENS.delete(token);
+    throw httpError(401, 'admin_required');
+  }
+}
+
+async function saveLocalComment(res, body) {
+  const text = filterProfanity(cleanText(body.text, 360));
+  if (!text) {
+    sendJson(res, 400, { error: 'empty_comment' });
+    return;
+  }
+
+  const comment = {
+    id: randomUUID(),
+    channel: cleanChannel(body.channel),
+    eventId: cleanText(body.eventId, 80),
+    text,
+    profile: sanitizeProfile(body.profile),
+    createdAt: new Date().toISOString()
+  };
+
+  const comments = await readJsonFile(COMMUNITY_COMMENTS, []);
+  comments.unshift(comment);
+  await writeJsonFile(COMMUNITY_COMMENTS, comments.slice(0, COMMUNITY_MAX_COMMENTS));
+  await incrementLocalStats({ event: 'comment_posted', channel: comment.channel });
+  sendJson(res, 200, { ok: true, comment });
+}
+
+async function incrementLocalStats(body) {
+  const stats = await readJsonFile(COMMUNITY_STATS, emptyCommunityStats());
+  const now = new Date().toISOString();
+  const event = cleanText(body.event, 60) || 'unknown';
+  const visitorId = cleanText(body.visitorId, 80);
+  const section = cleanText(body.section, 80);
+  const durationMs = Math.max(0, Math.min(Number(body.durationMs) || 0, 30 * 60 * 1000));
+
+  stats.updatedAt = now;
+  stats.events[event] = (stats.events[event] || 0) + 1;
+
+  if (visitorId) {
+    if (!stats.visitors[visitorId]) {
+      stats.visitors[visitorId] = { firstSeen: now, lastSeen: now, visits: 0 };
+      stats.uniqueVisitors += 1;
+    }
+    stats.visitors[visitorId].lastSeen = now;
+    if (event === 'visit') stats.visitors[visitorId].visits += 1;
+  }
+
+  if (event === 'visit') stats.totalPageViews += 1;
+
+  if (section) {
+    stats.sections[section] ||= { views: 0, totalMs: 0 };
+    if (durationMs > 0) stats.sections[section].totalMs += durationMs;
+    else stats.sections[section].views += 1;
+  }
+
+  const visitorEntries = Object.entries(stats.visitors || {});
+  if (visitorEntries.length > COMMUNITY_MAX_VISITORS) {
+    visitorEntries
+      .sort((a, b) => new Date(b[1].lastSeen) - new Date(a[1].lastSeen))
+      .slice(COMMUNITY_MAX_VISITORS)
+      .forEach(([id]) => delete stats.visitors[id]);
+  }
+
+  await writeJsonFile(COMMUNITY_STATS, stats);
 }
 
 function warmTideCache() {
@@ -174,6 +333,76 @@ async function readCache() {
 async function writeCache(payload) {
   await mkdir(CACHE_DIR, { recursive: true });
   await writeFile(TIDE_CACHE, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+}
+
+async function readJsonFile(path, fallback) {
+  try {
+    const text = await readFile(path, 'utf8');
+    return JSON.parse(text);
+  } catch {
+    return fallback;
+  }
+}
+
+async function writeJsonFile(path, payload) {
+  await mkdir(CACHE_DIR, { recursive: true });
+  await writeFile(path, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+}
+
+async function readRequestJson(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  if (!chunks.length) return {};
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch {
+    return {};
+  }
+}
+
+function emptyCommunityStats() {
+  return {
+    totalPageViews: 0,
+    uniqueVisitors: 0,
+    visitors: {},
+    sections: {},
+    events: {},
+    updatedAt: null
+  };
+}
+
+function sanitizeProfile(profile = {}) {
+  return {
+    id: cleanText(profile.id, 80) || randomUUID(),
+    name: filterProfanity(cleanText(profile.name, 40)) || 'Coast Friend',
+    cat: cleanText(profile.cat, 80) || 'SpringQuiet.webp'
+  };
+}
+
+function filterProfanity(value) {
+  return PROFANITY.reduce((next, word) => {
+    const pattern = new RegExp(`\\b${escapeRegExp(word)}\\b`, 'gi');
+    return next.replace(pattern, 'meow');
+  }, String(value || ''));
+}
+
+function cleanChannel(value) {
+  return cleanText(value, 80).replace(/[^a-z0-9:_-]/gi, '') || 'forum';
+}
+
+function cleanText(value, max = 200) {
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function httpError(status, publicMessage) {
+  const error = new Error(publicMessage);
+  error.status = status;
+  error.publicMessage = publicMessage;
+  return error;
 }
 
 function cacheAge(cache) {
