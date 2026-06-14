@@ -285,10 +285,10 @@ section {
   min-width: 0;
 }
 .nav__brand-text strong {
-  font-family: var(--font-display);
-  font-size: 0.86rem;
-  letter-spacing: 0.14em;
-  font-weight: 600;
+  font-family: var(--font-logo-en);
+  font-size: 1.03rem;
+  letter-spacing: 0.13em;
+  font-weight: 700;
 }
 .nav__brand-text span {
   font-size: 0.6rem;
