@@ -213,6 +213,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--hero-logo-gap);
+  left: -32px;
   max-width: min(100%, 458px);
   width: min(100%, 458px);
   min-width: 0;
