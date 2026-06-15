@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await i18n.init();
 
   initThemeToggle();
-  initOceanMotion();
   initHeroPaintDrops();
   initNav();
   initPlaceholderLinks();
@@ -32,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initHeroPaintDrops() {
   const heroCard = document.querySelector('.hero__copy');
   if (!heroCard || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const isMobilePaint = window.matchMedia('(max-width: 700px)').matches;
 
   const layer = document.createElement('div');
   layer.className = 'hero__paint-drop-layer';
@@ -50,17 +50,20 @@ function initHeroPaintDrops() {
 
   const scheduleNextSequence = () => {
     window.clearTimeout(timer);
-    timer = window.setTimeout(spawnDrop, 5000);
+    timer = window.setTimeout(spawnDrop, isMobilePaint ? 9000 : 5000);
   };
 
   const spawnOneDrop = () => {
-    if (activeDrops >= 2) return;
+    const maxDrops = isMobilePaint ? 1 : 2;
+    if (activeDrops >= maxDrops) return;
     const spot = positions[Math.floor(Math.random() * positions.length)];
     const drop = document.createElement('span');
-    const size = Math.round(window.innerWidth <= 640
-      ? 320 + Math.random() * 180
+    const size = Math.round(isMobilePaint
+      ? 180 + Math.random() * 100
       : 480 + Math.random() * 300);
-    const duration = 9300 + Math.random() * 3600;
+    const duration = isMobilePaint
+      ? 7600 + Math.random() * 1600
+      : 9300 + Math.random() * 3600;
 
     activeDrops += 1;
     drop.className = 'hero__paint-drop';
@@ -69,6 +72,7 @@ function initHeroPaintDrops() {
     drop.style.setProperty('--drop-size', `${size}px`);
     drop.style.setProperty('--drop-duration', `${duration}ms`);
     drop.style.setProperty('--drop-rotate', `${Math.random() * 80 - 40}deg`);
+    drop.style.setProperty('--drop-blur', isMobilePaint ? '8px' : '14px');
     layer.appendChild(drop);
     drop.addEventListener('animationend', () => {
       activeDrops = Math.max(0, activeDrops - 1);
@@ -78,8 +82,9 @@ function initHeroPaintDrops() {
   };
 
   const spawnDrop = () => {
-    const openSlots = Math.max(0, 2 - activeDrops);
-    const count = Math.min(openSlots, Math.random() < 0.25 ? 2 : 1);
+    const maxDrops = isMobilePaint ? 1 : 2;
+    const openSlots = Math.max(0, maxDrops - activeDrops);
+    const count = isMobilePaint ? Math.min(openSlots, 1) : Math.min(openSlots, Math.random() < 0.25 ? 2 : 1);
     pendingInSequence = count;
     for (let i = 0; i < count; i++) {
       window.setTimeout(() => {
@@ -90,76 +95,8 @@ function initHeroPaintDrops() {
     }
   };
 
-  timer = window.setTimeout(spawnDrop, 1800);
+  timer = window.setTimeout(spawnDrop, isMobilePaint ? 3000 : 1800);
   window.addEventListener('pagehide', () => window.clearTimeout(timer), { once: true });
-}
-
-/* ─── Ocean Motion Layer ────────────────────── */
-function initOceanMotion() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const water = document.createElement('div');
-  water.className = 'page-water';
-  water.setAttribute('aria-hidden', 'true');
-
-  const rippleLayer = document.createElement('div');
-  rippleLayer.className = 'page-ripple-layer';
-  rippleLayer.setAttribute('aria-hidden', 'true');
-
-  document.body.prepend(water);
-  document.body.appendChild(rippleLayer);
-
-  let targetY = window.scrollY;
-  let currentY = targetY;
-  let lastY = targetY;
-  let raf = 0;
-
-  const setOceanVars = (value, velocity = 0) => {
-    document.body.style.setProperty('--ocean-x', `${Math.sin(value * 0.0028) * 28}px`);
-    document.body.style.setProperty('--ocean-y', `${(value % 900) * 0.035}px`);
-    document.body.style.setProperty('--ocean-drift', `${Math.max(-1.8, Math.min(1.8, velocity * 0.08))}deg`);
-    document.body.style.setProperty('--ocean-scroll', String(value));
-  };
-
-  const render = () => {
-    currentY += (targetY - currentY) * 0.075;
-    const velocity = currentY - lastY;
-    lastY = currentY;
-    setOceanVars(currentY, velocity);
-
-    if (Math.abs(targetY - currentY) < 0.2 && Math.abs(velocity) < 0.08) {
-      currentY = targetY;
-      setOceanVars(currentY, 0);
-      raf = 0;
-      return;
-    }
-
-    raf = requestAnimationFrame(render);
-  };
-
-  const startOceanMotion = () => {
-    targetY = window.scrollY;
-    if (!raf) raf = requestAnimationFrame(render);
-  };
-
-  setOceanVars(currentY, 0);
-  window.addEventListener('scroll', startOceanMotion, { passive: true });
-  window.addEventListener('pagehide', () => {
-    if (raf) cancelAnimationFrame(raf);
-  }, { once: true });
-
-  document.addEventListener('pointerdown', (event) => {
-    const eventTarget = event.target instanceof Element ? event.target : event.target?.parentElement;
-    const target = eventTarget?.closest('button, .btn, a, [role="button"]');
-    if (!target) return;
-
-    const ripple = document.createElement('span');
-    ripple.className = 'page-ripple';
-    ripple.style.setProperty('--ripple-x', `${event.clientX}px`);
-    ripple.style.setProperty('--ripple-y', `${event.clientY}px`);
-    rippleLayer.appendChild(ripple);
-    ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
-  }, { passive: true });
 }
 
 /* ─── Theme Toggle (logo click) ───────────────────── */
@@ -293,6 +230,42 @@ const COMMUNITY_CATS = [
   { file: 'WinterQuiet.webp', label: 'Winter Quiet' },
   { file: 'WinterActive.webp', label: 'Winter Active' }
 ];
+const COMMUNITY_EXAMPLE_POSTS = [
+  {
+    id: 'example-reading-route',
+    title: 'Best quiet reading route for a first visit?',
+    text: 'I would start at the library-linked reading room, then walk toward the terrace when the light gets softer. Has anyone found a better quiet loop?',
+    profile: { name: 'Harbor Reader', cat: 'SpringQuiet.webp' },
+    replies: [
+      { id: 'example-reading-route-r1', text: 'Terrace first, then coffee shop seating worked well for me. Less backtracking.', profile: { name: 'Tide Walker', cat: 'SummerQuiet.webp' }, createdAt: '2026-06-01T09:30:00.000Z' }
+    ],
+    replyCount: 1,
+    createdAt: '2026-06-01T09:00:00.000Z',
+    isExample: true
+  },
+  {
+    id: 'example-sunset-seat',
+    title: 'Which seat gets the warmest sunset view?',
+    text: 'The outside benches look strongest in photos, but I am curious whether the terrace is better when the tide is high.',
+    profile: { name: 'Coast Lens', cat: 'AutumnQuiet.webp' },
+    replies: [],
+    replyCount: 0,
+    createdAt: '2026-06-02T11:00:00.000Z',
+    isExample: true
+  },
+  {
+    id: 'example-kids',
+    title: 'Good low-energy visit plan with kids?',
+    text: 'Looking for a route that keeps walking short and still gives enough discovery points to make it feel special.',
+    profile: { name: 'Slow Saturday', cat: 'WinterActive.webp' },
+    replies: [
+      { id: 'example-kids-r1', text: 'Coffee shop area plus one short waterfront stop felt manageable.', profile: { name: 'Map Cat', cat: 'SpringActive.webp' }, createdAt: '2026-06-03T12:15:00.000Z' }
+    ],
+    replyCount: 1,
+    createdAt: '2026-06-03T12:00:00.000Z',
+    isExample: true
+  }
+];
 
 const communityState = {
   profile: null,
@@ -300,6 +273,7 @@ const communityState = {
   isAdmin: false,
   activePostId: '',
   usingLocalForum: false,
+  showingExamples: false,
   activeSectionId: '',
   activeSectionAt: 0
 };
@@ -309,10 +283,12 @@ function initCommunityEngagement() {
   try { communityState.adminToken = sessionStorage.getItem(COMMUNITY_ADMIN_KEY) || ''; } catch (e) {}
   communityState.isAdmin = Boolean(communityState.adminToken);
 
+  ensureGlobalProfileModal();
   renderCommunityProfile();
   bindCommunityModal();
   initEngagementTracking();
   syncEventCommentProfile();
+  syncBookingProfileName();
 }
 
 function loadCommunityProfile() {
@@ -339,17 +315,17 @@ function renderCommunityProfile() {
   const profile = communityState.profile;
   const imgs = document.querySelectorAll('[data-community-profile-img]');
   const names = document.querySelectorAll('[data-community-profile-name]');
-  const form = document.querySelector('[data-community-profile-form]');
-  const cats = document.querySelector('[data-community-cats]');
+  const forms = document.querySelectorAll('[data-community-profile-form]');
+  const cats = document.querySelectorAll('[data-community-cats]');
   const admin = document.querySelector('[data-community-admin]');
 
   imgs.forEach(img => { img.src = catImage(profile.cat); });
   names.forEach(name => { name.textContent = profile.name; });
-  if (form?.elements.name) form.elements.name.value = profile.name;
+  forms.forEach(form => { if (form.elements.name) form.elements.name.value = profile.name; });
   if (admin) admin.hidden = profile.name.toLowerCase() !== 'sangaisadmin';
 
-  if (cats) {
-    cats.innerHTML = '';
+  cats.forEach(catRoot => {
+    catRoot.innerHTML = '';
     COMMUNITY_CATS.forEach(cat => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -361,15 +337,14 @@ function renderCommunityProfile() {
         renderCommunityProfile();
         syncEventCommentProfile();
       });
-      cats.appendChild(button);
+      catRoot.appendChild(button);
     });
-  }
+  });
 }
 
 function bindCommunityModal() {
   const modal = document.getElementById('communityModal');
   const page = document.querySelector('[data-community-page]');
-  if (!modal && !page) return;
 
   document.querySelectorAll('[data-community-open]').forEach(link => {
     link.addEventListener('click', (event) => {
@@ -382,20 +357,35 @@ function bindCommunityModal() {
     button.addEventListener('click', closeCommunityModal);
   });
 
-  document.querySelector('[data-community-profile-form]')?.addEventListener('submit', (event) => {
+  document.querySelectorAll('[data-profile-open]').forEach(button => {
+    button.addEventListener('click', openGlobalProfileModal);
+  });
+
+  document.querySelectorAll('[data-community-profile-form]').forEach(form => form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const form = event.currentTarget;
     const nextName = cleanCommunityText(form.elements.name.value, 40) || 'Coast Friend';
     saveCommunityProfile({ ...communityState.profile, name: nextName });
     renderCommunityProfile();
-    setCommunityProfileCollapsed(true);
     syncEventCommentProfile();
+    syncBookingProfileName();
+    closeGlobalProfileModal();
     trackCommunityEvent('profile_saved');
+  }));
+
+  document.querySelectorAll('[data-profile-close]').forEach(button => {
+    button.addEventListener('click', closeGlobalProfileModal);
   });
 
-  document.querySelector('[data-community-profile-toggle]')?.addEventListener('click', () => {
-    const panel = document.querySelector('[data-community-profile-panel]');
-    setCommunityProfileCollapsed(panel ? !panel.hidden : false);
+  document.querySelector('[data-community-create-post]')?.addEventListener('click', () => {
+    setCommunityPostComposerOpen(true);
+  });
+
+  document.querySelectorAll('[data-community-cancel-post]').forEach(button => button.addEventListener('click', () => {
+    setCommunityPostComposerOpen(false);
+  }));
+
+  document.querySelectorAll('[data-community-thread-close]').forEach(button => {
+    button.addEventListener('click', closeForumThreadModal);
   });
 
   document.querySelector('[data-community-post-form]')?.addEventListener('submit', async (event) => {
@@ -406,6 +396,7 @@ function bindCommunityModal() {
     if (!title || !text) return;
     const post = await createForumPost(title, text);
     form.reset();
+    setCommunityPostComposerOpen(false);
     communityState.activePostId = post?.id || communityState.activePostId;
     await loadForumPosts();
   });
@@ -427,10 +418,13 @@ function bindCommunityModal() {
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && modal?.classList.contains('is-open')) closeCommunityModal();
+    if (event.key === 'Escape') {
+      closeForumThreadModal();
+      setCommunityPostComposerOpen(false);
+    }
   });
 
   if (page) {
-    setCommunityProfileCollapsed(getCommunityProfileCollapsedDefault());
     loadForumPosts();
     if (communityState.isAdmin) loadAdminStats();
     trackCommunityEvent('forum_page_open');
@@ -460,25 +454,96 @@ function closeCommunityModal() {
   }
 }
 
-function getCommunityProfileCollapsedDefault() {
-  try {
-    const savedProfile = localStorage.getItem(COMMUNITY_PROFILE_KEY);
-    const savedCollapse = localStorage.getItem(COMMUNITY_PROFILE_COLLAPSED_KEY);
-    if (savedCollapse !== null) return savedCollapse === 'true';
-    return Boolean(savedProfile);
-  } catch (e) {
-    return true;
+function ensureGlobalProfileModal() {
+  if (document.getElementById('globalProfileModal')) return;
+  const modal = document.createElement('div');
+  modal.className = 'profile-modal';
+  modal.id = 'globalProfileModal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'Community profile');
+  modal.innerHTML = `
+    <div class="profile-modal__overlay" data-profile-close></div>
+    <div class="profile-modal__content">
+      <button class="profile-modal__close" type="button" data-profile-close aria-label="Close profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="profile-modal__head">
+        <span class="eyebrow">Global Profile</span>
+        <h2>Your Coast Profile</h2>
+        <p>This name and cat avatar are used for booking, event comments, and forum posts.</p>
+      </div>
+      <div class="community-profile__preview">
+        <img data-community-profile-img src="${catImage(communityState.profile?.cat)}" alt="" />
+        <div>
+          <strong data-community-profile-name>${communityState.profile?.name || 'Coast Friend'}</strong>
+          <span>Shared across this visit.</span>
+        </div>
+      </div>
+      <form class="community-profile__form" data-community-profile-form>
+        <label>
+          <span>Name</span>
+          <input type="text" name="name" maxlength="40" autocomplete="nickname" />
+        </label>
+        <div class="community-cats" data-community-cats aria-label="Choose a cat profile picture"></div>
+        <button class="btn btn--primary" type="submit">Save Profile</button>
+      </form>
+      <div class="community-admin" data-community-admin hidden>
+        <span class="eyebrow">Admin</span>
+        <form class="community-admin__login" data-community-admin-login>
+          <input type="password" name="password" placeholder="Password" autocomplete="current-password" />
+          <button class="btn btn--primary" type="submit">Unlock Stats</button>
+        </form>
+        <div class="community-admin__status" data-community-admin-status></div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function openGlobalProfileModal() {
+  const modal = document.getElementById('globalProfileModal');
+  if (!modal) return;
+  renderCommunityProfile();
+  modal.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGlobalProfileModal() {
+  const modal = document.getElementById('globalProfileModal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  if (!document.querySelector('.event-modal.is-open, .booking-modal.is-open, .community-modal.is-open')) {
+    document.body.style.overflow = '';
   }
 }
 
-function setCommunityProfileCollapsed(collapsed) {
-  const panel = document.querySelector('[data-community-profile-panel]');
-  const toggle = document.querySelector('[data-community-profile-toggle]');
-  if (!panel || !toggle) return;
-  panel.hidden = collapsed;
-  toggle.setAttribute('aria-expanded', String(!collapsed));
-  toggle.classList.toggle('is-open', !collapsed);
-  try { localStorage.setItem(COMMUNITY_PROFILE_COLLAPSED_KEY, String(collapsed)); } catch (e) {}
+function setCommunityPostComposerOpen(open) {
+  const form = document.querySelector('[data-community-post-form]');
+  const modal = document.getElementById('newPostModal');
+  if (!form || !modal) return;
+  modal.classList.toggle('is-open', open);
+  if (open) document.body.style.overflow = 'hidden';
+  else if (!document.querySelector('.profile-modal.is-open, .booking-modal.is-open, .event-modal.is-open, .community-modal.is-open, #forumThreadModal.is-open')) {
+    document.body.style.overflow = '';
+  }
+  if (!open) form.reset();
+  if (open) requestAnimationFrame(() => form.elements.title?.focus({ preventScroll: true }));
+}
+
+function openForumThreadModal() {
+  const modal = document.getElementById('forumThreadModal');
+  if (!modal) return;
+  modal.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeForumThreadModal() {
+  const modal = document.getElementById('forumThreadModal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  if (!document.querySelector('.profile-modal.is-open, .booking-modal.is-open, .event-modal.is-open, .community-modal.is-open, #newPostModal.is-open')) {
+    document.body.style.overflow = '';
+  }
 }
 
 async function loadForumPosts() {
@@ -491,32 +556,25 @@ async function loadForumPosts() {
     communityState.usingLocalForum = false;
     setCommunityStatus('');
     renderForumPosts(data.posts || []);
-    if (communityState.activePostId) await openForumPost(communityState.activePostId, { skipList: true });
   } catch (error) {
     communityState.usingLocalForum = true;
     setCommunityStatus('Static/local mode: posts are saved in this browser only. Use node server.mjs or Cloudflare KV for shared live posts.');
     const posts = readFallbackPosts();
     renderForumPosts(posts);
-    if (communityState.activePostId) await openForumPost(communityState.activePostId, { skipList: true });
   }
 }
 
 function renderForumPosts(posts) {
   const list = document.querySelector('[data-community-posts]');
   if (!list) return;
+  const mergedPosts = mergeExampleForumPosts(posts);
   list.innerHTML = '';
 
-  if (!posts.length) {
-    list.innerHTML = '<div class="community-post"><strong>No posts yet</strong><p>Create the first thread for this coast.</p></div>';
-    renderForumThread(null);
-    return;
-  }
+  communityState.showingExamples = mergedPosts.every(post => post.isExample);
 
-  if (!posts.some(post => post.id === communityState.activePostId)) {
-    communityState.activePostId = posts[0].id;
-  }
+  if (!mergedPosts.some(post => post.id === communityState.activePostId)) communityState.activePostId = '';
 
-  posts.forEach(post => {
+  mergedPosts.forEach(post => {
     const item = document.createElement('button');
     item.type = 'button';
     item.className = `community-post${post.id === communityState.activePostId ? ' is-active' : ''}`;
@@ -539,7 +597,6 @@ function renderForumPosts(posts) {
     list.appendChild(item);
   });
 
-  openForumPost(communityState.activePostId, { skipList: true });
 }
 
 async function openForumPost(id, options = {}) {
@@ -549,6 +606,11 @@ async function openForumPost(id, options = {}) {
   }
 
   communityState.activePostId = id;
+  if (id.startsWith('example-')) {
+    renderForumThread(COMMUNITY_EXAMPLE_POSTS.find(post => post.id === id) || null);
+    if (!options.skipList) renderForumPosts(COMMUNITY_EXAMPLE_POSTS);
+    return;
+  }
   try {
     const data = communityState.usingLocalForum
       ? { post: readFallbackPosts().find(post => post.id === id) }
@@ -562,17 +624,18 @@ async function openForumPost(id, options = {}) {
 }
 
 function renderForumThread(post) {
-  const empty = document.querySelector('[data-community-thread-empty]');
   const content = document.querySelector('[data-community-thread-content]');
   const postEl = document.querySelector('[data-community-thread-post]');
   const repliesEl = document.querySelector('[data-community-replies]');
-  if (!empty || !content || !postEl || !repliesEl) return;
+  const replyForm = document.querySelector('[data-community-reply-form]');
+  if (!content || !postEl || !repliesEl) return;
 
-  empty.hidden = Boolean(post);
   content.hidden = !post;
+  if (replyForm) replyForm.hidden = Boolean(post?.isExample);
   postEl.innerHTML = '';
   repliesEl.innerHTML = '';
   if (!post) return;
+  openForumThreadModal();
 
   const header = document.createElement('div');
   header.className = 'community-thread__post-head';
@@ -584,7 +647,14 @@ function renderForumThread(post) {
   body.textContent = post.text || '';
   postEl.append(header, body);
 
-  if (communityState.isAdmin) {
+  if (post.isExample) {
+    const note = document.createElement('div');
+    note.className = 'community-status community-status--inline';
+    note.textContent = 'Example thread. Create a new post to start a real conversation.';
+    postEl.appendChild(note);
+  }
+
+  if (communityState.isAdmin && !post.isExample) {
     const removePost = document.createElement('button');
     removePost.type = 'button';
     removePost.className = 'community-thread__delete';
@@ -977,6 +1047,24 @@ function syncEventCommentProfile() {
   form.elements.name.value = communityState.profile.name;
   form.elements.name.readOnly = true;
   form.elements.name.title = 'Uses your community profile name';
+  if (!form.elements.name.dataset.profileBound) {
+    form.elements.name.dataset.profileBound = 'true';
+    form.elements.name.addEventListener('click', openGlobalProfileModal);
+    form.elements.name.addEventListener('focus', openGlobalProfileModal);
+  }
+}
+
+function syncBookingProfileName() {
+  const input = document.getElementById('guestName');
+  if (!input || !communityState.profile) return;
+  input.value = communityState.profile.name;
+  input.readOnly = true;
+  input.title = 'Click to edit your global profile';
+  if (!input.dataset.profileBound) {
+    input.dataset.profileBound = 'true';
+    input.addEventListener('click', openGlobalProfileModal);
+    input.addEventListener('focus', openGlobalProfileModal);
+  }
 }
 
 function catImage(file) {
@@ -3152,6 +3240,12 @@ function renderCurrentList() {
   });
 }
 
+function mergeExampleForumPosts(posts = []) {
+  const realPosts = Array.isArray(posts) ? posts : [];
+  const ids = new Set(realPosts.map(post => post.id));
+  return [...realPosts, ...COMMUNITY_EXAMPLE_POSTS.filter(post => !ids.has(post.id))];
+}
+
 function renderCurrentCalendar() {
   const calendar = document.querySelector('[data-current-calendar]');
   const agenda = document.querySelector('[data-current-agenda]');
@@ -3373,10 +3467,11 @@ async function loadEventComments(event) {
   try {
     const data = await communityApi(`?action=comments&channel=${encodeURIComponent(`event:${event.id}`)}`);
     if (currentEventsState.activeEventId !== event.id) return;
-    event.liveComments = data.comments || [];
+    event.liveComments = (data.comments || []).length ? data.comments : (event.comments || []);
     populateEventComments(event);
   } catch (error) {
-    event.liveComments = readFallbackComments(`event:${event.id}`);
+    const localComments = readFallbackComments(`event:${event.id}`);
+    event.liveComments = localComments.length ? localComments : (event.comments || []);
     populateEventComments(event);
   }
 }

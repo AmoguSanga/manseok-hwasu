@@ -69,34 +69,15 @@
         <p>Create a post, open a thread, and trade reading tips or shore notes with other visitors.</p>
       </header>
 
-      <section class="community-profile-dock" aria-label="Community profile">
-        <button class="community-profile-toggle" type="button" data-community-profile-toggle aria-expanded="false">
+      <section class="community-page__actions" aria-label="Community actions">
+        <button class="community-profile-toggle" type="button" data-profile-open>
           <img data-community-profile-img src="assets/images/catresults/SpringQuiet.webp" alt="" />
           <span>
             <strong data-community-profile-name>Coast Friend</strong>
             <small>Profile</small>
           </span>
         </button>
-
-        <div class="community-profile-panel" data-community-profile-panel hidden>
-          <form class="community-profile__form" data-community-profile-form>
-            <label>
-              <span>Name</span>
-              <input type="text" name="name" maxlength="40" autocomplete="nickname" />
-            </label>
-            <div class="community-cats" data-community-cats aria-label="Choose a cat profile picture"></div>
-            <button class="btn" type="submit">Save Profile</button>
-          </form>
-
-          <div class="community-admin" data-community-admin hidden>
-            <span class="eyebrow">Admin</span>
-            <form class="community-admin__login" data-community-admin-login>
-              <input type="password" name="password" placeholder="Password" autocomplete="current-password" />
-              <button class="btn btn--primary" type="submit">Unlock Stats</button>
-            </form>
-            <div class="community-admin__status" data-community-admin-status></div>
-          </div>
-        </div>
+        <button class="btn btn--primary" type="button" data-community-create-post>New Post</button>
       </section>
 
       <div class="community-forum">
@@ -109,31 +90,9 @@
             <button class="btn" type="button" data-community-refresh>Refresh</button>
           </div>
 
-          <form class="community-post-form" data-community-post-form>
-            <input type="text" name="title" maxlength="100" placeholder="Post title" />
-            <textarea name="text" maxlength="800" placeholder="Start a conversation, ask a question, or share a coast tip."></textarea>
-            <button class="btn btn--primary" type="submit">Create Post</button>
-          </form>
-
           <div class="community-status" data-community-status></div>
           <div class="community-post-list" data-community-posts></div>
         </section>
-
-        <aside class="community-thread" data-community-thread aria-label="Forum thread">
-          <div class="community-thread__empty" data-community-thread-empty>
-            <span class="eyebrow">Thread</span>
-            <h2>Select a Post</h2>
-            <p>Open a post to read the full note and add a reply.</p>
-          </div>
-          <article class="community-thread__content" data-community-thread-content hidden>
-            <div class="community-thread__post" data-community-thread-post></div>
-            <form class="community-reply-form" data-community-reply-form>
-              <textarea name="reply" maxlength="500" placeholder="Write a reply"></textarea>
-              <button class="btn btn--primary" type="submit">Reply</button>
-            </form>
-            <div class="community-reply-list" data-community-replies></div>
-          </article>
-        </aside>
 
         <section class="community-stats" data-community-stats hidden aria-label="Community statistics">
           <div class="community-forum__head">
@@ -150,6 +109,46 @@
     </div>
   </section>
 </main>
+
+<div class="forum-modal" id="newPostModal" role="dialog" aria-modal="true" aria-label="Create a community post">
+  <div class="forum-modal__overlay" data-community-cancel-post></div>
+  <div class="forum-modal__content forum-modal__content--compose">
+    <button class="forum-modal__close" type="button" data-community-cancel-post aria-label="Close new post">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="community-forum__head">
+      <div>
+        <span class="eyebrow">New Thread</span>
+        <h2>Create Post</h2>
+      </div>
+    </div>
+    <form class="community-post-form" data-community-post-form>
+      <input type="text" name="title" maxlength="100" placeholder="Post title" />
+      <textarea name="text" maxlength="800" placeholder="Start a conversation, ask a question, or share a coast tip."></textarea>
+      <div class="community-post-form__actions">
+        <button class="btn btn--primary" type="submit">Create Post</button>
+        <button class="btn" type="button" data-community-cancel-post>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="forum-modal forum-modal--thread" id="forumThreadModal" role="dialog" aria-modal="true" aria-label="Community post thread">
+  <div class="forum-modal__overlay" data-community-thread-close></div>
+  <div class="forum-modal__content">
+    <button class="forum-modal__close" type="button" data-community-thread-close aria-label="Close thread">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <article class="community-thread__content" data-community-thread-content>
+      <div class="community-thread__post" data-community-thread-post></div>
+      <form class="community-reply-form" data-community-reply-form>
+        <textarea name="reply" maxlength="500" placeholder="Write a reply"></textarea>
+        <button class="btn btn--primary" type="submit">Reply</button>
+      </form>
+      <div class="community-reply-list" data-community-replies></div>
+    </article>
+  </div>
+</div>
 
 <script src="js/i18n.js"></script>
 <script src="js/app.js"></script>
