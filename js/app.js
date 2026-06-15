@@ -3037,6 +3037,7 @@ function initTideStatus() {
   const stageEl = root.querySelector('[data-tide-stage]');
   const labelEl = root.querySelector('[data-tide-label]');
   const detailEl = root.querySelector('[data-tide-detail]');
+  const updatedEl = root.querySelector('[data-tide-updated]');
   const miniBadges = document.querySelectorAll('[data-tide-mini]');
 
   const formatTime = (value) => {
@@ -3065,6 +3066,7 @@ function initTideStatus() {
     const next = payload?.nextExtreme;
     const previous = payload?.previousExtreme;
     const lang = document.documentElement.lang?.startsWith('ko') ? 'ko' : 'en';
+    const isLive = payload?.source === 'stormglass';
 
     const stageLabel = {
       en: {
@@ -3139,7 +3141,15 @@ function initTideStatus() {
           ? `${detailText[lang][displayStage] || detailText[lang].unknown} Last tide marker was around ${previousTime}.`
           : detailText[lang][displayStage] || detailText[lang].unknown;
     }
+    if (updatedEl) {
+      const updatedTime = formatTime(payload?.updatedAt);
+      updatedEl.textContent = isLive && updatedTime
+        ? (lang === 'ko' ? `실시간 조위 · ${updatedTime} 업데이트` : `Live tide · updated ${updatedTime}`)
+        : (lang === 'ko' ? '조위 미리보기 · 연결 대기 중' : 'Tide preview · waiting for live data');
+    }
 
+    root.classList.toggle('is-live', isLive);
+    root.dataset.tideSource = payload?.source || '';
     root.dataset.tideStage = stage;
     document.dispatchEvent(new CustomEvent('mh:tide-updated', { detail: { ...(payload || {}), stage, displayStage } }));
   };
@@ -3487,11 +3497,20 @@ function populateEventModal(id) {
   loadEventComments(event);
 }
 
+function mergeEventComments(event, liveComments = []) {
+  const live = Array.isArray(liveComments) ? liveComments.filter(Boolean) : [];
+  const examples = Array.isArray(event?.comments) ? event.comments : [];
+  return [
+    ...live,
+    ...examples.map(comment => ({ ...comment, isExample: true }))
+  ];
+}
+
 function populateEventComments(event) {
   const comments = document.querySelector('[data-event-comments]');
   if (!comments) return;
   comments.innerHTML = '';
-  const sourceComments = event.liveComments || event.comments || [];
+  const sourceComments = event.liveComments || mergeEventComments(event);
   if (!sourceComments.length) {
     const empty = document.createElement('div');
     empty.className = 'event-post__comment';
@@ -3525,11 +3544,11 @@ async function loadEventComments(event) {
   try {
     const data = await communityApi(`?action=comments&channel=${encodeURIComponent(`event:${event.id}`)}`);
     if (currentEventsState.activeEventId !== event.id) return;
-    event.liveComments = (data.comments || []).length ? data.comments : (event.comments || []);
+    event.liveComments = mergeEventComments(event, data.comments || []);
     populateEventComments(event);
   } catch (error) {
     const localComments = readFallbackComments(`event:${event.id}`);
-    event.liveComments = localComments.length ? localComments : (event.comments || []);
+    event.liveComments = mergeEventComments(event, localComments);
     populateEventComments(event);
   }
 }

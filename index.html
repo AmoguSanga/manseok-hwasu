@@ -100,11 +100,15 @@
 
     <div class="hero__visual">
       <div class="hero__tide" data-tide-status aria-live="polite">
-        <span class="hero__tide-kicker" data-tide-label>High tide</span>
+        <span class="hero__tide-kicker">
+          <span class="hero__tide-live-dot" data-tide-live-dot aria-hidden="true"></span>
+          <span data-tide-label>High tide</span>
+        </span>
         <div class="hero__tide-ticker">
           <div class="hero__tide-marquee">
             <strong data-tide-stage>Perfect time to go</strong>
             <span data-tide-detail>Server tide cache will update this view.</span>
+            <span class="hero__tide-updated" data-tide-updated>Checking tide...</span>
           </div>
         </div>
       </div>
