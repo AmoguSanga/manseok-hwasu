@@ -65,20 +65,20 @@
 
       <header class="community-page__head">
         <span class="eyebrow">Live Community</span>
-        <h1>Community Shore Notes</h1>
-        <p>Choose a cat profile, leave a public note, and see what other visitors are sharing from the coast.</p>
+        <h1>Community Forum</h1>
+        <p>Create a post, open a thread, and trade reading tips or shore notes with other visitors.</p>
       </header>
 
-      <div class="community-forum">
-        <aside class="community-profile" aria-label="Community profile">
-          <span class="eyebrow">Community Profile</span>
-          <div class="community-profile__preview">
-            <img data-community-profile-img src="assets/images/catresults/SpringQuiet.webp" alt="" />
-            <div>
-              <strong data-community-profile-name>Coast Friend</strong>
-              <span>Your comments use this profile everywhere.</span>
-            </div>
-          </div>
+      <section class="community-profile-dock" aria-label="Community profile">
+        <button class="community-profile-toggle" type="button" data-community-profile-toggle aria-expanded="false">
+          <img data-community-profile-img src="assets/images/catresults/SpringQuiet.webp" alt="" />
+          <span>
+            <strong data-community-profile-name>Coast Friend</strong>
+            <small>Profile</small>
+          </span>
+        </button>
+
+        <div class="community-profile-panel" data-community-profile-panel hidden>
           <form class="community-profile__form" data-community-profile-form>
             <label>
               <span>Name</span>
@@ -96,22 +96,44 @@
             </form>
             <div class="community-admin__status" data-community-admin-status></div>
           </div>
-        </aside>
+        </div>
+      </section>
 
-        <section class="community-forum__main" aria-label="Community comments">
+      <div class="community-forum">
+        <section class="community-forum__main" aria-label="Community forum posts">
           <div class="community-forum__head">
             <div>
               <span class="eyebrow">Forum</span>
-              <h2>Visitor Comments</h2>
+              <h2>Posts</h2>
             </div>
             <button class="btn" type="button" data-community-refresh>Refresh</button>
           </div>
-          <form class="community-comment-form" data-community-comment-form>
-            <textarea name="comment" maxlength="360" placeholder="Share a memory, reading recommendation, or quiet coast tip."></textarea>
-            <button class="btn btn--primary" type="submit">Post Comment</button>
+
+          <form class="community-post-form" data-community-post-form>
+            <input type="text" name="title" maxlength="100" placeholder="Post title" />
+            <textarea name="text" maxlength="800" placeholder="Start a conversation, ask a question, or share a coast tip."></textarea>
+            <button class="btn btn--primary" type="submit">Create Post</button>
           </form>
-          <div class="community-comment-list" data-community-comments></div>
+
+          <div class="community-status" data-community-status></div>
+          <div class="community-post-list" data-community-posts></div>
         </section>
+
+        <aside class="community-thread" data-community-thread aria-label="Forum thread">
+          <div class="community-thread__empty" data-community-thread-empty>
+            <span class="eyebrow">Thread</span>
+            <h2>Select a Post</h2>
+            <p>Open a post to read the full note and add a reply.</p>
+          </div>
+          <article class="community-thread__content" data-community-thread-content hidden>
+            <div class="community-thread__post" data-community-thread-post></div>
+            <form class="community-reply-form" data-community-reply-form>
+              <textarea name="reply" maxlength="500" placeholder="Write a reply"></textarea>
+              <button class="btn btn--primary" type="submit">Reply</button>
+            </form>
+            <div class="community-reply-list" data-community-replies></div>
+          </article>
+        </aside>
 
         <section class="community-stats" data-community-stats hidden aria-label="Community statistics">
           <div class="community-forum__head">

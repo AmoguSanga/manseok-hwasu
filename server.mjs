@@ -9,6 +9,7 @@ const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const CACHE_DIR = join(ROOT, '.cache');
 const TIDE_CACHE = join(CACHE_DIR, 'tide.json');
 const COMMUNITY_COMMENTS = join(CACHE_DIR, 'community-comments.json');
+const COMMUNITY_POSTS = join(CACHE_DIR, 'community-posts.json');
 const COMMUNITY_STATS = join(CACHE_DIR, 'community-stats.json');
 const PORT = Number(process.env.PORT || 8080);
 const LAT = Number(process.env.TIDE_LAT || 37.488407);
@@ -18,6 +19,8 @@ const REFRESH_MS = Math.floor(24 * 60 * 60 * 1000 / REQUESTS_PER_DAY);
 const STORMGLASS_ENDPOINT = 'https://api.stormglass.io/v2/tide/extremes/point';
 const DEFAULT_ADMIN_PASSWORD = '9919BOMa1!';
 const COMMUNITY_MAX_COMMENTS = 240;
+const COMMUNITY_MAX_POSTS = 140;
+const COMMUNITY_MAX_REPLIES = 160;
 const COMMUNITY_MAX_VISITORS = 2500;
 const ADMIN_TOKENS = new Map();
 const PROFANITY = [
@@ -87,11 +90,32 @@ async function sendCommunity(req, res, url) {
       return;
     }
 
+    if (req.method === 'GET' && action === 'posts') {
+      const posts = await readJsonFile(COMMUNITY_POSTS, []);
+      sendJson(res, 200, {
+        posts: posts.map(post => ({
+          ...post,
+          replies: Array.isArray(post.replies) ? post.replies.slice(0, 3) : [],
+          replyCount: Array.isArray(post.replies) ? post.replies.length : 0
+        })).slice(0, COMMUNITY_MAX_POSTS)
+      });
+      return;
+    }
+
+    if (req.method === 'GET' && action === 'post') {
+      const id = cleanText(url.searchParams.get('id'), 80);
+      const posts = await readJsonFile(COMMUNITY_POSTS, []);
+      const post = posts.find(item => item.id === id);
+      sendJson(res, post ? 200 : 404, post ? { post } : { error: 'not_found' });
+      return;
+    }
+
     if (req.method === 'GET' && action === 'admin-stats') {
       requireLocalAdmin(req);
       sendJson(res, 200, {
         stats: await readJsonFile(COMMUNITY_STATS, emptyCommunityStats()),
-        comments: await readJsonFile(COMMUNITY_COMMENTS, [])
+        comments: await readJsonFile(COMMUNITY_COMMENTS, []),
+        posts: await readJsonFile(COMMUNITY_POSTS, [])
       });
       return;
     }
@@ -100,6 +124,14 @@ async function sendCommunity(req, res, url) {
       const body = await readRequestJson(req);
       if (body.action === 'admin-login') {
         await localAdminLogin(res, body);
+        return;
+      }
+      if (body.action === 'post') {
+        await saveLocalPost(res, body);
+        return;
+      }
+      if (body.action === 'reply') {
+        await saveLocalReply(res, body);
         return;
       }
       if (body.action === 'comment') {
@@ -120,6 +152,34 @@ async function sendCommunity(req, res, url) {
       const next = comments.filter(comment => comment.id !== id);
       await writeJsonFile(COMMUNITY_COMMENTS, next);
       sendJson(res, 200, { ok: true, removed: comments.length - next.length });
+      return;
+    }
+
+    if (req.method === 'DELETE' && action === 'post') {
+      requireLocalAdmin(req);
+      const id = cleanText(url.searchParams.get('id'), 80);
+      const posts = await readJsonFile(COMMUNITY_POSTS, []);
+      const next = posts.filter(post => post.id !== id);
+      await writeJsonFile(COMMUNITY_POSTS, next);
+      sendJson(res, 200, { ok: true, removed: posts.length - next.length });
+      return;
+    }
+
+    if (req.method === 'DELETE' && action === 'reply') {
+      requireLocalAdmin(req);
+      const postId = cleanText(url.searchParams.get('postId'), 80);
+      const id = cleanText(url.searchParams.get('id'), 80);
+      const posts = await readJsonFile(COMMUNITY_POSTS, []);
+      const post = posts.find(item => item.id === postId);
+      if (!post) {
+        sendJson(res, 200, { ok: true, removed: 0 });
+        return;
+      }
+      const before = Array.isArray(post.replies) ? post.replies.length : 0;
+      post.replies = (post.replies || []).filter(reply => reply.id !== id);
+      post.updatedAt = new Date().toISOString();
+      await writeJsonFile(COMMUNITY_POSTS, posts);
+      sendJson(res, 200, { ok: true, removed: before - post.replies.length });
       return;
     }
 
@@ -179,6 +239,61 @@ async function saveLocalComment(res, body) {
   await writeJsonFile(COMMUNITY_COMMENTS, comments.slice(0, COMMUNITY_MAX_COMMENTS));
   await incrementLocalStats({ event: 'comment_posted', channel: comment.channel });
   sendJson(res, 200, { ok: true, comment });
+}
+
+async function saveLocalPost(res, body) {
+  const title = filterProfanity(cleanText(body.title, 100));
+  const text = filterProfanity(cleanText(body.text, 800));
+  if (!title || !text) {
+    sendJson(res, 400, { error: 'empty_post' });
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const post = {
+    id: randomUUID(),
+    title,
+    text,
+    profile: sanitizeProfile(body.profile),
+    replies: [],
+    createdAt: now,
+    updatedAt: now
+  };
+
+  const posts = await readJsonFile(COMMUNITY_POSTS, []);
+  posts.unshift(post);
+  await writeJsonFile(COMMUNITY_POSTS, posts.slice(0, COMMUNITY_MAX_POSTS));
+  await incrementLocalStats({ event: 'forum_post_created' });
+  sendJson(res, 200, { ok: true, post });
+}
+
+async function saveLocalReply(res, body) {
+  const postId = cleanText(body.postId, 80);
+  const text = filterProfanity(cleanText(body.text, 500));
+  if (!postId || !text) {
+    sendJson(res, 400, { error: 'empty_reply' });
+    return;
+  }
+
+  const posts = await readJsonFile(COMMUNITY_POSTS, []);
+  const post = posts.find(item => item.id === postId);
+  if (!post) {
+    sendJson(res, 404, { error: 'post_not_found' });
+    return;
+  }
+
+  const reply = {
+    id: randomUUID(),
+    text,
+    profile: sanitizeProfile(body.profile),
+    createdAt: new Date().toISOString()
+  };
+
+  post.replies = [reply, ...(post.replies || [])].slice(0, COMMUNITY_MAX_REPLIES);
+  post.updatedAt = new Date().toISOString();
+  await writeJsonFile(COMMUNITY_POSTS, posts);
+  await incrementLocalStats({ event: 'forum_reply_created' });
+  sendJson(res, 200, { ok: true, reply, post });
 }
 
 async function incrementLocalStats(body) {

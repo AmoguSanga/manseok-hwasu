@@ -279,7 +279,10 @@ function initIncheonLinks() {
 
 /* ─── Community Profile, Comments, Stats ───────────── */
 const COMMUNITY_PROFILE_KEY = 'mh-community-profile-v1';
+const COMMUNITY_PROFILE_COLLAPSED_KEY = 'mh-community-profile-collapsed-v1';
 const COMMUNITY_ADMIN_KEY = 'mh-community-admin-token-v1';
+const COMMUNITY_FALLBACK_POSTS_KEY = 'mh-community-fallback-posts-v1';
+const COMMUNITY_FALLBACK_COMMENTS_KEY = 'mh-community-fallback-comments-v1';
 const COMMUNITY_CATS = [
   { file: 'SpringQuiet.webp', label: 'Spring Quiet' },
   { file: 'SpringActive.webp', label: 'Spring Active' },
@@ -295,6 +298,8 @@ const communityState = {
   profile: null,
   adminToken: null,
   isAdmin: false,
+  activePostId: '',
+  usingLocalForum: false,
   activeSectionId: '',
   activeSectionAt: 0
 };
@@ -332,14 +337,14 @@ function saveCommunityProfile(profile) {
 
 function renderCommunityProfile() {
   const profile = communityState.profile;
-  const img = document.querySelector('[data-community-profile-img]');
-  const name = document.querySelector('[data-community-profile-name]');
+  const imgs = document.querySelectorAll('[data-community-profile-img]');
+  const names = document.querySelectorAll('[data-community-profile-name]');
   const form = document.querySelector('[data-community-profile-form]');
   const cats = document.querySelector('[data-community-cats]');
   const admin = document.querySelector('[data-community-admin]');
 
-  if (img) img.src = catImage(profile.cat);
-  if (name) name.textContent = profile.name;
+  imgs.forEach(img => { img.src = catImage(profile.cat); });
+  names.forEach(name => { name.textContent = profile.name; });
   if (form?.elements.name) form.elements.name.value = profile.name;
   if (admin) admin.hidden = profile.name.toLowerCase() !== 'sangaisadmin';
 
@@ -383,22 +388,40 @@ function bindCommunityModal() {
     const nextName = cleanCommunityText(form.elements.name.value, 40) || 'Coast Friend';
     saveCommunityProfile({ ...communityState.profile, name: nextName });
     renderCommunityProfile();
+    setCommunityProfileCollapsed(true);
     syncEventCommentProfile();
     trackCommunityEvent('profile_saved');
   });
 
-  document.querySelector('[data-community-comment-form]')?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const textarea = form.elements.comment;
-    const text = cleanCommunityText(textarea.value, 360);
-    if (!text) return;
-    await postCommunityComment('forum', text);
-    textarea.value = '';
-    await loadForumComments();
+  document.querySelector('[data-community-profile-toggle]')?.addEventListener('click', () => {
+    const panel = document.querySelector('[data-community-profile-panel]');
+    setCommunityProfileCollapsed(panel ? !panel.hidden : false);
   });
 
-  document.querySelector('[data-community-refresh]')?.addEventListener('click', loadForumComments);
+  document.querySelector('[data-community-post-form]')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const title = cleanCommunityText(form.elements.title.value, 100);
+    const text = cleanCommunityText(form.elements.text.value, 800);
+    if (!title || !text) return;
+    const post = await createForumPost(title, text);
+    form.reset();
+    communityState.activePostId = post?.id || communityState.activePostId;
+    await loadForumPosts();
+  });
+
+  document.querySelector('[data-community-reply-form]')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const text = cleanCommunityText(form.elements.reply.value, 500);
+    if (!communityState.activePostId || !text) return;
+    await createForumReply(communityState.activePostId, text);
+    form.reset();
+    await openForumPost(communityState.activePostId);
+    await loadForumPosts();
+  });
+
+  document.querySelector('[data-community-refresh]')?.addEventListener('click', loadForumPosts);
   document.querySelector('[data-community-admin-login]')?.addEventListener('submit', handleAdminLogin);
   document.querySelector('[data-community-stats-refresh]')?.addEventListener('click', loadAdminStats);
 
@@ -407,7 +430,8 @@ function bindCommunityModal() {
   });
 
   if (page) {
-    loadForumComments();
+    setCommunityProfileCollapsed(getCommunityProfileCollapsedDefault());
+    loadForumPosts();
     if (communityState.isAdmin) loadAdminStats();
     trackCommunityEvent('forum_page_open');
   }
@@ -422,7 +446,7 @@ function openCommunityModal() {
   modal.classList.add('is-open');
   document.body.style.overflow = 'hidden';
   renderCommunityProfile();
-  loadForumComments();
+  loadForumPosts();
   if (communityState.isAdmin) loadAdminStats();
   trackCommunityEvent('forum_open');
 }
@@ -436,84 +460,358 @@ function closeCommunityModal() {
   }
 }
 
-async function loadForumComments() {
-  const list = document.querySelector('[data-community-comments]');
-  if (!list) return;
-  list.innerHTML = '<div class="community-comment"><div></div><div><strong>Loading shore notes...</strong></div></div>';
-
+function getCommunityProfileCollapsedDefault() {
   try {
-    const data = await communityApi(`?action=comments&channel=forum`);
-    renderCommunityComments(data.comments || []);
-  } catch (error) {
-    list.innerHTML = '<div class="community-comment"><div></div><div><strong>Could not load comments yet.</strong><p>Please try again in a moment.</p></div></div>';
+    const savedProfile = localStorage.getItem(COMMUNITY_PROFILE_KEY);
+    const savedCollapse = localStorage.getItem(COMMUNITY_PROFILE_COLLAPSED_KEY);
+    if (savedCollapse !== null) return savedCollapse === 'true';
+    return Boolean(savedProfile);
+  } catch (e) {
+    return true;
   }
 }
 
-function renderCommunityComments(comments) {
-  const list = document.querySelector('[data-community-comments]');
+function setCommunityProfileCollapsed(collapsed) {
+  const panel = document.querySelector('[data-community-profile-panel]');
+  const toggle = document.querySelector('[data-community-profile-toggle]');
+  if (!panel || !toggle) return;
+  panel.hidden = collapsed;
+  toggle.setAttribute('aria-expanded', String(!collapsed));
+  toggle.classList.toggle('is-open', !collapsed);
+  try { localStorage.setItem(COMMUNITY_PROFILE_COLLAPSED_KEY, String(collapsed)); } catch (e) {}
+}
+
+async function loadForumPosts() {
+  const list = document.querySelector('[data-community-posts]');
+  if (!list) return;
+  list.innerHTML = '<div class="community-post is-loading"><strong>Loading posts...</strong></div>';
+
+  try {
+    const data = await communityApi('?action=posts');
+    communityState.usingLocalForum = false;
+    setCommunityStatus('');
+    renderForumPosts(data.posts || []);
+    if (communityState.activePostId) await openForumPost(communityState.activePostId, { skipList: true });
+  } catch (error) {
+    communityState.usingLocalForum = true;
+    setCommunityStatus('Static/local mode: posts are saved in this browser only. Use node server.mjs or Cloudflare KV for shared live posts.');
+    const posts = readFallbackPosts();
+    renderForumPosts(posts);
+    if (communityState.activePostId) await openForumPost(communityState.activePostId, { skipList: true });
+  }
+}
+
+function renderForumPosts(posts) {
+  const list = document.querySelector('[data-community-posts]');
   if (!list) return;
   list.innerHTML = '';
 
-  if (!comments.length) {
-    list.innerHTML = '<div class="community-comment"><div></div><div><strong>No comments yet</strong><p>Leave the first note from the coast.</p></div></div>';
+  if (!posts.length) {
+    list.innerHTML = '<div class="community-post"><strong>No posts yet</strong><p>Create the first thread for this coast.</p></div>';
+    renderForumThread(null);
     return;
   }
 
-  comments.forEach(comment => {
-    const item = document.createElement('article');
-    item.className = 'community-comment';
+  if (!posts.some(post => post.id === communityState.activePostId)) {
+    communityState.activePostId = posts[0].id;
+  }
 
+  posts.forEach(post => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = `community-post${post.id === communityState.activePostId ? ' is-active' : ''}`;
     const avatar = document.createElement('img');
-    avatar.src = catImage(comment.profile?.cat);
+    avatar.src = catImage(post.profile?.cat);
     avatar.alt = '';
 
     const body = document.createElement('div');
-    const author = document.createElement('strong');
-    author.textContent = comment.profile?.name || comment.name || 'Coast Friend';
-    const time = document.createElement('time');
-    time.textContent = formatCommunityDate(comment.createdAt);
+    const title = document.createElement('strong');
+    title.textContent = post.title || 'Untitled post';
+    const meta = document.createElement('span');
+    meta.textContent = `${post.profile?.name || 'Coast Friend'} · ${formatCommunityDate(post.createdAt)} · ${post.replyCount || post.replies?.length || 0} replies`;
     const text = document.createElement('p');
-    text.textContent = comment.text || '';
-    body.append(author, time, text);
+    text.textContent = post.text || '';
+    body.append(title, meta, text);
 
     item.append(avatar, body);
+    item.addEventListener('click', () => openForumPost(post.id));
 
+    list.appendChild(item);
+  });
+
+  openForumPost(communityState.activePostId, { skipList: true });
+}
+
+async function openForumPost(id, options = {}) {
+  if (!id) {
+    renderForumThread(null);
+    return;
+  }
+
+  communityState.activePostId = id;
+  try {
+    const data = communityState.usingLocalForum
+      ? { post: readFallbackPosts().find(post => post.id === id) }
+      : await communityApi(`?action=post&id=${encodeURIComponent(id)}`);
+    renderForumThread(data.post || null);
+    if (!options.skipList) await loadForumPosts();
+  } catch (error) {
+    const post = readFallbackPosts().find(item => item.id === id);
+    renderForumThread(post || null);
+  }
+}
+
+function renderForumThread(post) {
+  const empty = document.querySelector('[data-community-thread-empty]');
+  const content = document.querySelector('[data-community-thread-content]');
+  const postEl = document.querySelector('[data-community-thread-post]');
+  const repliesEl = document.querySelector('[data-community-replies]');
+  if (!empty || !content || !postEl || !repliesEl) return;
+
+  empty.hidden = Boolean(post);
+  content.hidden = !post;
+  postEl.innerHTML = '';
+  repliesEl.innerHTML = '';
+  if (!post) return;
+
+  const header = document.createElement('div');
+  header.className = 'community-thread__post-head';
+  header.innerHTML = '<img alt=""><div><h2></h2><span></span></div>';
+  header.querySelector('img').src = catImage(post.profile?.cat);
+  header.querySelector('h2').textContent = post.title || 'Untitled post';
+  header.querySelector('span').textContent = `${post.profile?.name || 'Coast Friend'} · ${formatCommunityDate(post.createdAt)}`;
+  const body = document.createElement('p');
+  body.textContent = post.text || '';
+  postEl.append(header, body);
+
+  if (communityState.isAdmin) {
+    const removePost = document.createElement('button');
+    removePost.type = 'button';
+    removePost.className = 'community-thread__delete';
+    removePost.textContent = 'Delete Post';
+    removePost.addEventListener('click', () => deleteForumPost(post.id));
+    postEl.appendChild(removePost);
+  }
+
+  const replies = Array.isArray(post.replies) ? post.replies : [];
+  if (!replies.length) {
+    repliesEl.innerHTML = '<div class="community-reply"><strong>No replies yet</strong><p>Be the first to answer.</p></div>';
+    return;
+  }
+
+  replies.forEach(reply => {
+    const item = document.createElement('article');
+    item.className = 'community-reply';
+    item.innerHTML = '<img alt=""><div><strong></strong><time></time><p></p></div>';
+    item.querySelector('img').src = catImage(reply.profile?.cat);
+    item.querySelector('strong').textContent = reply.profile?.name || 'Coast Friend';
+    item.querySelector('time').textContent = formatCommunityDate(reply.createdAt);
+    item.querySelector('p').textContent = reply.text || '';
     if (communityState.isAdmin) {
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'community-comment__delete';
-      remove.setAttribute('aria-label', 'Delete comment');
+      remove.setAttribute('aria-label', 'Delete reply');
       remove.textContent = '×';
-      remove.addEventListener('click', () => deleteCommunityComment(comment.id));
+      remove.addEventListener('click', () => deleteForumReply(post.id, reply.id));
       item.appendChild(remove);
     }
-
-    list.appendChild(item);
+    repliesEl.appendChild(item);
   });
+}
+
+async function createForumPost(title, text) {
+  try {
+    const result = await communityApi('', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'post',
+        title,
+        text,
+        profile: communityState.profile
+      })
+    });
+    communityState.usingLocalForum = false;
+    setCommunityStatus('');
+    trackCommunityEvent('forum_post_created_client');
+    return result.post;
+  } catch (error) {
+    communityState.usingLocalForum = true;
+    const post = saveFallbackPost(title, text);
+    setCommunityStatus('Saved locally in this browser. Start node server.mjs or configure Cloudflare KV for shared posts.');
+    return post;
+  }
+}
+
+async function createForumReply(postId, text) {
+  try {
+    const result = await communityApi('', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'reply',
+        postId,
+        text,
+        profile: communityState.profile
+      })
+    });
+    communityState.usingLocalForum = false;
+    setCommunityStatus('');
+    trackCommunityEvent('forum_reply_created_client');
+    return result.reply;
+  } catch (error) {
+    communityState.usingLocalForum = true;
+    const reply = saveFallbackReply(postId, text);
+    setCommunityStatus('Reply saved locally in this browser.');
+    return reply;
+  }
+}
+
+function readFallbackPosts() {
+  try {
+    const posts = JSON.parse(localStorage.getItem(COMMUNITY_FALLBACK_POSTS_KEY) || '[]');
+    return Array.isArray(posts) ? posts : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeFallbackPosts(posts) {
+  try { localStorage.setItem(COMMUNITY_FALLBACK_POSTS_KEY, JSON.stringify(posts.slice(0, 140))); } catch (e) {}
+}
+
+function saveFallbackPost(title, text) {
+  const now = new Date().toISOString();
+  const post = {
+    id: window.crypto?.randomUUID ? window.crypto.randomUUID() : `post-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    title: filterCommunityProfanity(title),
+    text: filterCommunityProfanity(text),
+    profile: { ...communityState.profile },
+    replies: [],
+    replyCount: 0,
+    createdAt: now,
+    updatedAt: now
+  };
+  const posts = readFallbackPosts();
+  posts.unshift(post);
+  writeFallbackPosts(posts);
+  return post;
+}
+
+function saveFallbackReply(postId, text) {
+  const posts = readFallbackPosts();
+  const post = posts.find(item => item.id === postId);
+  if (!post) return null;
+  const reply = {
+    id: window.crypto?.randomUUID ? window.crypto.randomUUID() : `reply-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    text: filterCommunityProfanity(text),
+    profile: { ...communityState.profile },
+    createdAt: new Date().toISOString()
+  };
+  post.replies = [reply, ...(post.replies || [])].slice(0, 160);
+  post.replyCount = post.replies.length;
+  post.updatedAt = new Date().toISOString();
+  writeFallbackPosts(posts);
+  return reply;
+}
+
+function readFallbackComments(channel) {
+  try {
+    const comments = JSON.parse(localStorage.getItem(COMMUNITY_FALLBACK_COMMENTS_KEY) || '[]');
+    return Array.isArray(comments) ? comments.filter(comment => comment.channel === channel).slice(0, 80) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveFallbackComment(channel, text, eventId = '') {
+  const comment = {
+    id: window.crypto?.randomUUID ? window.crypto.randomUUID() : `comment-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    channel,
+    eventId,
+    text: filterCommunityProfanity(text),
+    profile: { ...communityState.profile },
+    createdAt: new Date().toISOString()
+  };
+  try {
+    const comments = JSON.parse(localStorage.getItem(COMMUNITY_FALLBACK_COMMENTS_KEY) || '[]');
+    const next = [comment, ...(Array.isArray(comments) ? comments : [])].slice(0, 240);
+    localStorage.setItem(COMMUNITY_FALLBACK_COMMENTS_KEY, JSON.stringify(next));
+  } catch (e) {}
+  return comment;
+}
+
+function setCommunityStatus(message) {
+  const status = document.querySelector('[data-community-status]');
+  if (!status) return;
+  status.textContent = message || '';
+  status.hidden = !message;
+}
+
+function filterCommunityProfanity(value) {
+  const words = ['fuck', 'shit', 'bitch', 'asshole', 'bastard', 'damn', 'dick', 'cunt', 'slut', 'whore', 'crap', 'piss'];
+  return words.reduce((next, word) => {
+    const pattern = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    return next.replace(pattern, 'meow');
+  }, String(value || ''));
 }
 
 async function postCommunityComment(channel, text, eventId = '') {
-  const result = await communityApi('', {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'comment',
-      channel,
-      eventId,
-      text,
-      profile: communityState.profile
-    })
-  });
-  trackCommunityEvent('comment_posted_client', { channel });
-  return result.comment;
+  try {
+    const result = await communityApi('', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'comment',
+        channel,
+        eventId,
+        text,
+        profile: communityState.profile
+      })
+    });
+    trackCommunityEvent('comment_posted_client', { channel });
+    return result.comment;
+  } catch (error) {
+    const comment = saveFallbackComment(channel, text, eventId);
+    trackCommunityEvent('comment_posted_local', { channel });
+    return comment;
+  }
 }
 
-async function deleteCommunityComment(id) {
-  if (!communityState.adminToken || !id) return;
-  await communityApi(`?action=comment&id=${encodeURIComponent(id)}`, {
+async function deleteForumPost(id) {
+  if (!id) return;
+  if (communityState.usingLocalForum) {
+    writeFallbackPosts(readFallbackPosts().filter(post => post.id !== id));
+    communityState.activePostId = '';
+    await loadForumPosts();
+    return;
+  }
+  if (!communityState.adminToken) return;
+  await communityApi(`?action=post&id=${encodeURIComponent(id)}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${communityState.adminToken}` }
   });
-  await loadForumComments();
+  communityState.activePostId = '';
+  await loadForumPosts();
+  await loadAdminStats();
+}
+
+async function deleteForumReply(postId, id) {
+  if (!postId || !id) return;
+  if (communityState.usingLocalForum) {
+    const posts = readFallbackPosts();
+    const post = posts.find(item => item.id === postId);
+    if (post) post.replies = (post.replies || []).filter(reply => reply.id !== id);
+    writeFallbackPosts(posts);
+    await openForumPost(postId);
+    await loadForumPosts();
+    return;
+  }
+  if (!communityState.adminToken) return;
+  await communityApi(`?action=reply&postId=${encodeURIComponent(postId)}&id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${communityState.adminToken}` }
+  });
+  await openForumPost(postId);
+  await loadForumPosts();
   await loadAdminStats();
 }
 
@@ -538,7 +836,7 @@ async function handleAdminLogin(event) {
     form.reset();
     if (status) status.textContent = 'Admin unlocked.';
     await loadAdminStats();
-    await loadForumComments();
+    await loadForumPosts();
   } catch (error) {
     if (status) status.textContent = 'Admin login failed. Check the password or server secret.';
   }
@@ -560,7 +858,9 @@ async function loadAdminStats() {
     [
       ['Page Views', stats.totalPageViews || 0],
       ['Unique Visitors', stats.uniqueVisitors || 0],
-      ['Comments', (data.comments || []).length],
+      ['Forum Posts', (data.posts || []).length],
+      ['Replies', (data.posts || []).reduce((total, post) => total + (post.replies?.length || 0), 0)],
+      ['Event Comments', (data.comments || []).length],
       ['Forum Opens', stats.events?.forum_open || 0],
       ['Bookings', stats.events?.booking_confirm || 0],
       ['Event Opens', stats.events?.event_modal_open || 0]
@@ -3076,6 +3376,7 @@ async function loadEventComments(event) {
     event.liveComments = data.comments || [];
     populateEventComments(event);
   } catch (error) {
+    event.liveComments = readFallbackComments(`event:${event.id}`);
     populateEventComments(event);
   }
 }

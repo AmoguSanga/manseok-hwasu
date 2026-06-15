@@ -1,8 +1,11 @@
 const COMMENTS_KEY = 'manseok-hwasu:community:comments:v1';
+const POSTS_KEY = 'manseok-hwasu:community:posts:v1';
 const STATS_KEY = 'manseok-hwasu:community:stats:v1';
 const TOKEN_PREFIX = 'manseok-hwasu:community:admin-token:';
 const TOKEN_TTL = 60 * 60 * 2;
 const MAX_COMMENTS = 240;
+const MAX_POSTS = 140;
+const MAX_REPLIES = 160;
 const MAX_VISITORS = 2500;
 const DEFAULT_ADMIN_PASSWORD = '9919BOMa1!';
 const PROFANITY = [
@@ -38,17 +41,29 @@ async function handleRequest(context) {
       return json({ comments: await listComments(store, channel) });
     }
 
+    if (request.method === 'GET' && action === 'posts') {
+      return json({ posts: await listPosts(store) });
+    }
+
+    if (request.method === 'GET' && action === 'post') {
+      const post = await getPost(store, cleanText(url.searchParams.get('id'), 80));
+      return post ? json({ post }) : json({ error: 'not_found' }, 404);
+    }
+
     if (request.method === 'GET' && action === 'admin-stats') {
       await requireAdmin(store, request);
       return json({
         stats: await readJson(store, STATS_KEY, emptyStats()),
-        comments: await readJson(store, COMMENTS_KEY, [])
+        comments: await readJson(store, COMMENTS_KEY, []),
+        posts: await readJson(store, POSTS_KEY, [])
       });
     }
 
     if (request.method === 'POST') {
       const body = await readBody(request);
       if (body.action === 'admin-login') return adminLogin(store, env, body);
+      if (body.action === 'post') return savePost(store, body);
+      if (body.action === 'reply') return saveReply(store, body);
       if (body.action === 'comment') return saveComment(store, body);
       if (body.action === 'track') return saveTrack(store, body);
     }
@@ -60,6 +75,29 @@ async function handleRequest(context) {
       const next = comments.filter(comment => comment.id !== id);
       await store.put(COMMENTS_KEY, JSON.stringify(next));
       return json({ ok: true, removed: comments.length - next.length });
+    }
+
+    if (request.method === 'DELETE' && action === 'post') {
+      await requireAdmin(store, request);
+      const id = cleanText(url.searchParams.get('id'), 80);
+      const posts = await readJson(store, POSTS_KEY, []);
+      const next = posts.filter(post => post.id !== id);
+      await store.put(POSTS_KEY, JSON.stringify(next));
+      return json({ ok: true, removed: posts.length - next.length });
+    }
+
+    if (request.method === 'DELETE' && action === 'reply') {
+      await requireAdmin(store, request);
+      const postId = cleanText(url.searchParams.get('postId'), 80);
+      const id = cleanText(url.searchParams.get('id'), 80);
+      const posts = await readJson(store, POSTS_KEY, []);
+      const post = posts.find(item => item.id === postId);
+      if (!post) return json({ ok: true, removed: 0 });
+      const before = Array.isArray(post.replies) ? post.replies.length : 0;
+      post.replies = (post.replies || []).filter(reply => reply.id !== id);
+      post.updatedAt = new Date().toISOString();
+      await store.put(POSTS_KEY, JSON.stringify(posts));
+      return json({ ok: true, removed: before - post.replies.length });
     }
 
     return json({ error: 'not_found' }, 404);
@@ -118,6 +156,52 @@ async function saveComment(store, body) {
   return json({ ok: true, comment });
 }
 
+async function savePost(store, body) {
+  const title = filterProfanity(cleanText(body.title, 100));
+  const text = filterProfanity(cleanText(body.text, 800));
+  if (!title || !text) return json({ error: 'empty_post' }, 400);
+
+  const now = new Date().toISOString();
+  const post = {
+    id: crypto.randomUUID(),
+    title,
+    text,
+    profile: sanitizeProfile(body.profile),
+    replies: [],
+    createdAt: now,
+    updatedAt: now
+  };
+
+  const posts = await readJson(store, POSTS_KEY, []);
+  posts.unshift(post);
+  await store.put(POSTS_KEY, JSON.stringify(posts.slice(0, MAX_POSTS)));
+  await incrementStats(store, { event: 'forum_post_created' });
+  return json({ ok: true, post });
+}
+
+async function saveReply(store, body) {
+  const postId = cleanText(body.postId, 80);
+  const text = filterProfanity(cleanText(body.text, 500));
+  if (!postId || !text) return json({ error: 'empty_reply' }, 400);
+
+  const posts = await readJson(store, POSTS_KEY, []);
+  const post = posts.find(item => item.id === postId);
+  if (!post) return json({ error: 'post_not_found' }, 404);
+
+  const reply = {
+    id: crypto.randomUUID(),
+    text,
+    profile: sanitizeProfile(body.profile),
+    createdAt: new Date().toISOString()
+  };
+
+  post.replies = [reply, ...(post.replies || [])].slice(0, MAX_REPLIES);
+  post.updatedAt = new Date().toISOString();
+  await store.put(POSTS_KEY, JSON.stringify(posts));
+  await incrementStats(store, { event: 'forum_reply_created' });
+  return json({ ok: true, reply, post });
+}
+
 async function saveTrack(store, body) {
   await incrementStats(store, body);
   return json({ ok: true });
@@ -126,6 +210,22 @@ async function saveTrack(store, body) {
 async function listComments(store, channel) {
   const comments = await readJson(store, COMMENTS_KEY, []);
   return comments.filter(comment => comment.channel === channel).slice(0, 80);
+}
+
+async function listPosts(store) {
+  const posts = await readJson(store, POSTS_KEY, []);
+  return posts
+    .map(post => ({
+      ...post,
+      replies: Array.isArray(post.replies) ? post.replies.slice(0, 3) : [],
+      replyCount: Array.isArray(post.replies) ? post.replies.length : 0
+    }))
+    .slice(0, MAX_POSTS);
+}
+
+async function getPost(store, id) {
+  const posts = await readJson(store, POSTS_KEY, []);
+  return posts.find(post => post.id === id) || null;
 }
 
 async function incrementStats(store, body) {

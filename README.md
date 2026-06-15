@@ -43,7 +43,7 @@ The live forum, event comments, profile avatars, and anonymous engagement stats 
 3. In Production Settings > Variables and Secrets, add `ADMIN_PASSWORD` as an encrypted secret.
 4. Redeploy the Pages project.
 
-If `ENGAGEMENT_STORE` is missing, the function falls back to `TIDE_CACHE`, but a separate binding is cleaner. The admin password defaults to the project password unless `ADMIN_PASSWORD` is set as a secret. For local testing, run `node server.mjs`; plain `npx serve` cannot run the `/api/community` endpoint. Local comments and stats are written to `.cache/community-comments.json` and `.cache/community-stats.json`.
+If `ENGAGEMENT_STORE` is missing, the function falls back to `TIDE_CACHE`, but a separate binding is cleaner. The admin password defaults to the project password unless `ADMIN_PASSWORD` is set as a secret. For shared local testing, run `node server.mjs`; comments, forum posts, replies, and stats are written to `.cache/community-*.json`. Plain `npx serve` cannot run `/api/community`, so the forum falls back to browser-local storage in that mode. That is useful for UI testing, but it is not shared between visitors.
 
 For a static-only preview without live tide data, pick one:
 
