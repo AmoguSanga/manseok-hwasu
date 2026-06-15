@@ -7,7 +7,7 @@ const MAX_COMMENTS = 240;
 const MAX_POSTS = 140;
 const MAX_REPLIES = 160;
 const MAX_VISITORS = 2500;
-const DEFAULT_ADMIN_PASSWORD = '9919BOMa1!';
+const DEFAULT_ADMIN_PASSWORD = '123';
 const PROFANITY = [
   'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'damn', 'dick',
   'cunt', 'slut', 'whore', 'crap', 'piss'

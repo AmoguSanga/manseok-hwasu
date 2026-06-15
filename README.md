@@ -40,10 +40,10 @@ The live forum, event comments, profile avatars, and anonymous engagement stats 
 
 1. In Cloudflare, create a Workers KV namespace for engagement data.
 2. In your Pages project Production environment, add the namespace binding as `ENGAGEMENT_STORE`.
-3. In Production Settings > Variables and Secrets, add `ADMIN_PASSWORD` as an encrypted secret.
+3. In Production Settings > Variables and Secrets, add `ADMIN_PASSWORD` as an encrypted secret. If this secret is omitted, the current fallback admin password is `123`.
 4. Redeploy the Pages project.
 
-If `ENGAGEMENT_STORE` is missing, the function falls back to `TIDE_CACHE`, but a separate binding is cleaner. The admin password defaults to the project password unless `ADMIN_PASSWORD` is set as a secret. For shared local testing, run `node server.mjs`; comments, forum posts, replies, and stats are written to `.cache/community-*.json`. Plain `npx serve` cannot run `/api/community`, so the forum falls back to browser-local storage in that mode. That is useful for UI testing, but it is not shared between visitors.
+If `ENGAGEMENT_STORE` is missing, the function falls back to `TIDE_CACHE`, but a separate binding is cleaner. The admin password defaults to `123` unless `ADMIN_PASSWORD` is set as a secret. For shared local testing, run `node server.mjs`; comments, forum posts, replies, and stats are written to `.cache/community-*.json`. Plain `npx serve` cannot run `/api/community`, so the forum falls back to browser-local storage in that mode. That is useful for UI testing, but it is not shared between visitors.
 
 For a static-only preview without live tide data, pick one:
 

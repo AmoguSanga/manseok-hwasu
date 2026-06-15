@@ -558,7 +558,7 @@ async function loadForumPosts() {
     renderForumPosts(data.posts || []);
   } catch (error) {
     communityState.usingLocalForum = true;
-    setCommunityStatus('Static/local mode: posts are saved in this browser only. Use node server.mjs or Cloudflare KV for shared live posts.');
+    setCommunityStatus('Local browser mode: posts are saved only on this device. Connect the Cloudflare KV binding ENGAGEMENT_STORE for shared live comments across devices.');
     const posts = readFallbackPosts();
     renderForumPosts(posts);
   }
@@ -885,6 +885,20 @@ async function deleteForumReply(postId, id) {
   await loadAdminStats();
 }
 
+async function deleteCommunityComment(id, options = {}) {
+  if (!id || !communityState.adminToken) return;
+  await communityApi(`?action=comment&id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${communityState.adminToken}` }
+  });
+
+  const activeEvent = window.MH_READING_EVENTS?.find(item => item.id === currentEventsState.activeEventId);
+  if (activeEvent && (!options.channel || options.channel === `event:${activeEvent.id}`)) {
+    await loadEventComments(activeEvent);
+  }
+  await loadAdminStats();
+}
+
 async function handleAdminLogin(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -907,6 +921,8 @@ async function handleAdminLogin(event) {
     if (status) status.textContent = 'Admin unlocked.';
     await loadAdminStats();
     await loadForumPosts();
+    const activeEvent = window.MH_READING_EVENTS?.find(item => item.id === currentEventsState.activeEventId);
+    if (activeEvent) populateEventComments(activeEvent);
   } catch (error) {
     if (status) status.textContent = 'Admin login failed. Check the password or server secret.';
   }
@@ -916,6 +932,7 @@ async function loadAdminStats() {
   const statsPanel = document.querySelector('[data-community-stats]');
   const statGrid = document.querySelector('[data-community-stat-grid]');
   const sectionStats = document.querySelector('[data-community-section-stats]');
+  const adminComments = document.querySelector('[data-community-admin-comments]');
   if (!communityState.adminToken || !statsPanel || !statGrid || !sectionStats) return;
 
   try {
@@ -955,6 +972,33 @@ async function loadAdminStats() {
         row.querySelectorAll('span')[1].textContent = `${formatDuration(value.totalMs || 0)} stayed`;
         sectionStats.appendChild(row);
       });
+
+    if (adminComments) {
+      adminComments.innerHTML = '<h3>Comments Review</h3>';
+      const comments = (data.comments || []).slice(0, 80);
+      if (!comments.length) {
+        const empty = document.createElement('p');
+        empty.className = 'community-admin-comments__empty';
+        empty.textContent = 'No comments yet.';
+        adminComments.appendChild(empty);
+      }
+      comments.forEach(comment => {
+        const item = document.createElement('article');
+        item.className = 'community-admin-comment';
+        item.innerHTML = '<div><strong></strong><span></span><p></p></div>';
+        item.querySelector('strong').textContent = comment.profile?.name || 'Coast Friend';
+        item.querySelector('span').textContent = `${comment.channel || 'comment'} · ${formatCommunityDate(comment.createdAt)}`;
+        item.querySelector('p').textContent = comment.text || '';
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'community-comment__delete';
+        remove.setAttribute('aria-label', 'Delete comment');
+        remove.textContent = '×';
+        remove.addEventListener('click', () => deleteCommunityComment(comment.id, { channel: comment.channel }));
+        item.appendChild(remove);
+        adminComments.appendChild(item);
+      });
+    }
   } catch (error) {
     communityState.isAdmin = false;
     try { sessionStorage.removeItem(COMMUNITY_ADMIN_KEY); } catch (e) {}
@@ -1903,6 +1947,10 @@ function initDiscoverMap() {
   };
 
   const spaceOrder = ['lounge', 'terrace', 'parking', 'cafe', 'gallery', 'beachfront', 'tidalstage', 'readingshore', 'neighborpath', 'catisland'];
+  const viewerFallbackTargets = {
+    house: 'cafe'
+  };
+  const getViewerTargetId = (id) => viewerFallbackTargets[id] || id;
 
   // Edit 360 scene hotspots here. Each key matches a panoramaSpaces node id.
   // Each hotspot can have its own image, trigger label, title, body, yaw, and pitch.
@@ -2545,7 +2593,7 @@ function initDiscoverMap() {
     if (previewImage && imagePath) previewImage.style.backgroundImage = `url('${imagePath}')`;
     if (previewTitle) previewTitle.textContent = point.title;
     if (previewDesc) previewDesc.textContent = point.description;
-    if (watchButton) watchButton.disabled = isHouseCluster || !panoramaSpaces[id];
+    if (watchButton) watchButton.disabled = !panoramaSpaces[getViewerTargetId(id)];
 
     previewPanel?.classList.add('is-visible');
     map.classList.add('is-node-focused');
@@ -2782,16 +2830,17 @@ function initDiscoverMap() {
   });
 
   watchButton?.addEventListener('click', () => {
-    if (selectedId) openViewer(selectedId);
+    if (selectedId) openViewer(getViewerTargetId(selectedId));
   });
 
   document.addEventListener('discover:open-space', (event) => {
     const id = event.detail?.id;
-    if (!id || !panoramaSpaces[id]) return;
+    const viewerTargetId = getViewerTargetId(id);
+    if (!id || !panoramaSpaces[viewerTargetId]) return;
 
     const openSelectedSpace = () => {
       showNodePreview(id);
-      window.setTimeout(() => openViewer(id), 220);
+      window.setTimeout(() => openViewer(viewerTargetId), 220);
     };
 
     if (map.classList.contains('is-locked')) {
@@ -3458,6 +3507,15 @@ function populateEventComments(event) {
     item.innerHTML = '<strong></strong><p></p>';
     item.querySelector('strong').textContent = comment.profile?.name || comment.name || 'Coast Friend';
     item.querySelector('p').textContent = comment.text;
+    if (communityState.isAdmin && comment.id) {
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'community-comment__delete event-post__comment-delete';
+      remove.setAttribute('aria-label', 'Delete comment');
+      remove.textContent = '×';
+      remove.addEventListener('click', () => deleteCommunityComment(comment.id, { channel: `event:${event.id}` }));
+      item.appendChild(remove);
+    }
     comments.appendChild(item);
   });
 }
