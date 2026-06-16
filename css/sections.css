@@ -2047,6 +2047,18 @@
   box-shadow: 0 0 8px rgba(215, 170, 85, 0.84);
 }
 
+.discover__tour-badge.is-local-tide-toggle {
+  cursor: pointer;
+  outline-offset: 4px;
+}
+
+.discover__tour-badge.is-local-tide-toggle:hover,
+.discover__tour-badge.is-local-tide-toggle:focus-visible {
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.15),
+    0 0 0 3px rgba(132, 227, 233, 0.24);
+}
+
 .discover__controls {
   position: absolute;
   z-index: 1004;

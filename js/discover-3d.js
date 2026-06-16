@@ -99,6 +99,7 @@ function initDiscover3DScene(map, canvas) {
   const tideMeshes = {
     sea: [],
     mud: [],
+    lowOuterSea: [],
     foam: foamMeshes,
     seaReference: null,
     mudReference: null,
@@ -639,6 +640,8 @@ function buildGeneratedTideSurfaces(root, tideMeshes) {
   tideMeshes.mud.push(mud);
   root.add(mud);
 
+  buildLowTideOuterWater(root, tideMeshes, mudBase);
+
   const ocean = new THREE.Mesh(
     new THREE.PlaneGeometry(120, 120, 1, 1),
     new THREE.MeshBasicMaterial({
@@ -654,6 +657,64 @@ function buildGeneratedTideSurfaces(root, tideMeshes) {
   ocean.userData.floatBase = ocean.position.y;
   tideMeshes.sea.push(ocean);
   root.add(ocean);
+}
+
+function buildLowTideOuterWater(root, tideMeshes, mudBase) {
+  const outerWater = new THREE.Mesh(
+    new THREE.PlaneGeometry(132, 38, 1, 1),
+    new THREE.MeshBasicMaterial({
+      map: createOuterWaterTexture(),
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    })
+  );
+  outerWater.name = 'generated-low-tide-outer-water';
+  outerWater.rotation.x = -Math.PI / 2;
+  outerWater.position.set(0, mudBase + 0.014, -27);
+  outerWater.visible = false;
+  outerWater.renderOrder = 1;
+  outerWater.userData.lowOuterSea = true;
+  outerWater.userData.modelBaseY = outerWater.position.y;
+  outerWater.userData.floatBase = outerWater.position.y;
+  outerWater.userData.baseZ = outerWater.position.z;
+  outerWater.userData.waveOpacity = 0.9;
+  tideMeshes.lowOuterSea.push(outerWater);
+  root.add(outerWater);
+
+  const waterlineMaterial = new THREE.MeshBasicMaterial({
+    color: 0xcff7ff,
+    transparent: true,
+    opacity: 0.28,
+    depthWrite: false
+  });
+
+  for (let i = 0; i < 9; i += 1) {
+    const z = -12.8 - i * 1.15;
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-50, mudBase + 0.024, z),
+      new THREE.Vector3(-22, mudBase + 0.028, z + 0.22),
+      new THREE.Vector3(8, mudBase + 0.026, z - 0.16),
+      new THREE.Vector3(52, mudBase + 0.024, z + 0.12)
+    ]);
+    const waterline = new THREE.Mesh(
+      new THREE.TubeGeometry(curve, 72, 0.018, 5, false),
+      waterlineMaterial.clone()
+    );
+    waterline.name = 'generated-low-tide-waterline';
+    waterline.visible = false;
+    waterline.renderOrder = 2;
+    waterline.userData.lowOuterSea = true;
+    waterline.userData.modelBaseY = mudBase + 0.024;
+    waterline.userData.floatBase = mudBase + 0.024;
+    waterline.userData.baseZ = waterline.position.z;
+    waterline.userData.wavePhase = i * 0.7;
+    waterline.userData.waveSpeed = 0.5 + i * 0.035;
+    waterline.userData.waveOpacity = 0.16 + i * 0.016;
+    tideMeshes.lowOuterSea.push(waterline);
+    root.add(waterline);
+  }
 }
 
 function getReferenceCenterY(object, fallback) {
@@ -713,6 +774,40 @@ function createMudflatTexture() {
   return texture;
 }
 
+function createOuterWaterTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, 'rgba(85, 184, 210, 0.9)');
+  gradient.addColorStop(0.46, 'rgba(128, 220, 229, 0.68)');
+  gradient.addColorStop(0.72, 'rgba(143, 210, 251, 0.32)');
+  gradient.addColorStop(1, 'rgba(143, 210, 251, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 22; y < canvas.height; y += 34) {
+    ctx.strokeStyle = `rgba(255, 250, 245, ${0.13 - Math.min(0.08, y / canvas.height * 0.08)})`;
+    ctx.lineWidth = 2 + (y % 3);
+    ctx.beginPath();
+    for (let x = -20; x <= canvas.width + 20; x += 24) {
+      const waveY = y + Math.sin(x * 0.018 + y * 0.05) * 5;
+      if (x === -20) ctx.moveTo(x, waveY);
+      else ctx.lineTo(x, waveY);
+    }
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.repeat.set(1.1, 1);
+  return texture;
+}
+
 function getSeaBaseY(root) {
   const sea = [];
   root.traverse(child => {
@@ -731,6 +826,20 @@ function animateSea(tideMeshes, foamMeshes, clock) {
   tideMeshes.sea.forEach((sea, index) => {
     if (sea.userData.floatBase === undefined) sea.userData.floatBase = sea.position.y;
     sea.position.y = sea.userData.floatBase + Math.sin(clock * 0.85 + index) * 0.006;
+  });
+
+  tideMeshes.lowOuterSea?.forEach((water, index) => {
+    if (water.userData.floatBase === undefined) water.userData.floatBase = water.position.y;
+    const phase = water.userData.wavePhase || index * 0.42;
+    const speed = water.userData.waveSpeed || 0.48;
+    water.position.y = water.userData.floatBase + Math.sin(clock * speed + phase) * 0.006;
+    water.position.z = (water.userData.baseZ ?? water.position.z) + Math.sin(clock * speed * 0.7 + phase) * 0.045;
+    if (water.material?.map?.offset) {
+      water.material.map.offset.x = Math.sin(clock * 0.035) * 0.018;
+    }
+    if (water.material?.opacity !== undefined && water.visible) {
+      water.material.opacity = Math.max(0.08, (water.userData.waveOpacity || 0.32) + Math.sin(clock * speed + phase) * 0.045);
+    }
   });
 
   foamMeshes.forEach((foam, index) => {
@@ -760,6 +869,16 @@ function applyTideState(tideMeshes, stage = 'unknown') {
   tideMeshes.foam?.forEach(foam => {
     foam.visible = !isLow;
     foam.userData.baseY = seaBase + 0.024;
+  });
+
+  tideMeshes.lowOuterSea?.forEach(water => {
+    water.visible = isLow;
+    const modelBase = water.userData.modelBaseY ?? water.position.y;
+    water.userData.floatBase = modelBase;
+    if (water.material?.opacity !== undefined) {
+      water.material.transparent = true;
+      water.material.opacity = isLow ? (water.userData.waveOpacity || 0.32) : 0;
+    }
   });
 
   tideMeshes.mud.forEach(mud => {

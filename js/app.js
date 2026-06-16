@@ -3039,6 +3039,8 @@ function initTideStatus() {
   const detailEl = root.querySelector('[data-tide-detail]');
   const updatedEl = root.querySelector('[data-tide-updated]');
   const miniBadges = document.querySelectorAll('[data-tide-mini]');
+  const isLocalPreview = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname) || window.location.protocol === 'file:';
+  let localManualTideOverride = null;
 
   const formatTime = (value) => {
     if (!value) return '';
@@ -3057,7 +3059,8 @@ function initTideStatus() {
       'missing_api_key',
       'missing_kv_binding',
       'empty_cache',
-      'stormglass_error'
+      'stormglass_error',
+      'local_preview_toggle'
     ]);
     const rawStage = payload?.stage || 'unknown';
     const stage = rawStage === 'unknown' && fallbackPreviewSources.has(payload?.source) ? 'high' : rawStage;
@@ -3067,6 +3070,7 @@ function initTideStatus() {
     const previous = payload?.previousExtreme;
     const lang = document.documentElement.lang?.startsWith('ko') ? 'ko' : 'en';
     const isLive = payload?.source === 'stormglass';
+    const isLocalToggle = payload?.source === 'local_preview_toggle';
 
     const stageLabel = {
       en: {
@@ -3145,6 +3149,8 @@ function initTideStatus() {
       const updatedTime = formatTime(payload?.updatedAt);
       updatedEl.textContent = isLive && updatedTime
         ? (lang === 'ko' ? `실시간 조위 · ${updatedTime} 업데이트` : `Live tide · updated ${updatedTime}`)
+        : isLocalToggle
+          ? (lang === 'ko' ? '로컬 미리보기 전환' : 'Local preview toggle')
         : (lang === 'ko' ? '조위 미리보기 · 연결 대기 중' : 'Tide preview · waiting for live data');
     }
 
@@ -3154,10 +3160,47 @@ function initTideStatus() {
     document.dispatchEvent(new CustomEvent('mh:tide-updated', { detail: { ...(payload || {}), stage, displayStage } }));
   };
 
+  const enableLocalPreviewToggle = () => {
+    if (!isLocalPreview || !miniBadges.length) return;
+
+    miniBadges.forEach(badge => {
+      badge.classList.add('is-local-tide-toggle');
+      badge.setAttribute('role', 'button');
+      badge.setAttribute('tabindex', '0');
+      badge.setAttribute('title', 'Local preview only: toggle high/low tide');
+      badge.setAttribute('aria-label', 'Local preview only: toggle high and low tide');
+
+      const toggle = () => {
+        const current = localManualTideOverride || root.dataset.tideStage || 'high';
+        const next = current === 'low' || current === 'falling' ? 'high' : 'low';
+        localManualTideOverride = next;
+        publish({
+          stage: next,
+          displayStage: next,
+          source: 'local_preview_toggle',
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      badge.addEventListener('click', toggle);
+      badge.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        toggle();
+      });
+    });
+  };
+
+  enableLocalPreviewToggle();
+
   fetch('/api/tide', { headers: { Accept: 'application/json' } })
     .then(response => response.ok ? response.json() : Promise.reject(new Error(`Tide status ${response.status}`)))
-    .then(publish)
-    .catch(() => publish({ stage: 'high', displayStage: 'high', source: 'static_pending' }));
+    .then(payload => {
+      if (!localManualTideOverride) publish(payload);
+    })
+    .catch(() => {
+      if (!localManualTideOverride) publish({ stage: 'high', displayStage: 'high', source: 'static_pending' });
+    });
 }
 
 /* ─── Current Reading Themes ──────────────────────── */
